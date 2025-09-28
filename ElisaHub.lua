@@ -2,6 +2,20 @@
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
+local whitelist = {
+    ["wasaorchiquito"] = true,
+    ["purppom"] = true,
+    ["threldor"] = true,
+   ["noahxelisa"] = true
+}
+
+if not whitelist[plr.Name] then
+    plr:Kick("You are not whitelisted to use this script pls contact owner at discord to buy script and get whitelist.")
+    return
+end
+
+print(plr.Name .. " is whitelisted. Waiting for key...")
+
 --// Key GUI
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
 local Frame = Instance.new("Frame", ScreenGui)
