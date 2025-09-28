@@ -198,7 +198,7 @@ local function showSpeedMenu()
     AutoSkipMsg.Size = UDim2.new(1, -20, 0, 30)
     AutoSkipMsg.Position = UDim2.new(0, 10, 0, 40)
     AutoSkipMsg.BackgroundTransparency = 1
-    AutoSkipMsg.Text = "Pls Enable Auto Skip On Manually"
+    AutoSkipMsg.Text = "Please enable auto skip manually or you will get banned."
     AutoSkipMsg.Font = Enum.Font.GothamBold
     AutoSkipMsg.TextSize = 14
     AutoSkipMsg.TextColor3 = Color3.fromRGB(255, 200, 0)
