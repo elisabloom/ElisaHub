@@ -10,7 +10,7 @@ local whitelist = {
 }
 
 if not whitelist[plr.Name] then
-    plr:Kick("You are not whitelisted to use this script pls contact owner at discord to buy script and get whitelist.")
+    plr:Kick("You are not whitelisted.")
     return
 end
 
