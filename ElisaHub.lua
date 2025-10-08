@@ -14,6 +14,8 @@ local whitelist = {
     ["chandra0302"]= true,
     ["menorbom928373"]= true,
     ["LOSTRALALA771"]= true,
+    ["freetc2active"]= true,
+    ["tc2active"]= true,
     ["keraieu"] = true
 }
 
