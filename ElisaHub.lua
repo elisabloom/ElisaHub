@@ -10,6 +10,7 @@ local whitelist = {
     ["Nstub1234"] = true,
    -- ["0kHiper"] = true,
   --  ["HaydenPaul0"] = true,
+    ["VladimirMercer"]= true,
     ["P0RJ0R"]= true,
     ["lyrachanx"]=true,
    -- ["cyecylll"]= true,
