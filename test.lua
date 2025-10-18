@@ -15,7 +15,7 @@ local whitelist = {
     ["holasoy_kier"]= true,
     ["LOSTRALALA771"]= true,
     ["kaique91919"]= true,
-    ["67cheesy"]= true,
+    ["Derick12401"]= true,
     ["FleonelF100mil"]= true,
     ["keraieu"] = true
 }
@@ -73,151 +73,6 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== AUTO SKIP HANDLER ===--
--- Reemplaza la función ensureAutoSkip existente por esta versión mejorada
-local function ensureAutoSkip()
-    local player = game.Players.LocalPlayer
-    if not player then return false end
-
-    -- intenta obtener la GUI principal (no bloquea demasiado)
-    local gui = player.PlayerGui:FindFirstChild("GameGuiNoInset") or player.PlayerGui:FindFirstChildWhichIsA and player.PlayerGui:FindFirstChildWhichIsA("ScreenGui")
-    -- si no encontramos la GUI aún, buscar en todos los descendants
-    if not gui then
-        for _, g in pairs(player.PlayerGui:GetChildren()) do
-            if g:IsA("ScreenGui") then
-                gui = g
-                break
-            end
-        end
-    end
-
-    -- helper: intentar detectar si ya está ON
-    local function isOn(btn)
-        if not btn or not btn.Text then return false end
-        local ok, t = pcall(function() return btn.Text end)
-        if not ok or not t then return false end
-        return string.find(t:lower(), "on")
-    end
-
-    -- helper: buscar botón por rutas conocidas o por nombre/texto
-    local function findButton()
-        if gui then
-            -- ruta común según tu script original
-            local ok, screen = pcall(function() return player.PlayerGui:WaitForChild("GameGuiNoInset", 0.1) end)
-            if ok and screen then
-                local suc, btn = pcall(function() return screen.Screen.Top.WaveControls.AutoSkip end)
-                if suc and btn and (btn:IsA("TextButton") or btn:IsA("ImageButton")) then
-                    return btn
-                end
-            end
-
-            -- fallback: buscar en todo PlayerGui por nombre o texto
-            for _, v in pairs(player.PlayerGui:GetDescendants()) do
-                if (v:IsA("TextButton") or v:IsA("ImageButton")) then
-                    local nameLower = tostring(v.Name):lower()
-                    local textLower = ""
-                    pcall(function() textLower = (v.Text and v.Text:lower()) or "" end)
-                    if string.find(nameLower, "autoskip") or string.find(nameLower, "skip") or string.find(textLower, "auto skip") or string.find(textLower, "autoskip") then
-                        return v
-                    end
-                end
-            end
-        end
-        return nil
-    end
-
-    -- intento de activar por conexiones (getconnections)
-    local function tryFireConnections(button)
-        if not button then return false end
-        local ok, conns = pcall(function() return getconnections(button.MouseButton1Click) end)
-        if ok and conns and #conns > 0 then
-            for i = 1, #conns do
-                pcall(function() conns[i]:Fire() end)
-            end
-            return true
-        end
-        return false
-    end
-
-    -- intento de activar por VirtualInputManager (simula clic real)
-    local function tryVirtualClick(button)
-        if not button or not button.Parent then return false end
-        local ok, vim = pcall(function() return game:GetService("VirtualInputManager") end)
-        if not ok or not vim then return false end
-        local absPos, absSize = nil, nil
-        pcall(function()
-            absPos = button.AbsolutePosition
-            absSize = button.AbsoluteSize
-        end)
-        if not absPos or not absSize then return false end
-        local cx = absPos.X + absSize.X/2
-        local cy = absPos.Y + absSize.Y/2
-        pcall(function()
-            vim:SendMouseButtonEvent(cx, cy, 0, true, game, 0)
-            task.wait(0.05)
-            vim:SendMouseButtonEvent(cx, cy, 0, false, game, 0)
-        end)
-        return true
-    end
-
-    -- fallback: buscar remotos parecidos en ReplicatedStorage y llamar
-    local function tryRemotes()
-        local rs = game:GetService("ReplicatedStorage")
-        for _, r in ipairs(rs:GetDescendants()) do
-            if (r.ClassName == "RemoteFunction" or r.ClassName == "RemoteEvent") then
-                local name = tostring(r.Name):lower()
-                if string.find(name, "skip") or string.find(name, "autoskip") or string.find(name, "skipwave") then
-                    pcall(function()
-                        if r.ClassName == "RemoteFunction" then
-                            r:InvokeServer(true)
-                        else
-                            r:FireServer(true)
-                        end
-                    end)
-                end
-            end
-        end
-    end
-
-    -- 3 intentos combinando métodos con pequeñas pausas
-    local btn = findButton()
-    for attempt = 1, 3 do
-        -- refrescar botón si no hay
-        if not btn then btn = findButton() end
-
-        if btn and isOn(btn) then
-            return true -- ya está ON
-        end
-
-        local fired = false
-        if btn then
-            fired = tryFireConnections(btn) -- preferente
-            if not fired then
-                fired = tryVirtualClick(btn)  -- fallback más seguro
-            end
-        end
-
-        if not fired then
-            -- si no tuvimos botón o no funcionó, intentamos remotos
-            tryRemotes()
-        end
-
-        -- esperar un poco y comprobar resultado
-        task.wait(0.25)
-        if btn and isOn(btn) then
-            return true
-        end
-
-        -- intentar encontrar botón otra vez antes del siguiente intento
-        btn = findButton()
-        task.wait(0.15)
-    end
-
-    -- verificación final: si encontramos botón y está on, devuelve true
-    if btn and isOn(btn) then return true end
-    return false
-end
-
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
@@ -264,14 +119,15 @@ function load2xScript()
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- Auto Skip: inicia 6 segundos después y se mantiene activo
-        task.delay(6, function()
-            ensureAutoSkip()
-            task.spawn(function()
-                while task.wait(2) do
-                    ensureAutoSkip()
-                end
-            end)
+        -- Auto Skip click simulation (1s after difficulty selection)
+        task.delay(1, function()
+            local player = game.Players.LocalPlayer
+            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
+            end
         end)
 
         for _, p in ipairs(placements) do
@@ -332,14 +188,15 @@ function load3xScript()
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- Auto Skip: inicia 6 segundos después y se mantiene activo
-        task.delay(6, function()
-            ensureAutoSkip()
-            task.spawn(function()
-                while task.wait(2) do
-                    ensureAutoSkip()
-                end
-            end)
+        -- Auto Skip click simulation (1s after difficulty selection)
+        task.delay(1, function()
+            local player = game.Players.LocalPlayer
+            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
+            end
         end)
 
         for _, p in ipairs(placements) do
