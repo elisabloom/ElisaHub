@@ -25,8 +25,6 @@ if not whitelist[plr.Name] then
     return
 end
 
-print(plr.Name .. " is whitelisted. Waiting for key...")
-
 --// Key GUI
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
 local Frame = Instance.new("Frame", ScreenGui)
@@ -76,7 +74,6 @@ local remotes = rs:WaitForChild("RemoteFunctions")
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
-    warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
 
     local difficulty = "dif_impossible"
@@ -113,14 +110,12 @@ function load2xScript()
 
     local function placeUnit(unitName, slot, data)
         remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
     end
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- Auto Skip click simulation (1s after difficulty selection)
-        task.delay(20, function()
+        task.delay(10, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
@@ -145,7 +140,6 @@ function load2xScript()
 end
 
 function load3xScript()
-    warn("[System] Loaded 3x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(3)
 
     local difficulty = "dif_impossible"
@@ -182,14 +176,12 @@ function load3xScript()
 
     local function placeUnit(unitName, slot, data)
         remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
     end
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- Auto Skip click simulation (1s after difficulty selection)
-        task.delay(1, function()
+        task.delay(10, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
