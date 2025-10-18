@@ -25,8 +25,6 @@ if not whitelist[plr.Name] then
     return
 end
 
-print(plr.Name .. " is whitelisted. Waiting for key...")
-
 --// Key GUI
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
 local Frame = Instance.new("Frame", ScreenGui)
@@ -73,28 +71,9 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== AUTO SKIP SYSTEM ===--
-local function ensureAutoSkip()
-    local player = game.Players.LocalPlayer
-    local gui = player:WaitForChild("PlayerGui"):WaitForChild("GameGuiNoInset")
-    local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-    if autoSkipButton.Text ~= "ON" then
-        local connections = getconnections(autoSkipButton.MouseButton1Click)
-        if connections and #connections > 0 then
-            connections[1]:Fire()
-        end
-    end
-end
-
-task.spawn(function()
-    while task.wait(1) do
-        pcall(ensureAutoSkip)
-    end
-end)
-
 --=== GAME SCRIPTS ===--
+
 function load2xScript()
-    warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
 
     local difficulty = "dif_impossible"
@@ -137,7 +116,13 @@ function load2xScript()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
         task.delay(6, function()
-            ensureAutoSkip()
+            local player = game.Players.LocalPlayer
+            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
+            end
         end)
 
         for _, p in ipairs(placements) do
@@ -155,7 +140,6 @@ function load2xScript()
 end
 
 function load3xScript()
-    warn("[System] Loaded 3x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(3)
 
     local difficulty = "dif_impossible"
@@ -198,7 +182,13 @@ function load3xScript()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
         task.delay(6, function()
-            ensureAutoSkip()
+            local player = game.Players.LocalPlayer
+            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
+            end
         end)
 
         for _, p in ipairs(placements) do
