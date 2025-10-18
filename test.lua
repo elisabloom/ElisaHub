@@ -94,7 +94,7 @@ function load2xScript()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
         -- 🔹 Auto Skip después de 3 segundos
-        task.delay(3, function()
+        task.delay(6, function()
             pcall(function()
                 local ReplicatedStorage = game:GetService("ReplicatedStorage")
                 local UpdateTDVotes = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("UpdateTDVotes")
