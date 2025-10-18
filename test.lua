@@ -120,7 +120,7 @@ function load2xScript()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
         -- Auto Skip click simulation (1s after difficulty selection)
-        task.delay(9, function()
+        task.delay(20, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
