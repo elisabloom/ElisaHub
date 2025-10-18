@@ -16,7 +16,7 @@ local whitelist = {
     ["LOSTRALALA771"]= true,
     ["kaique91919"]= true,
     ["Derick12401"]= true,
-    ["67cheesy"]= true,
+    ["FleonelF100mil"]= true,
     ["keraieu"] = true
 }
 
@@ -210,16 +210,6 @@ local function showSpeedMenu()
     Title.Text = "Select Speed"
     TextBox.Visible = false
     CheckBtn.Visible = false
-
-    local AutoSkipMsg = Instance.new("TextLabel", Frame)
-    AutoSkipMsg.Size = UDim2.new(1, -20, 0, 30)
-    AutoSkipMsg.Position = UDim2.new(0, 10, 0, 40)
-    AutoSkipMsg.BackgroundTransparency = 1
-    AutoSkipMsg.Text = "Please enable auto skip manually or you will get banned."
-    AutoSkipMsg.Font = Enum.Font.GothamBold
-    AutoSkipMsg.TextSize = 14
-    AutoSkipMsg.TextColor3 = Color3.fromRGB(255, 200, 0)
-    AutoSkipMsg.TextWrapped = true
 
     local btn2x = Instance.new("TextButton", Frame)
     btn2x.Size = UDim2.new(0.45, 0, 0, 50)
