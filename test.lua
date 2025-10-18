@@ -17,7 +17,6 @@ local whitelist = {
     ["kaique91919"]= true,
     ["Derick12401"]= true,
     ["FleonelF100mil"]= true,
-    ["67cheesy"]= true,
     ["keraieu"] = true
 }
 
@@ -74,6 +73,20 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
+--=== AUTO SKIP HANDLER ===--
+local function ensureAutoSkip()
+    local player = game.Players.LocalPlayer
+    local gui = player.PlayerGui:FindFirstChild("GameGuiNoInset")
+    if not gui then return end
+    local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+    if autoSkipButton and autoSkipButton.Text and string.find(autoSkipButton.Text, "Off") then
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+        end
+    end
+end
+
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
@@ -120,15 +133,14 @@ function load2xScript()
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- Auto Skip click simulation (1s after difficulty selection)
-        task.delay(1, function()
-            local player = game.Players.LocalPlayer
-            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-            end
+        -- Auto Skip: inicia 6 segundos después y se mantiene activo
+        task.delay(6, function()
+            ensureAutoSkip()
+            task.spawn(function()
+                while task.wait(2) do
+                    ensureAutoSkip()
+                end
+            end)
         end)
 
         for _, p in ipairs(placements) do
@@ -189,15 +201,14 @@ function load3xScript()
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        -- Auto Skip click simulation (1s after difficulty selection)
-        task.delay(1, function()
-            local player = game.Players.LocalPlayer
-            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-            end
+        -- Auto Skip: inicia 6 segundos después y se mantiene activo
+        task.delay(6, function()
+            ensureAutoSkip()
+            task.spawn(function()
+                while task.wait(2) do
+                    ensureAutoSkip()
+                end
+            end)
         end)
 
         for _, p in ipairs(placements) do
