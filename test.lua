@@ -15,7 +15,7 @@ local whitelist = {
     ["holasoy_kier"]= true,
     ["LOSTRALALA771"]= true,
     ["kaique91919"]= true,
-    ["Derick12401"]= true,
+    ["67cheesy"]= true,
     ["FleonelF100mil"]= true,
     ["keraieu"] = true
 }
