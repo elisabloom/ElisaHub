@@ -1,75 +1,241 @@
--- Hook para detectar qué RemoteFunction/RemoteEvent se invoca al presionar Auto Skip
--- Ejecuta esto en Delta ANTES de pulsar el botón Auto Skip en el juego.
+--// Key GUI
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
 
+local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 200)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundTransparency = 1
+Title.Text = "Enter Key"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
+
+local TextBox = Instance.new("TextBox", Frame)
+TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Position = UDim2.new(0, 10, 0, 50)
+TextBox.PlaceholderText = "Enter Key Here"
+TextBox.Text = ""
+TextBox.Font = Enum.Font.Gotham
+TextBox.TextSize = 16
+TextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextBox.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+
+local CheckBtn = Instance.new("TextButton", Frame)
+CheckBtn.Size = UDim2.new(1, -20, 0, 40)
+CheckBtn.Position = UDim2.new(0, 10, 0, 100)
+CheckBtn.Text = "Check Key"
+CheckBtn.Font = Enum.Font.GothamBold
+CheckBtn.TextSize = 18
+CheckBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+
+local Label = Instance.new("TextLabel", Frame)
+Label.Size = UDim2.new(1, -20, 0, 40)
+Label.Position = UDim2.new(0, 10, 0, 150)
+Label.BackgroundTransparency = 1
+Label.Text = ""
+Label.Font = Enum.Font.GothamBold
+Label.TextSize = 16
+Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+--// Remotes
 local rs = game:GetService("ReplicatedStorage")
-local printed = {}
+local remotes = rs:WaitForChild("RemoteFunctions")
 
-local function safePrint(...)
-    local t = {}
-    for i=1, select("#", ...) do
-        local v = select(i, ...)
-        table.insert(t, tostring(v))
+--=== GAME SCRIPTS ===--
+
+function load2xScript()
+    warn("[System] Loaded 2x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(2)
+
+    local difficulty = "dif_impossible"
+    local placements = {
+        {
+            time = 29, unit = "unit_lawnmower", slot = "1",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+                Rotation=180}
+        },
+        {
+            time = 47, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
+                DistanceAlongPath=180.53,
+                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 85, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
+                DistanceAlongPath=178.04,
+                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 110, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
+                DistanceAlongPath=100.65,
+                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
+                Rotation=180}
+        }
+    }
+
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
     end
-    print("[REMOTE-SPY]", table.concat(t, "\t"))
-end
 
--- Intenta usar hookfunction (la mayoría de executors lo tienen)
-local canHook = (type(hookfunction) == "function")
+    local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-if canHook then
-    safePrint("hookfunction disponible -> usando wrapper para InvokeServer/FireServer")
-else
-    safePrint("hookfunction NO disponible -> intentaré imprimir nombres de remotes por GetDescendants()")
-end
-
--- Wrapper para RemoteFunction: hookea InvokeServer
-for _, v in ipairs(rs:GetDescendants()) do
-    if v:IsA("RemoteFunction") then
-        local ok, info = pcall(function()
-            if canHook and v.InvokeServer then
-                local orig = v.InvokeServer
-                -- no repetir hooks
-                if not printed[v] then
-                    printed[v] = true
-                    hookfunction(orig, function(self, ...)
-                        safePrint("RemoteFunction.InvokeServer ->", self:GetFullName() or self.Name, "args:", ...)
-                        return orig(self, ...)
-                    end)
-                end
-            end
+        -- 🔹 Auto Skip después de 3 segundos
+        task.delay(3, function()
+            pcall(function()
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local UpdateTDVotes = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("UpdateTDVotes")
+                UpdateTDVotes:FireServer("SkipWave")
+                warn("[System] Auto Skip Enabled Automatically (after 3s)")
+            end)
         end)
-        if not ok then
-            -- ignore
+
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
+            end)
         end
-    elseif v:IsA("RemoteEvent") then
-        local ok2, info2 = pcall(function()
-            if canHook and v.FireServer then
-                local origE = v.FireServer
-                if not printed[v] then
-                    printed[v] = true
-                    hookfunction(origE, function(self, ...)
-                        safePrint("RemoteEvent.FireServer ->", self:GetFullName() or self.Name, "args:", ...)
-                        return origE(self, ...)
-                    end)
-                end
-            end
+    end
+
+    while true do
+        startGame()
+        task.wait(174.5)
+        remotes.RestartGame:InvokeServer()
+    end
+end
+
+function load3xScript()
+    warn("[System] Loaded 3x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(3)
+
+    local difficulty = "dif_impossible"
+    local placements = {
+        {
+            time = 23, unit = "unit_lawnmower", slot = "1",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+                Rotation=180}
+        },
+        {
+            time = 32, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
+                DistanceAlongPath=180.53,
+                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 57, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
+                DistanceAlongPath=178.04,
+                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 77, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
+                DistanceAlongPath=100.65,
+                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
+                Rotation=180}
+        }
+    }
+
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
+    end
+
+    local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+
+        -- 🔹 Auto Skip después de 3 segundos
+        task.delay(3, function()
+            pcall(function()
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local UpdateTDVotes = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("UpdateTDVotes")
+                UpdateTDVotes:FireServer("SkipWave")
+                warn("[System] Auto Skip Enabled Automatically (after 3s)")
+            end)
         end)
-    end
-end
 
--- Si hookfunction no está disponible: imprime lista y pide que copies la consola
-if not canHook then
-    safePrint("Listado de remotes en ReplicatedStorage (busca nombres con 'skip' o similares):")
-    for _, v in ipairs(rs:GetDescendants()) do
-        if v:IsA("RemoteFunction") or v:IsA("RemoteEvent") then
-            safePrint(v.ClassName .. " : " .. v:GetFullName())
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
+            end)
         end
     end
-    safePrint("Luego, pulsa Auto Skip manualmente y mira la consola para ver si algo aparece.")
-else
-    safePrint("Hooking completado. Ahora pulsa el botón Auto Skip en el juego. Observa la consola para ver qué remote fue llamado.")
+
+    while true do
+        startGame()
+        task.wait(128)
+        remotes.RestartGame:InvokeServer()
+    end
 end
 
--- Nota: algunos remotes sólo aceptan llamadas desde scripts "de confianza" (p. ej. ClientLoader).
--- Si al presionar ves en consola el nombre del remote -> úsalo en tu script.
--- Si no aparece nada, copia la salida de la consola aquí y la reviso.
+--=== SPEED MENU ===--
+local function showSpeedMenu()
+    Title.Text = "Select Speed"
+    TextBox.Visible = false
+    CheckBtn.Visible = false
+
+    local AutoSkipMsg = Instance.new("TextLabel", Frame)
+    AutoSkipMsg.Size = UDim2.new(1, -20, 0, 30)
+    AutoSkipMsg.Position = UDim2.new(0, 10, 0, 40)
+    AutoSkipMsg.BackgroundTransparency = 1
+    AutoSkipMsg.Text = "Please enable auto skip manually or you will get banned."
+    AutoSkipMsg.Font = Enum.Font.GothamBold
+    AutoSkipMsg.TextSize = 14
+    AutoSkipMsg.TextColor3 = Color3.fromRGB(255, 200, 0)
+    AutoSkipMsg.TextWrapped = true
+
+    local btn2x = Instance.new("TextButton", Frame)
+    btn2x.Size = UDim2.new(0.45, 0, 0, 50)
+    btn2x.Position = UDim2.new(0.05, 0, 0.5, -25)
+    btn2x.Text = "2x Speed"
+    btn2x.BackgroundColor3 = Color3.fromRGB(80,160,250)
+
+    local btn3x = Instance.new("TextButton", Frame)
+    btn3x.Size = UDim2.new(0.45, 0, 0, 50)
+    btn3x.Position = UDim2.new(0.5, 0, 0.5, -25)
+    btn3x.Text = "3x Speed"
+    btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
+
+    btn2x.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+        load2xScript()
+    end)
+
+    btn3x.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+        load3xScript()
+    end)
+end
+
+--=== KEY CHECK ===--
+CheckBtn.MouseButton1Click:Connect(function()
+    if TextBox.Text == "test" then
+        Label.Text = "Key Accepted!"
+        Label.TextColor3 = Color3.fromRGB(0,255,0)
+        task.delay(1, showSpeedMenu)
+    else
+        TextBox.Text = ""
+        Label.Text = "Invalid Key!"
+        Label.TextColor3 = Color3.fromRGB(255,0,0)
+    end
+end)
+
+loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
