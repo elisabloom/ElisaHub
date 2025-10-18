@@ -1,9 +1,17 @@
---// Garden Tower Defense Script (Auto Skip ON + Key GUI + Speed Menu)
--- Whitelist removed | Auto Skip fixed to activate automatically
--- Author: (your version updated)
-
+--// Whitelist system
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
+
+local whitelist = {
+    ["67cheesy"] = true
+}
+
+if not whitelist[plr.Name] then
+    plr:Kick("You are not whitelisted.")
+    return
+end
+
+print(plr.Name .. " is whitelisted. Waiting for key...")
 
 --// Key GUI
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
@@ -51,18 +59,19 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
+-- Auto Skip (enable once at start)
+task.delay(2, function()
+    pcall(function()
+        remotes.ToggleAutoSkip:InvokeServer(true)
+        warn("[System] Auto Skip Enabled")
+    end)
+end)
+
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
     warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
-
-    -- Enable Auto Skip automatically after difficulty selection
-    task.wait(3)
-    pcall(function()
-        remotes.SkipWave:InvokeServer("y")
-        warn("[System] Auto Skip Enabled ✅")
-    end)
 
     local difficulty = "dif_impossible"
     local placements = {
@@ -103,6 +112,15 @@ function load2xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+
+        -- 🔹 Auto Skip automático 3 segundos después
+        task.delay(3, function()
+            pcall(function()
+                remotes.ToggleAutoSkip:InvokeServer(true)
+                warn("[System] Auto Skip Enabled Automatically (after 3s)")
+            end)
+        end)
+
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -120,13 +138,6 @@ end
 function load3xScript()
     warn("[System] Loaded 3x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(3)
-
-    -- Enable Auto Skip automatically after difficulty selection
-    task.wait(3)
-    pcall(function()
-        remotes.SkipWave:InvokeServer("y")
-        warn("[System] Auto Skip Enabled ✅")
-    end)
 
     local difficulty = "dif_impossible"
     local placements = {
@@ -167,6 +178,15 @@ function load3xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+
+        -- 🔹 Auto Skip automático 3 segundos después
+        task.delay(3, function()
+            pcall(function()
+                remotes.ToggleAutoSkip:InvokeServer(true)
+                warn("[System] Auto Skip Enabled Automatically (after 3s)")
+            end)
+        end)
+
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -187,11 +207,12 @@ local function showSpeedMenu()
     TextBox.Visible = false
     CheckBtn.Visible = false
 
+    -- Reminder label directly below title
     local AutoSkipMsg = Instance.new("TextLabel", Frame)
     AutoSkipMsg.Size = UDim2.new(1, -20, 0, 30)
     AutoSkipMsg.Position = UDim2.new(0, 10, 0, 40)
     AutoSkipMsg.BackgroundTransparency = 1
-    AutoSkipMsg.Text = "Auto Skip will be turned ON automatically."
+    AutoSkipMsg.Text = "Please enable auto skip manually or you will get banned."
     AutoSkipMsg.Font = Enum.Font.GothamBold
     AutoSkipMsg.TextSize = 14
     AutoSkipMsg.TextColor3 = Color3.fromRGB(255, 200, 0)
@@ -233,6 +254,5 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Anti-AFK scripts
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
