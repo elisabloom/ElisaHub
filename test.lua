@@ -115,7 +115,7 @@ function load2xScript()
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        task.delay(6, function()
+        task.delay(2, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
@@ -181,7 +181,7 @@ function load3xScript()
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-        task.delay(6, function()
+        task.delay(2, function()
             local player = game.Players.LocalPlayer
             local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
