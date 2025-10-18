@@ -3,7 +3,28 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
-    ["67cheesy"] = true
+    ["wasaorchiquito"] = true,
+    ["PurpPom"] = true,
+    ["Girthentersmyvergona"] = true,
+    ["Sugaplum753"] = true,
+    ["Nstub1234"] = true,
+   -- ["0kHiper"] = true,
+  --  ["HaydenPaul0"] = true,
+    ["VladimirMercer"]= true,
+    ["ilyprame"]= true,
+    ["lyrachanx"]=true,
+   -- ["cyecylll"]= true,
+   -- ["chandra0302"]= true,
+    ["menorbom928373"]= true,
+    ["holasoy_kier"]= true,
+    ["LOSTRALALA771"]= true,
+   -- ["freetc2active"]= true,
+    ["kaique91919"]= true,
+    --["kaki56000"]= true,
+   -- ["tc2active"]= true,
+    ["Derick12401"]= true,
+    ["67cheesy"]= true,
+    ["keraieu"] = true
 }
 
 if not whitelist[plr.Name] then
@@ -112,15 +133,6 @@ function load2xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-
-        -- 🔹 Auto Skip automático 3 segundos después
-        task.delay(3, function()
-            pcall(function()
-                remotes.ToggleAutoSkip:InvokeServer(true)
-                warn("[System] Auto Skip Enabled Automatically (after 3s)")
-            end)
-        end)
-
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -178,15 +190,6 @@ function load3xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-
-        -- 🔹 Auto Skip automático 3 segundos después
-        task.delay(3, function()
-            pcall(function()
-                remotes.ToggleAutoSkip:InvokeServer(true)
-                warn("[System] Auto Skip Enabled Automatically (after 3s)")
-            end)
-        end)
-
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
