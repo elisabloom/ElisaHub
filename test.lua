@@ -3,28 +3,9 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
-    ["wasaorchiquito"] = true,
-    ["PurpPom"] = true,
-    ["Girthentersmyvergona"] = true,
-    ["Sugaplum753"] = true,
-    ["Nstub1234"] = true,
-    -- ["0kHiper"] = true,
-    -- ["HaydenPaul0"] = true,
-    ["VladimirMercer"]= true,
-    ["ilyprame"]= true,
-    ["lyrachanx"]=true,
-    -- ["cyecylll"]= true,
-    -- ["chandra0302"]= true,
-    ["menorbom928373"]= true,
+
     ["holasoy_kier"]= true,
-    ["LOSTRALALA771"]= true,
-    -- ["freetc2active"]= true,
-    ["kaique91919"]= true,
-    --["kaki56000"]= true,
-    -- ["tc2active"]= true,
-    ["Derick12401"]= true,
-    ["FleonelF100mil"]= true,
-    ["keraieu"] = true
+    ["67cheese"] = true
 }
 
 if not whitelist[plr.Name] then
