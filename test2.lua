@@ -21,6 +21,7 @@ local Frame = Instance.new("Frame", ScreenGui)
 Frame.Size = UDim2.new(0, 300, 0, 200)
 Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Active = true  -- Permite recibir input
 
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -47,6 +48,7 @@ CheckBtn.Text = "Check Key"
 CheckBtn.Font = Enum.Font.GothamBold
 CheckBtn.TextSize = 18
 CheckBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+CheckBtn.Selectable = true
 
 local Label = Instance.new("TextLabel", Frame)
 Label.Size = UDim2.new(1, -20, 0, 40)
@@ -60,69 +62,6 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 --// Remotes
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
-
---=== GAME SCRIPTS ===--
-function load2xScript()
-    warn("[System] Loaded 2x Speed Script")
-    remotes.ChangeTickSpeed:InvokeServer(2)
-
-    local difficulty = "dif_impossible"
-    local placements = {
-        {time = 29, unit = "unit_lawnmower", slot = "1", data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032), DistanceAlongPath=248.0065, CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0), Rotation=180}},
-        {time = 47, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131), DistanceAlongPath=180.53, CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1), Rotation=180}},
-        {time = 85, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538), DistanceAlongPath=178.04, CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1), Rotation=180}},
-        {time = 110, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032), DistanceAlongPath=100.65, CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0), Rotation=180}}
-    }
-
-    local function placeUnit(unitName, slot, data)
-        remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
-    end
-
-    local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function() placeUnit(p.unit, p.slot, p.data) end)
-        end
-    end
-
-    while true do
-        startGame()
-        task.wait(174.5)
-        remotes.RestartGame:InvokeServer()
-    end
-end
-
-function load3xScript()
-    warn("[System] Loaded 3x Speed Script")
-    remotes.ChangeTickSpeed:InvokeServer(3)
-
-    local difficulty = "dif_impossible"
-    local placements = {
-        {time = 23, unit = "unit_lawnmower", slot = "1", data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032), DistanceAlongPath=248.0065, CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0), Rotation=180}},
-        {time = 32, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131), DistanceAlongPath=180.53, CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1), Rotation=180}},
-        {time = 57, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538), DistanceAlongPath=178.04, CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1), Rotation=180}},
-        {time = 77, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032), DistanceAlongPath=100.65, CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0), Rotation=180}}
-    }
-
-    local function placeUnit(unitName, slot, data)
-        remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
-    end
-
-    local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function() placeUnit(p.unit, p.slot, p.data) end)
-        end
-    end
-
-    while true do
-        startGame()
-        task.wait(128)
-        remotes.RestartGame:InvokeServer()
-    end
-end
 
 --=== SPEED MENU ===--
 local function showSpeedMenu()
@@ -142,10 +81,64 @@ local function showSpeedMenu()
     btn3x.Text = "3x Speed"
     btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
 
-    btn2x.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-        load2xScript()
+    btn2x.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            ScreenGui:Destroy()
+            load2xScript()
+        end
     end)
 
-    btn3x.MouseButton1Click:Connect(function()
-        ScreenGui
+    btn3x.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            ScreenGui:Destroy()
+            load3xScript()
+        end
+    end)
+end
+
+--=== KEY CHECK ===--
+CheckBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or
+       input.UserInputType == Enum.UserInputType.Touch then
+        if TextBox.Text == "test" then
+            Label.Text = "Key Accepted!"
+            Label.TextColor3 = Color3.fromRGB(0,255,0)
+            task.delay(1, showSpeedMenu)
+        else
+            TextBox.Text = ""
+            Label.Text = "Invalid Key!"
+            Label.TextColor3 = Color3.fromRGB(255,0,0)
+        end
+    end
+end)
+
+--=== AUTO SKIP MONITOR ===--
+local function monitorAutoSkip()
+    local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
+    local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+
+    print("[AutoSkip Monitor] GUI loaded. Monitoring every 1s...")
+
+    while task.wait(1) do
+        pcall(function()
+            local c = autoSkipButton.ImageColor3
+            -- OFF es naranja: R>0.4, G>0.6, B≈0
+            if c.R > 0.4 and c.G > 0.6 and c.B < 0.1 then
+                local connections = getconnections(autoSkipButton.MouseButton1Click)
+                if connections and #connections > 0 then
+                    connections[1]:Fire()
+                    print("[AutoSkip Monitor] Auto Skip reactivated automatically")
+                end
+            end
+        end)
+    end
+end
+
+-- Ejecutar monitor después de que la key sea aceptada
+task.defer(monitorAutoSkip)
+
+--=== Cargar scripts adicionales ===--
+loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
