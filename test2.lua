@@ -1,24 +1,31 @@
+--// Auto Reactivate Auto Skip (OFF = naranja)
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+
+-- Esperar a que cargue la GUI del juego
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
 
-local lastState = autoSkipButton.ImageColor3 -- guarda el color actual
+print("[AutoSkip Monitor] Script started. Monitoring changes...")
 
-print("[AutoSkip Monitor] Started")
+-- Función para detectar OFF (naranja)
+local function isOff(color)
+    -- Ajusta los valores según tu dump
+    return color.R > 0.4 and color.R < 0.5 and color.G > 0.88 and color.G < 0.91 and color.B < 0.01
+end
 
-autoSkipButton:GetPropertyChangedSignal("ImageColor3"):Connect(function()
-    local current = autoSkipButton.ImageColor3
-    -- Detectar OFF: color verde (según tu dump)
-    if current.R < 0.5 and current.G > 0.8 then
-        -- Solo reactivar si el estado cambió desde ON a OFF
-        if lastState.R > 0.5 then
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip Monitor] Reactivated Auto Skip automatically")
-            end
-        end
+-- Reactivar Auto Skip
+local function reactivate()
+    local connections = getconnections(autoSkipButton.MouseButton1Click)
+    if connections and #connections > 0 then
+        connections[1]:Fire()
+        print("[AutoSkip Monitor] Auto Skip reactivated automatically")
     end
-    lastState = current
+end
+
+-- Detectar cambios en ImageColor3
+autoSkipButton:GetPropertyChangedSignal("ImageColor3"):Connect(function()
+    if isOff(autoSkipButton.ImageColor3) then
+        reactivate()
+    end
 end)
