@@ -16,7 +16,7 @@ local whitelist = {
     ["LOSTRALALA771"]= true,
     ["kaique91919"]= true,
     ["Derick12401"]= true,
-    ["67cheesy"]= true,
+    ["FleonelF100mil"]= true,
     ["keraieu"] = true
 }
 
@@ -73,72 +73,59 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== AUTO SKIP SYSTEM ===--
+-- Auto Skip confiable
 task.delay(2, function()
-    local success, err = pcall(function()
-        -- Inicializar Auto Skip
+    -- Activar una vez al inicio
+    pcall(function()
         remotes.ToggleAutoSkip:InvokeServer(true)
         warn("[System] Auto Skip Enabled")
-
-        -- Mantenerlo encendido si se desactiva
-        local player = game.Players.LocalPlayer
-        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-        local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-
-        task.spawn(function()
-            while true do
-                -- Color naranja = Off, Color verde = On
-                if autoSkipButton.BackgroundColor3 == Color3.fromRGB(255, 165, 0) then
-                    local connections = getconnections(autoSkipButton.MouseButton1Click)
-                    if connections and #connections > 0 then
-                        connections[1]:Fire()
-                        warn("[System] Auto Skip was Off, turned On")
-                    end
-                end
-                task.wait(1)
-            end
-        end)
     end)
-    if not success then
-        warn("[Auto Skip Error] "..err)
-    end
+
+    -- Revisar cada 1 segundo y activar solo si está apagado
+    task.spawn(function()
+        while true do
+            local success, isOn = pcall(function()
+                return remotes.GetAutoSkipState and remotes.GetAutoSkipState:InvokeServer() or true
+            end)
+            if success and not isOn then
+                pcall(function()
+                    remotes.ToggleAutoSkip:InvokeServer(true)
+                    warn("[System] Auto Skip was Off, turned On")
+                end)
+            end
+            task.wait(1)
+        end
+    end)
 end)
 
 --=== GAME SCRIPTS ===--
+
 function load2xScript()
     warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
 
     local difficulty = "dif_impossible"
     local placements = {
-        {
-            time = 29, unit = "unit_lawnmower", slot = "1",
+        {time = 29, unit = "unit_lawnmower", slot = "1",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
-                DistanceAlongPath=248.0065,
-                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
-                Rotation=180}
-        },
-        {
-            time = 47, unit = "unit_rafflesia", slot = "2",
+            DistanceAlongPath=248.0065,
+            CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+            Rotation=180}},
+        {time = 47, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
-                DistanceAlongPath=180.53,
-                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
-                Rotation=180}
-        },
-        {
-            time = 85, unit = "unit_rafflesia", slot = "2",
+            DistanceAlongPath=180.53,
+            CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
+            Rotation=180}},
+        {time = 85, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
-                DistanceAlongPath=178.04,
-                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
-                Rotation=180}
-        },
-        {
-            time = 110, unit = "unit_rafflesia", slot = "2",
+            DistanceAlongPath=178.04,
+            CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
+            Rotation=180}},
+        {time = 110, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
-                DistanceAlongPath=100.65,
-                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
-                Rotation=180}
-        }
+            DistanceAlongPath=100.65,
+            CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
+            Rotation=180}}
     }
 
     local function placeUnit(unitName, slot, data)
@@ -168,34 +155,26 @@ function load3xScript()
 
     local difficulty = "dif_impossible"
     local placements = {
-        {
-            time = 23, unit = "unit_lawnmower", slot = "1",
+        {time = 23, unit = "unit_lawnmower", slot = "1",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
-                DistanceAlongPath=248.0065,
-                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
-                Rotation=180}
-        },
-        {
-            time = 32, unit = "unit_rafflesia", slot = "2",
+            DistanceAlongPath=248.0065,
+            CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+            Rotation=180}},
+        {time = 32, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
-                DistanceAlongPath=180.53,
-                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
-                Rotation=180}
-        },
-        {
-            time = 57, unit = "unit_rafflesia", slot = "2",
+            DistanceAlongPath=180.53,
+            CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
+            Rotation=180}},
+        {time = 57, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
-                DistanceAlongPath=178.04,
-                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
-                Rotation=180}
-        },
-        {
-            time = 77, unit = "unit_rafflesia", slot = "2",
+            DistanceAlongPath=178.04,
+            CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
+            Rotation=180}},
+        {time = 77, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
-                DistanceAlongPath=100.65,
-                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
-                Rotation=180}
-        }
+            DistanceAlongPath=100.65,
+            CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
+            Rotation=180}}
     }
 
     local function placeUnit(unitName, slot, data)
