@@ -3,14 +3,36 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
+    ["wasaorchiquito"] = true,
+    ["PurpPom"] = true,
+    ["Girthentersmyvergona"] = true,
+    ["Sugaplum753"] = true,
+    ["Nstub1234"] = true,
+    -- ["0kHiper"] = true,
+    -- ["HaydenPaul0"] = true,
+    ["VladimirMercer"]= true,
+    ["ilyprame"]= true,
+    ["lyrachanx"]=true,
+    -- ["cyecylll"]= true,
+    -- ["chandra0302"]= true,
+    ["menorbom928373"]= true,
     ["holasoy_kier"]= true,
-    ["67cheesy"]= true
+    ["LOSTRALALA771"]= true,
+    -- ["freetc2active"]= true,
+    ["kaique91919"]= true,
+    --["kaki56000"]= true,
+    -- ["tc2active"]= true,
+    ["Derick12401"]= true,
+    ["FleonelF100mil"]= true,
+    ["keraieu"] = true
 }
 
 if not whitelist[plr.Name] then
     plr:Kick("You are not whitelisted.")
     return
 end
+
+print(plr.Name .. " is whitelisted. Waiting for key...")
 
 --// Key GUI
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
@@ -58,60 +80,25 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
--- global round id to avoid overlapping delays between rounds
-if not _G.__roundId then _G.__roundId = 0 end
+-- Auto Skip (enable once at start)
+task.delay(6, function() -- espera 6 segundos antes de activar
+    pcall(function()
+        local player = game.Players.LocalPlayer
+        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
--- helper: try to safely fire the autoskip button connections (uses getconnections only)
-local function fireAutoSkipButtonIfOffForButton(autoSkipButton)
-    if not autoSkipButton then return end
-    local okTxt, txt = pcall(function() return autoSkipButton.Text end)
-    if not okTxt or not txt then return end
-    if string.find(txt:lower(), "off") then
-        local okConns, conns = pcall(function() return getconnections(autoSkipButton.MouseButton1Click) end)
-        if okConns and conns and #conns > 0 then
-            pcall(function() conns[1]:Fire() end)
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
         end
-    end
-end
-
--- robust function to find the autoskip button (non-blocking)
-local function findAutoSkipButton()
-    local player = game.Players.LocalPlayer
-    if not player then return nil end
-    local gui = player:FindFirstChild("PlayerGui")
-    if not gui then return nil end
-
-    -- try common GUI name fast
-    local gameGui = gui:FindFirstChild("GameGuiNoInset")
-    if gameGui then
-        local ok, btn = pcall(function() return gameGui.Screen.Top.WaveControls.AutoSkip end)
-        if ok and btn and (btn:IsA("TextButton") or btn:IsA("ImageButton")) then
-            return btn
-        end
-    end
-
-    -- fallback: search all descendants for a button with name/text match
-    for _, v in pairs(gui:GetDescendants()) do
-        if (v:IsA("TextButton") or v:IsA("ImageButton")) then
-            local nameLower = tostring(v.Name):lower()
-            local textLower = ""
-            pcall(function() textLower = (v.Text and v.Text:lower()) or "" end)
-            if string.find(nameLower, "autoskip")
-            or string.find(nameLower, "skip")
-            or string.find(textLower, "auto skip")
-            or string.find(textLower, "autoskip") then
-                return v
-            end
-        end
-    end
-
-    return nil
-end
+    end)
+end)
 
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
-    pcall(function() remotes.ChangeTickSpeed:InvokeServer(2) end)
+    warn("[System] Loaded 2x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(2)
 
     local difficulty = "dif_impossible"
     local placements = {
@@ -146,50 +133,14 @@ function load2xScript()
     }
 
     local function placeUnit(unitName, slot, data)
-        pcall(function()
-            remotes.PlaceUnit:InvokeServer(unitName, data)
-        end)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
     end
 
     local function startGame()
-        -- increase round id to isolate delayed tasks per round
-        _G.__roundId = _G.__roundId + 1
-        local myRound = _G.__roundId
-
-        pcall(function()
-            remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        end)
-
-        -- schedule auto-skip initial attempt after 6 seconds, but only if still same round
-        task.delay(6, function()
-            if _G.__roundId ~= myRound then return end
-            -- try to find button (retry a few times short) then fire connections if off
-            local btn = findAutoSkipButton()
-            local tries = 0
-            while not btn and tries < 8 do
-                task.wait(0.5)
-                if _G.__roundId ~= myRound then return end
-                btn = findAutoSkipButton()
-                tries = tries + 1
-            end
-            if not btn then return end
-            fireAutoSkipButtonIfOffForButton(btn)
-
-            -- start per-round monitor that runs while same round
-            task.spawn(function()
-                while _G.__roundId == myRound do
-                    task.wait(1)
-                    local b = findAutoSkipButton()
-                    if b then
-                        fireAutoSkipButtonIfOffForButton(b)
-                    end
-                end
-            end)
-        end)
-
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
-                if _G.__roundId ~= myRound then return end
                 placeUnit(p.unit, p.slot, p.data)
             end)
         end
@@ -198,12 +149,13 @@ function load2xScript()
     while true do
         startGame()
         task.wait(174.5)
-        pcall(function() remotes.RestartGame:InvokeServer() end)
+        remotes.RestartGame:InvokeServer()
     end
 end
 
 function load3xScript()
-    pcall(function() remotes.ChangeTickSpeed:InvokeServer(3) end)
+    warn("[System] Loaded 3x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(3)
 
     local difficulty = "dif_impossible"
     local placements = {
@@ -238,49 +190,14 @@ function load3xScript()
     }
 
     local function placeUnit(unitName, slot, data)
-        pcall(function()
-            remotes.PlaceUnit:InvokeServer(unitName, data)
-        end)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
     end
 
     local function startGame()
-        -- increase round id to isolate delayed tasks per round
-        _G.__roundId = _G.__roundId + 1
-        local myRound = _G.__roundId
-
-        pcall(function()
-            remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        end)
-
-        -- schedule auto-skip initial attempt after 6 seconds, but only if still same round
-        task.delay(6, function()
-            if _G.__roundId ~= myRound then return end
-            local btn = findAutoSkipButton()
-            local tries = 0
-            while not btn and tries < 8 do
-                task.wait(0.5)
-                if _G.__roundId ~= myRound then return end
-                btn = findAutoSkipButton()
-                tries = tries + 1
-            end
-            if not btn then return end
-            fireAutoSkipButtonIfOffForButton(btn)
-
-            -- start per-round monitor that runs while same round
-            task.spawn(function()
-                while _G.__roundId == myRound do
-                    task.wait(1)
-                    local b = findAutoSkipButton()
-                    if b then
-                        fireAutoSkipButtonIfOffForButton(b)
-                    end
-                end
-            end)
-        end)
-
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
-                if _G.__roundId ~= myRound then return end
                 placeUnit(p.unit, p.slot, p.data)
             end)
         end
@@ -289,7 +206,7 @@ function load3xScript()
     while true do
         startGame()
         task.wait(128)
-        pcall(function() remotes.RestartGame:InvokeServer() end)
+        remotes.RestartGame:InvokeServer()
     end
 end
 
