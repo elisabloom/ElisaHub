@@ -3,8 +3,21 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
-    ["67cheesy"] = true,
-    ["67cheesy"] = true
+    ["wasaorchiquito"] = true,
+    ["PurpPom"] = true,
+    ["Girthentersmyvergona"] = true,
+    ["Sugaplum753"] = true,
+    ["Nstub1234"] = true,
+    ["VladimirMercer"]= true,
+    ["ilyprame"]= true,
+    ["lyrachanx"]=true,
+    ["menorbom928373"]= true,
+    ["holasoy_kier"]= true,
+    ["LOSTRALALA771"]= true,
+    ["kaique91919"]= true,
+    ["Derick12401"]= true,
+    ["67cheesy"]= true,
+    ["keraieu"] = true
 }
 
 if not whitelist[plr.Name] then
@@ -60,31 +73,41 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
--- Auto Skip (activar al inicio y vigilar cada segundo)
+--=== AUTO SKIP ===--
 local player = game.Players.LocalPlayer
-local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+local function setupAutoSkip()
+    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+    local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
-local function activateAutoSkip()
-    local connections = getconnections(autoSkipButton.MouseButton1Click)
-    if connections and #connections > 0 then
-        connections[1]:Fire()
+    local function isAutoSkipOn()
+        -- Ajusta esta condición según cómo indique el juego que está activado
+        return autoSkipButton.BackgroundColor3 == Color3.fromRGB(100,200,100)
     end
+
+    local function ensureAutoSkip()
+        if not isAutoSkipOn() then
+            local connections = getconnections(autoSkipButton.MouseButton1Click)
+            if connections and #connections > 0 then
+                connections[1]:Fire()
+            end
+        end
+    end
+
+    -- Activar una vez al inicio
+    pcall(ensureAutoSkip)
+
+    -- Revisar cada 1 segundo si alguien lo apaga
+    task.spawn(function()
+        while true do
+            task.wait(1)
+            pcall(ensureAutoSkip)
+        end
+    end)
 end
 
--- Activación inicial
-pcall(activateAutoSkip)
-
--- Vigilar cada segundo
-task.spawn(function()
-    while true do
-        task.wait(1)
-        pcall(activateAutoSkip)
-    end
-end)
+setupAutoSkip()
 
 --=== GAME SCRIPTS ===--
-
 function load2xScript()
     warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
@@ -241,6 +264,5 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Cargar anti-AFK y otros scripts externos
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
