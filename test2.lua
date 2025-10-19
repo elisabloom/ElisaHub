@@ -68,33 +68,6 @@ function load2xScript()
 
     local difficulty = "dif_impossible"
 
-    --=== AUTO SKIP SEGURO ===--
-    task.delay(6, function()
-        pcall(function()
-            local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
-            local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
-            print("[AutoSkip] Activated 6s after difficulty selection")
-
-            -- Monitor para mantener ON
-            spawn(function()
-                while true do
-                    task.wait(0.8)
-                    pcall(function()
-                        local c = autoSkipButton.ImageColor3
-                        -- OFF = naranja (R > 0.8, G>0.5), ON = verde (R ~0.45,G ~0.9)
-                        if c.R > 0.8 and c.G > 0.5 then
-                            local conns = getconnections(autoSkipButton.MouseButton1Click)
-                            if conns and #conns > 0 then
-                                conns[1]:Fire()
-                                print("[AutoSkip] Reactivated ON automatically")
-                            end
-                        end
-                    end)
-                end
-            end)
-        end)
-    end)
-
     local placements = {
         {
             time = 29, unit = "unit_lawnmower", slot = "1",
@@ -133,6 +106,32 @@ function load2xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        -- Auto Skip seguro 6s después de dificultad
+        task.delay(6, function()
+            pcall(function()
+                local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
+                local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+                print("[AutoSkip] Activated 6s after difficulty selection")
+                -- Monitor ON
+                spawn(function()
+                    while true do
+                        task.wait(0.8)
+                        pcall(function()
+                            local c = autoSkipButton.ImageColor3
+                            -- OFF naranja: R>0.8,G>0.5
+                            if c.R > 0.8 and c.G > 0.5 then
+                                local conns = getconnections(autoSkipButton.MouseButton1Click)
+                                if conns and #conns > 0 then
+                                    conns[1]:Fire()
+                                    print("[AutoSkip] Reactivated ON automatically")
+                                end
+                            end
+                        end)
+                    end
+                end)
+            end)
+        end)
+
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -140,6 +139,7 @@ function load2xScript()
         end
     end
 
+    -- Loop principal con play again
     while true do
         startGame()
         task.wait(174.5)
@@ -147,7 +147,7 @@ function load2xScript()
     end
 end
 
---=== KEY CHECK & SPEED MENU ===--
+--=== SPEED MENU ===--
 local function showSpeedMenu()
     Title.Text = "Select Speed"
     TextBox.Visible = false
@@ -172,10 +172,11 @@ local function showSpeedMenu()
 
     btn3x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        load2xScript() -- Cambia aquí a load3xScript si quieres 3x
+        load3xScript()
     end)
 end
 
+--=== KEY CHECK ===--
 CheckBtn.MouseButton1Click:Connect(function()
     if TextBox.Text == "test" then
         Label.Text = "Key Accepted!"
@@ -187,3 +188,7 @@ CheckBtn.MouseButton1Click:Connect(function()
         Label.TextColor3 = Color3.fromRGB(255,0,0)
     end
 end)
+
+--=== LOADSTRINGS ===--
+loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
