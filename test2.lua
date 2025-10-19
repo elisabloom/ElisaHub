@@ -1,27 +1,26 @@
-local player = game.Players.LocalPlayer
+--// Auto Reactivate Auto Skip
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Esperar a que cargue la GUI del juego
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
 
-print("=== DUMP AUTO SKIP IMAGEBUTTON ===")
-print("ClassName:", autoSkipButton.ClassName)
-print("BackgroundColor3:", autoSkipButton.BackgroundColor3)
-print("ImageColor3:", autoSkipButton.ImageColor3)
-print("ImageTransparency:", autoSkipButton.ImageTransparency)
-print("Visible:", autoSkipButton.Visible)
-print("Image:", autoSkipButton.Image)
+print("[AutoSkip Monitor] Script started. Monitoring every 0.5s...")
 
--- Detectar cambios
-local function dumpProps()
-    print("[Change Detected]")
-    print("BackgroundColor3:", autoSkipButton.BackgroundColor3)
-    print("ImageColor3:", autoSkipButton.ImageColor3)
-    print("ImageTransparency:", autoSkipButton.ImageTransparency)
-    print("Visible:", autoSkipButton.Visible)
-    print("Image:", autoSkipButton.Image)
+local function checkAutoSkip()
+    -- OFF detectado por ImageColor3 verde
+    local c = autoSkipButton.ImageColor3
+    if c.R < 0.5 and c.G > 0.8 then
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+            print("[AutoSkip Monitor] Auto Skip reactivated automatically")
+        end
+    end
 end
 
-autoSkipButton:GetPropertyChangedSignal("BackgroundColor3"):Connect(dumpProps)
-autoSkipButton:GetPropertyChangedSignal("ImageColor3"):Connect(dumpProps)
-autoSkipButton:GetPropertyChangedSignal("ImageTransparency"):Connect(dumpProps)
-autoSkipButton:GetPropertyChangedSignal("Visible"):Connect(dumpProps)
-autoSkipButton:GetPropertyChangedSignal("Image"):Connect(dumpProps)
+-- Revisar cada 0.5 segundos
+while task.wait(0.5) do
+    pcall(checkAutoSkip)
+end
