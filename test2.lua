@@ -1,32 +1,27 @@
---// Auto Reactivate Auto Skip
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
--- Esperar a que cargue la GUI del juego
+local player = game.Players.LocalPlayer
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+local btn = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
 
-print("[AutoSkip Monitor] Script started. Monitoring every 0.5s...")
-
-local function isOff(color)
-    -- Detecta naranja (OFF)
-    return color.R > 0.44 and color.R < 0.46
-       and color.G > 0.88 and color.G < 0.91
-       and color.B < 0.01
+local ok, vim = pcall(function() return game:GetService("VirtualInputManager") end)
+if not ok or not vim then
+    print("VirtualInputManager no disponible en este entorno.")
+    return
 end
 
-local function checkAutoSkip()
-    local c = autoSkipButton.ImageColor3
-    if isOff(c) then
-        local connections = getconnections(autoSkipButton.MouseButton1Click)
-        if connections and #connections > 0 then
-            connections[1]:Fire()
-            print("[AutoSkip Monitor] Auto Skip reactivated automatically")
-        end
-    end
+local ok2, pos, size = pcall(function() return btn.AbsolutePosition, btn.AbsoluteSize end)
+if not ok2 or not pos or not size then
+    -- try waiting a bit then re-read
+    task.wait(0.2)
+    pos = btn.AbsolutePosition
+    size = btn.AbsoluteSize
 end
 
--- Revisar cada 0.5 segundos
-while task.wait(0.5) do
-    pcall(checkAutoSkip)
-end
+local cx = pos.X + size.X/2
+local cy = pos.Y + size.Y/2
+print("Simulating mouse click at", cx, cy)
+pcall(function()
+    vim:SendMouseButtonEvent(cx, cy, 0, true, game, 0)
+    task.wait(0.05)
+    vim:SendMouseButtonEvent(cx, cy, 0, false, game, 0)
+end)
+print("Done simulated click")
