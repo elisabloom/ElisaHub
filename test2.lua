@@ -1,26 +1,26 @@
--- Mantener Auto Skip siempre activado
-task.spawn(function()
-    local player = game.Players.LocalPlayer
-    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-    local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+task.delay(6, function() -- espera inicial antes de activar
+    pcall(function()
+        local player = game.Players.LocalPlayer
+        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
-    local connections = getconnections(autoSkipButton.MouseButton1Click)
-    if not connections or #connections == 0 then
-        warn("[AutoSkip] No se encontró la función del botón")
-        return
-    end
-
-    local clickFunc = connections[1]
-
-    -- Activar Auto Skip una vez al inicio
-    clickFunc:Fire()
-
-    while true do
-        task.wait(1) -- revisar cada 1 segundo
-        -- Si el texto del botón es "Auto Skip: Off", volver a activarlo
-        if autoSkipButton.Text == "Auto Skip: Off" then
-            clickFunc:Fire()
-            warn("[AutoSkip] Se reactivó Auto Skip automáticamente")
+        -- Activar Auto Skip al inicio
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+            warn("[AutoSkip] Activado al inicio")
         end
-    end
+
+        -- Listener para reactivar si se pone Off manualmente
+        autoSkipButton:GetPropertyChangedSignal("Text"):Connect(function()
+            if autoSkipButton.Text == "Auto Skip: Off" then
+                -- Reactivar Auto Skip
+                local connections = getconnections(autoSkipButton.MouseButton1Click)
+                if connections and #connections > 0 then
+                    connections[1]:Fire()
+                    warn("[AutoSkip] Reactivado automáticamente")
+                end
+            end
+        end)
+    end)
 end)
