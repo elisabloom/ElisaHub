@@ -61,93 +61,67 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== GAME SCRIPTS ===--
-function load2xScript()
-    warn("[System] Loaded 2x Speed Script")
-    remotes.ChangeTickSpeed:InvokeServer(2)
-
+--=== SPEED SCRIPTS ===--
+local function createGameLoop(speed)
+    local tickSpeed = speed
+    local duration = (speed == 2) and 174.5 or 128
     local difficulty = "dif_impossible"
-    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-    -- Activar Auto Skip 6 segundos después de seleccionar la dificultad
-    task.delay(6, function()
-        pcall(function()
-            local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
-            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip] Activated after selecting difficulty (2x)")
-            end
+    local placements = {
+        -- Ajusta tus placements aquí según tu script original
+    }
 
-            -- Monitor para mantener Auto Skip en ON
-            local autoSkipState = true
-            task.spawn(function()
-                while true do
-                    task.wait(0.5)
-                    pcall(function()
-                        local c = autoSkipButton.ImageColor3
-                        local isOff = math.abs(c.R - 1) < 0.05 and math.abs(c.G - 0.6667) < 0.05 and math.abs(c.B - 0) < 0.05 -- naranja = OFF
-                        if isOff and autoSkipState then
-                            if connections and #connections > 0 then
-                                connections[1]:Fire()
-                                print("[AutoSkip Monitor] Reactivated automatically")
-                            end
-                            autoSkipState = false
-                        elseif not isOff then
-                            autoSkipState = true
-                        end
-                    end)
-                end
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
+    end
+
+    local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
             end)
-        end)
+        end
+    end
+
+    -- Activar Tick Speed
+    remotes.ChangeTickSpeed:InvokeServer(tickSpeed)
+
+    task.spawn(function()
+        while true do
+            startGame()
+            task.wait(duration)
+            remotes.RestartGame:InvokeServer()
+        end
     end)
 
-    -- Tu lógica de placements y loop de juego
-end
-
-function load3xScript()
-    warn("[System] Loaded 3x Speed Script")
-    remotes.ChangeTickSpeed:InvokeServer(3)
-
-    local difficulty = "dif_impossible"
-    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-
-    -- Activar Auto Skip 6 segundos después de seleccionar la dificultad
+    -- Esperar 6s después de seleccionar dificultad para activar Auto Skip
     task.delay(6, function()
-        pcall(function()
-            local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
-            local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip] Activated after selecting difficulty (3x)")
-            end
+        local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+            print("[AutoSkip] Activated after difficulty")
+        end
 
-            -- Monitor para mantener Auto Skip en ON
-            local autoSkipState = true
-            task.spawn(function()
-                while true do
-                    task.wait(0.5)
-                    pcall(function()
-                        local c = autoSkipButton.ImageColor3
-                        local isOff = math.abs(c.R - 1) < 0.05 and math.abs(c.G - 0.6667) < 0.05 and math.abs(c.B - 0) < 0.05 -- naranja = OFF
-                        if isOff and autoSkipState then
-                            if connections and #connections > 0 then
-                                connections[1]:Fire()
-                                print("[AutoSkip Monitor] Reactivated automatically")
-                            end
-                            autoSkipState = false
-                        elseif not isOff then
-                            autoSkipState = true
-                        end
-                    end)
-                end
-            end)
+        -- Seguro Auto Skip ON
+        task.spawn(function()
+            while true do
+                task.wait(0.5)
+                pcall(function()
+                    local c = autoSkipButton.ImageColor3
+                    -- OFF = naranja (R ~0.45, G~0.9, B~0)
+                    local isOff = math.abs(c.R - 0.45) < 0.05 and math.abs(c.G - 0.9) < 0.05 and math.abs(c.B - 0) < 0.05
+                    if isOff and connections and #connections > 0 then
+                        connections[1]:Fire()
+                        print("[AutoSkip Monitor] Reactivated automatically")
+                    end
+                end)
+            end
         end)
     end)
-
-    -- Tu lógica de placements y loop de juego
 end
 
 --=== SPEED MENU ===--
@@ -170,12 +144,12 @@ local function showSpeedMenu()
 
     btn2x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        load2xScript()
+        createGameLoop(2)
     end)
 
     btn3x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        load3xScript()
+        createGameLoop(3)
     end)
 end
 
@@ -192,5 +166,6 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Anti AFK y demás scripts externos
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
