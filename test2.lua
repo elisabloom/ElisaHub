@@ -1,4 +1,4 @@
---// Auto Reactivate Auto Skip
+--// Auto Reactivate Auto Skip (Event-based)
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
@@ -6,9 +6,9 @@ local player = Players.LocalPlayer
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
 
-print("[AutoSkip Monitor] Script started. Monitoring every 0.5s...")
+print("[AutoSkip Monitor] Script started. Reacting to color changes...")
 
-local function checkAutoSkip()
+local function reactivateIfOff()
     local c = autoSkipButton.ImageColor3
     -- Detectar OFF (naranja)
     if c.R > 0.9 and c.G > 0.6 and c.G < 0.7 and c.B < 0.1 then
@@ -20,7 +20,10 @@ local function checkAutoSkip()
     end
 end
 
--- Revisar cada 1 segundos
-while task.wait(1) do
-    pcall(checkAutoSkip)
-end
+-- Conectar al evento Changed del ImageColor3
+autoSkipButton:GetPropertyChangedSignal("ImageColor3"):Connect(function()
+    pcall(reactivateIfOff)
+end)
+
+-- Ejecutar una primera vez al inicio, por si ya estaba en Off
+pcall(reactivateIfOff)
