@@ -1,50 +1,51 @@
 local player = game.Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui"):WaitForChild("GameGuiNoInset")
-local autoSkipButton = gui:WaitForChild("Screen"):WaitForChild("Top"):WaitForChild("WaveControls"):WaitForChild("AutoSkip")
+local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
--- Función para obtener el color visual real
-local function getVisualColor()
-    -- Revisa todos los hijos y toma el primero que tenga BackgroundColor3
-    for _, obj in ipairs(autoSkipButton:GetDescendants()) do
-        if obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("TextLabel") then
-            return obj.BackgroundColor3
-        end
-    end
-    -- Si no encuentra, devuelve el botón mismo
-    return autoSkipButton.BackgroundColor3
+-- Función para mostrar el pop-up en pantalla
+local function showPopup(text, color)
+    local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
+    local Frame = Instance.new("Frame", ScreenGui)
+    Frame.Size = UDim2.new(0, 250, 0, 50)
+    Frame.Position = UDim2.new(0.5, -125, 0.1, 0)
+    Frame.BackgroundColor3 = color
+    Frame.BorderSizePixel = 0
+
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Size = UDim2.new(1,0,1,0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(255,255,255)
+    Label.Font = Enum.Font.GothamBold
+    Label.TextSize = 18
+
+    task.delay(15, function()
+        ScreenGui:Destroy()
+    end)
 end
 
-local previousColor = getVisualColor()
+-- Estado previo
+local prevState = nil
 
+-- Loop que revisa cambios cada 0.5 segundos
 task.spawn(function()
     while true do
-        task.wait(0.3)
-        local color = getVisualColor()
-        if color ~= previousColor then
-            previousColor = color
+        local stateText = autoSkipButton.Text -- Usa el texto para detectar ON/OFF
+        local stateColor
 
-            -- Crear pop-up
-            local pop = Instance.new("ScreenGui")
-            pop.ResetOnSpawn = false
-            pop.Parent = player.PlayerGui
-
-            local label = Instance.new("TextLabel", pop)
-            label.Size = UDim2.new(0, 300, 0, 50)
-            label.Position = UDim2.new(0.5, -150, 0.1, 0)
-            label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            label.BackgroundTransparency = 0.3
-            label.TextColor3 = Color3.fromRGB(255, 255, 255)
-            label.Font = Enum.Font.GothamBold
-            label.TextSize = 18
-            label.Text = string.format("Auto Skip Color RGB: %d, %d, %d",
-                math.floor(color.R * 255),
-                math.floor(color.G * 255),
-                math.floor(color.B * 255)
-            )
-
-            task.delay(15, function()
-                pop:Destroy()
-            end)
+        if stateText:lower():find("on") then
+            stateColor = Color3.fromRGB(95, 189, 0) -- verde
+        elseif stateText:lower():find("off") then
+            stateColor = Color3.fromRGB(219, 145, 0) -- naranja
+        else
+            stateColor = Color3.fromRGB(255,255,255) -- fallback
         end
+
+        if stateText ~= prevState then
+            showPopup("Auto Skip: "..stateText, stateColor)
+            prevState = stateText
+        end
+
+        task.wait(0.5)
     end
 end)
