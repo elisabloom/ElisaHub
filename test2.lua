@@ -3,8 +3,21 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
+    ["wasaorchiquito"] = true,
+    ["PurpPom"] = true,
+    ["Girthentersmyvergona"] = true,
+    ["Sugaplum753"] = true,
+    ["Nstub1234"] = true,
+    ["VladimirMercer"]= true,
+    ["ilyprame"]= true,
+    ["lyrachanx"]=true,
+    ["menorbom928373"]= true,
+    ["holasoy_kier"]= true,
+    ["LOSTRALALA771"]= true,
+    ["kaique91919"]= true,
+    ["Derick12401"]= true,
     ["FleonelF100mil"]= true,
-    ["67cheesy"] = true
+    ["keraieu"] = true
 }
 
 if not whitelist[plr.Name] then
@@ -60,26 +73,26 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
--- Auto Skip monitor (activa al inicio y revisa cada 1 segundo)
-task.spawn(function()
-    local player = game.Players.LocalPlayer
-    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-    local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+-- Auto Skip (activar al inicio y vigilar cada segundo)
+local player = game.Players.LocalPlayer
+local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
-    local function enableAutoSkip()
-        local connections = getconnections(autoSkipButton.MouseButton1Click)
-        if connections and #connections > 0 then
-            connections[1]:Fire()
-        end
+local function activateAutoSkip()
+    local connections = getconnections(autoSkipButton.MouseButton1Click)
+    if connections and #connections > 0 then
+        connections[1]:Fire()
     end
+end
 
-    -- Primera activación después de 6 segundos
-    task.delay(6, enableAutoSkip)
+-- Activación inicial
+pcall(activateAutoSkip)
 
-    -- Loop de monitoreo cada 1 segundo
+-- Vigilar cada segundo
+task.spawn(function()
     while true do
         task.wait(1)
-        pcall(enableAutoSkip)
+        pcall(activateAutoSkip)
     end
 end)
 
@@ -241,5 +254,6 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Cargar anti-AFK y otros scripts externos
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
