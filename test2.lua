@@ -170,6 +170,7 @@ CheckBtn.MouseButton1Click:Connect(function()
         Label.TextColor3 = Color3.fromRGB(255,0,0)
     end
 end)
+ 
 
 --=== Loadstrings externos ===--
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
