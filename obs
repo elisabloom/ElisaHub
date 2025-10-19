@@ -10,7 +10,6 @@ task.delay(2, function()
         warn("[System] Auto Skip Enabled using SkipWave remote")
     end)
 end)
-
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
