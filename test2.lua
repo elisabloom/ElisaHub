@@ -62,53 +62,24 @@ local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
 --=== GAME SCRIPTS ===--
-local function loadGame(speed)
-    local tickSpeed = speed
-    remotes.ChangeTickSpeed:InvokeServer(tickSpeed)
-    
+local function load2xScript()
+    warn("[System] Loaded 2x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(2)
+
     local difficulty = "dif_impossible"
-    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-
-    -- Activar Auto Skip 6s después de seleccionar dificultad
-    task.delay(6, function()
-        local player = game.Players.LocalPlayer
-        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-        local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
-
-        -- Función para mantener Auto Skip en ON
-        local function maintainAutoSkip()
-            local c = autoSkipButton.ImageColor3
-            -- OFF detectado por naranja (aprox)
-            if c.R > 0.4 and c.G > 0.6 and c.B < 0.1 then
-                local connections = getconnections(autoSkipButton.MouseButton1Click)
-                if connections and #connections > 0 then
-                    connections[1]:Fire()
-                    print("[AutoSkip Monitor] Reactivated Auto Skip automatically")
-                end
-            end
-        end
-
-        -- Loop de verificación cada 1 segundo
-        spawn(function()
-            while true do
-                task.wait(1)
-                pcall(maintainAutoSkip)
-            end
-        end)
-
-        -- Activar Auto Skip inicialmente
-        pcall(function()
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip Monitor] Auto Skip initially activated")
-            end
-        end)
-    end)
-
-    -- Funciones de colocación de unidades (ejemplo simple)
     local placements = {
-        -- Aquí irían tus unidades y tiempos
+        {
+            time = 29, unit = "unit_lawnmower", slot = "1",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032), Rotation=180}
+        },
+        {
+            time = 47, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
+                DistanceAlongPath=180.53,
+                CF=CFrame.new(-842.381287,62.1803055,-162.012131), Rotation=180}
+        }
     }
 
     local function placeUnit(unitName, slot, data)
@@ -117,6 +88,7 @@ local function loadGame(speed)
     end
 
     local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -124,18 +96,47 @@ local function loadGame(speed)
         end
     end
 
-    -- Loop principal del juego
-    spawn(function()
-        while true do
-            startGame()
-            if speed == 2 then
-                task.wait(174.5)
-            else
-                task.wait(128)
-            end
-            remotes.RestartGame:InvokeServer()
+    startGame()
+    -- Auto Skip seguro 6 segundos después de seleccionar dificultad
+    task.delay(6, function()
+        local player = game.Players.LocalPlayer
+        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+        print("AutoSkip button found. Maintaining ON state…")
+
+        -- Inicializar en ON
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+        end
+
+        -- Seguro para mantener ON
+        local lastState = true
+        while task.wait(1) do
+            pcall(function()
+                local c = autoSkipButton.ImageColor3
+                -- OFF = naranja
+                local isOff = math.abs(c.R - 0.45098) < 0.05 and math.abs(c.G - 0.901961) < 0.05 and c.B < 0.05
+                if isOff and lastState then
+                    if connections and #connections > 0 then
+                        connections[1]:Fire()
+                        print("[AutoSkip Monitor] Reactivated Auto Skip automatically")
+                    end
+                    lastState = true
+                elseif not isOff then
+                    lastState = true
+                else
+                    lastState = false
+                end
+            end)
         end
     end)
+end
+
+local function load3xScript()
+    warn("[System] Loaded 3x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(3)
+    -- Similar setup que load2xScript
 end
 
 --=== SPEED MENU ===--
@@ -158,12 +159,12 @@ local function showSpeedMenu()
 
     btn2x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        loadGame(2)
+        load2xScript()
     end)
 
     btn3x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        loadGame(3)
+        load3xScript()
     end)
 end
 
@@ -172,7 +173,7 @@ CheckBtn.MouseButton1Click:Connect(function()
     if TextBox.Text == "test" then
         Label.Text = "Key Accepted!"
         Label.TextColor3 = Color3.fromRGB(0,255,0)
-        task.delay(0.5, showSpeedMenu)
+        task.delay(1, showSpeedMenu)
     else
         TextBox.Text = ""
         Label.Text = "Invalid Key!"
@@ -180,6 +181,6 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
---=== Anti AFK y otras cargas externas ===--
+-- Anti-AFK y otros loadstrings
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
