@@ -20,7 +20,7 @@ local whitelist = {
     ["LOSTRALALA771"]= true,
     -- ["freetc2active"]= true,
     ["kaique91919"]= true,
-    --["kaki56000"]= true,
+    -- ["kaki56000"]= true,
     -- ["tc2active"]= true,
     ["Derick12401"]= true,
     ["67cheesy"]= true,
@@ -86,38 +86,40 @@ task.spawn(function()
     local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
     local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
+    local ON_COLOR = Color3.fromRGB(95, 189, 0)
+    local OFF_COLOR = Color3.fromRGB(219, 145, 0)
+
     local function getAutoSkipState()
         local color = autoSkipButton.BackgroundColor3
-        if color == Color3.fromRGB(0, 255, 0) then
-            return true
+        if color == ON_COLOR then
+            return true -- ON
+        elseif color == OFF_COLOR then
+            return false -- OFF
         else
-            return false
+            return nil -- Desconocido
         end
     end
 
-    local function setAutoSkip(state)
+    local function setAutoSkipOn()
         local connections = getconnections(autoSkipButton.MouseButton1Click)
         if connections and #connections > 0 then
-            local currentState = getAutoSkipState()
-            if state and not currentState then
-                connections[1]:Fire() -- activamos
-            elseif not state and currentState then
-                connections[1]:Fire() -- desactivamos
+            if getAutoSkipState() == false then -- Solo si está OFF
+                connections[1]:Fire() -- Activar
             end
         end
     end
 
     -- Activar Auto Skip al inicio
     pcall(function()
-        setAutoSkip(true)
+        setAutoSkipOn()
     end)
 
     -- Vigilar cada segundo solo para reactivar si alguien lo apaga
     while true do
         task.wait(1)
         pcall(function()
-            if not getAutoSkipState() then
-                setAutoSkip(true)
+            if getAutoSkipState() == false then
+                setAutoSkipOn()
             end
         end)
     end
@@ -192,95 +194,4 @@ function load3xScript()
             time = 23, unit = "unit_lawnmower", slot = "1",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
                 DistanceAlongPath=248.0065,
-                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
-                Rotation=180}
-        },
-        {
-            time = 32, unit = "unit_rafflesia", slot = "2",
-            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
-                DistanceAlongPath=180.53,
-                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
-                Rotation=180}
-        },
-        {
-            time = 57, unit = "unit_rafflesia", slot = "2",
-            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
-                DistanceAlongPath=178.04,
-                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
-                Rotation=180}
-        },
-        {
-            time = 77, unit = "unit_rafflesia", slot = "2",
-            data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
-                DistanceAlongPath=100.65,
-                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
-                Rotation=180}
-        }
-    }
-
-    local function placeUnit(unitName, slot, data)
-        remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
-    end
-
-    local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function()
-                placeUnit(p.unit, p.slot, p.data)
-            end)
-        end
-    end
-
-    while true do
-        startGame()
-        task.wait(128)
-        remotes.RestartGame:InvokeServer()
-    end
-end
-
---=== SPEED MENU ===--
-local function showSpeedMenu()
-    Title.Text = "Select Speed"
-    TextBox.Visible = false
-    CheckBtn.Visible = false
-
-    local btn2x = Instance.new("TextButton", Frame)
-    btn2x.Size = UDim2.new(0.45, 0, 0, 50)
-    btn2x.Position = UDim2.new(0.05, 0, 0.5, -25)
-    btn2x.Text = "2x Speed"
-    btn2x.BackgroundColor3 = Color3.fromRGB(80,160,250)
-
-    local btn3x = Instance.new("TextButton", Frame)
-    btn3x.Size = UDim2.new(0.45, 0, 0, 50)
-    btn3x.Position = UDim2.new(0.5, 0, 0.5, -25)
-    btn3x.Text = "3x Speed"
-    btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
-
-    btn2x.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-        load2xScript()
-    end)
-
-    btn3x.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-        load3xScript()
-    end)
-end
-
---=== KEY CHECK ===--
-CheckBtn.MouseButton1Click:Connect(function()
-    if TextBox.Text == "test" then
-        Label.Text = "Key Accepted!"
-        Label.TextColor3 = Color3.fromRGB(0,255,0)
-        task.delay(1, showSpeedMenu)
-    else
-        TextBox.Text = ""
-        Label.Text = "Invalid Key!"
-        Label.TextColor3 = Color3.fromRGB(255,0,0)
-    end
-end)
-
---=== EXTERNAL SCRIPTS ===--
-loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0
