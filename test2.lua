@@ -10,8 +10,8 @@ print("[AutoSkip Monitor] Script started. Monitoring every 0.5s...")
 
 local function checkAutoSkip()
     local c = autoSkipButton.ImageColor3
-    -- Detectar OFF (verde)
-    if c.R < 0.5 and c.G > 0.8 and c.B < 0.5 then
+    -- Detectar OFF (naranja)
+    if c.R > 0.9 and c.G > 0.6 and c.G < 0.7 and c.B < 0.1 then
         local connections = getconnections(autoSkipButton.MouseButton1Click)
         if connections and #connections > 0 then
             connections[1]:Fire()
@@ -20,7 +20,7 @@ local function checkAutoSkip()
     end
 end
 
--- Revisar cada 0.5 segundos
-while task.wait(0.5) do
+-- Revisar cada 1 segundos
+while task.wait(1) do
     pcall(checkAutoSkip)
 end
