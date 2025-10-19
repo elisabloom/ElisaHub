@@ -1,4 +1,4 @@
---// WHITELIST SYSTEM
+--// Whitelist system
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
@@ -15,7 +15,7 @@ end
 
 print(plr.Name .. " is whitelisted. Waiting for key...")
 
---// KEY GUI
+--// Key GUI
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
 local Frame = Instance.new("Frame", ScreenGui)
 Frame.Size = UDim2.new(0, 300, 0, 200)
@@ -57,64 +57,34 @@ Label.Font = Enum.Font.GothamBold
 Label.TextSize = 16
 Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 
---// REMOTES
+--// Remotes
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== SPEED SCRIPTS ===--
-function load2xScript()
-    warn("[System] Loaded 2x Speed Script")
-    remotes.ChangeTickSpeed:InvokeServer(2)
-    local difficulty = "dif_impossible"
-    local placements = {
-        -- Tu lista de placements 2x aquí...
-    }
-    local function placeUnit(unitName, slot, data)
-        remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
-    end
-    local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function()
-                placeUnit(p.unit, p.slot, p.data)
-            end)
-        end
-    end
-    while true do
-        startGame()
-        task.wait(174.5)
-        remotes.RestartGame:InvokeServer()
-    end
-end
-
-function load3xScript()
-    warn("[System] Loaded 3x Speed Script")
-    remotes.ChangeTickSpeed:InvokeServer(3)
-    local difficulty = "dif_impossible"
-    local placements = {
-        -- Tu lista de placements 3x aquí...
-    }
-    local function placeUnit(unitName, slot, data)
-        remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
-    end
-    local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function()
-                placeUnit(p.unit, p.slot, p.data)
-            end)
-        end
-    end
-    while true do
-        startGame()
-        task.wait(128)
-        remotes.RestartGame:InvokeServer()
-    end
-end
-
 --=== SPEED MENU ===--
+local function startAutoSkipMonitor()
+    local player = game.Players.LocalPlayer
+    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+    local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+
+    task.spawn(function()
+        while true do
+            task.wait(0.8) -- revisar cada 0.8 segundos
+            pcall(function()
+                local c = autoSkipButton.ImageColor3
+                -- OFF es naranja: R > 0.4 y G > 0.6
+                if c.R > 0.4 and c.G > 0.6 then
+                    local connections = getconnections(autoSkipButton.MouseButton1Click)
+                    if connections and #connections > 0 then
+                        connections[1]:Fire()
+                        print("[AutoSkip Monitor] Auto Skip reactivated automatically")
+                    end
+                end
+            end)
+        end
+    end)
+end
+
 local function showSpeedMenu()
     Title.Text = "Select Speed"
     TextBox.Visible = false
@@ -132,21 +102,24 @@ local function showSpeedMenu()
     btn3x.Text = "3x Speed"
     btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
 
-    btn2x.MouseButton1Click:Connect(function()
+    local function start2x()
         ScreenGui:Destroy()
-        task.spawn(function()
-            load2xScript()
+        task.delay(6, function()
+            startAutoSkipMonitor() -- iniciar monitor después de 6s
         end)
-        task.delay(6, startAutoSkipMonitor) -- Auto Skip 6s después
-    end)
+        load2xScript()
+    end
 
-    btn3x.MouseButton1Click:Connect(function()
+    local function start3x()
         ScreenGui:Destroy()
-        task.spawn(function()
-            load3xScript()
+        task.delay(6, function()
+            startAutoSkipMonitor() -- iniciar monitor después de 6s
         end)
-        task.delay(6, startAutoSkipMonitor) -- Auto Skip 6s después
-    end)
+        load3xScript()
+    end
+
+    btn2x.MouseButton1Click:Connect(start2x)
+    btn3x.MouseButton1Click:Connect(start3x)
 end
 
 --=== KEY CHECK ===--
@@ -162,42 +135,66 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
---=== AUTO SKIP MONITOR ===--
-function startAutoSkipMonitor()
-    local player = game.Players.LocalPlayer
-    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-    local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+--=== GAME SCRIPTS ===--
+function load2xScript()
+    warn("[System] Loaded 2x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(2)
 
-    -- Activar Auto Skip inicial
-    task.delay(0.5, function()
-        pcall(function()
-            local conns = getconnections(autoSkipButton.MouseButton1Click)
-            if conns and #conns > 0 then
-                conns[1]:Fire()
-                print("[AutoSkip Monitor] Auto Skip activado")
-            end
-        end)
-    end)
+    local difficulty = "dif_impossible"
+    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
 
-    -- Loop de seguridad
-    task.spawn(function()
-        while true do
-            task.wait(0.8)
-            pcall(function()
-                local c = autoSkipButton.ImageColor3
-                -- Si está en OFF (naranja), reactivarlo
-                if c.R > 0.4 and c.G > 0.6 and c.B < 0.1 then
-                    local conns = getconnections(autoSkipButton.MouseButton1Click)
-                    if conns and #conns > 0 then
-                        conns[1]:Fire()
-                        print("[AutoSkip Monitor] Auto Skip reactivado automáticamente")
-                    end
-                end
+    local placements = {
+        -- Tus unidades y tiempos aquí
+    }
+
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+    end
+
+    local function startGame()
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
             end)
         end
-    end)
+    end
+
+    while true do
+        startGame()
+        task.wait(174.5)
+        remotes.RestartGame:InvokeServer()
+    end
 end
 
---=== ANTI AFK & EXTRAS ===--
-loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
+function load3xScript()
+    warn("[System] Loaded 3x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(3)
+
+    local difficulty = "dif_impossible"
+    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+
+    local placements = {
+        -- Tus unidades y tiempos aquí
+    }
+
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+    end
+
+    local function startGame()
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
+            end)
+        end
+    end
+
+    while true do
+        startGame()
+        task.wait(128)
+        remotes.RestartGame:InvokeServer()
+    end
+end
+
+--=== Anti-AFK ===--
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
