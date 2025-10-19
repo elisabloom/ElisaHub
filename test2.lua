@@ -1,34 +1,26 @@
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+--// Auto Reactivate Auto Skip
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
+-- Esperar a que cargue la GUI del juego
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
 
-local ON_IMAGE = "rbxassetid://91983021855852"
-local OFF_IMAGE = "rbxassetid://591983921855852"
+print("[AutoSkip Monitor] Script started. Monitoring every 0.5s...")
 
-print("GUI loaded")
-print("AutoSkip button found")
-print("Monitoring AutoSkip every 1s…")
-
-local function simulateClick(button)
-    -- Simular InputBegan + InputEnded
-    local pos = button.AbsolutePosition + button.AbsoluteSize / 2
-    local input = Instance.new("InputObject")
-    input.Position = pos
-    pcall(function()
-        firetouchinterest(button, input, 0)
-        firetouchinterest(button, input, 1)
-    end)
+local function checkAutoSkip()
+    local c = autoSkipButton.ImageColor3
+    -- Detectar OFF (verde)
+    if c.R < 0.5 and c.G > 0.8 and c.B < 0.5 then
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+            print("[AutoSkip Monitor] Auto Skip reactivated automatically")
+        end
+    end
 end
 
-RunService.Heartbeat:Connect(function()
-    pcall(function()
-        if autoSkipButton.Image == OFF_IMAGE then
-            simulateClick(autoSkipButton)
-            print("[AutoSkip Monitor] Simulated click to reactivate Auto Skip")
-        end
-    end)
-end)
+-- Revisar cada 0.5 segundos
+while task.wait(0.5) do
+    pcall(checkAutoSkip)
+end
