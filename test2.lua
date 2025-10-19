@@ -2,16 +2,24 @@ local player = game.Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui"):WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui:WaitForChild("Screen"):WaitForChild("Top"):WaitForChild("WaveControls"):WaitForChild("AutoSkip")
 
--- Encuentra el frame o imagen que realmente cambia de color
--- Ajusta el nombre si es distinto en tu juego
-local visualFrame = autoSkipButton:FindFirstChild("Background") or autoSkipButton
+-- Función para obtener el color visual real
+local function getVisualColor()
+    -- Revisa todos los hijos y toma el primero que tenga BackgroundColor3
+    for _, obj in ipairs(autoSkipButton:GetDescendants()) do
+        if obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("TextLabel") then
+            return obj.BackgroundColor3
+        end
+    end
+    -- Si no encuentra, devuelve el botón mismo
+    return autoSkipButton.BackgroundColor3
+end
 
-local previousColor = visualFrame.BackgroundColor3
+local previousColor = getVisualColor()
 
 task.spawn(function()
     while true do
-        task.wait(0.3) -- Revisa cada 0.3 segundos
-        local color = visualFrame.BackgroundColor3
+        task.wait(0.3)
+        local color = getVisualColor()
         if color ~= previousColor then
             previousColor = color
 
@@ -34,7 +42,6 @@ task.spawn(function()
                 math.floor(color.B * 255)
             )
 
-            -- Duración de 15 segundos
             task.delay(15, function()
                 pop:Destroy()
             end)
