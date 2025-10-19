@@ -1,43 +1,33 @@
-local player = game.Players.LocalPlayer
-local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+-- Auto Skip (enable once at start y mostrar color)
+task.delay(6, function() -- espera 6 segundos antes de activar
+    pcall(function()
+        local player = game.Players.LocalPlayer
+        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
--- Función para mostrar un pop-up
-local function showPopup(message)
-    local screenGui = Instance.new("ScreenGui", player.PlayerGui)
-    local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 250, 0, 50)
-    frame.Position = UDim2.new(0.5, -125, 0.1, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    frame.BackgroundTransparency = 0.5
-    frame.BorderSizePixel = 0
+        -- Activar Auto Skip una sola vez
+        local connections = getconnections(autoSkipButton.MouseButton1Click)
+        if connections and #connections > 0 then
+            connections[1]:Fire()
+        end
 
-    local label = Instance.new("TextLabel", frame)
-    label.Size = UDim2.new(1,0,1,0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(255,255,255)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 16
-    label.Text = message
+        -- Crear pop-up mostrando el color actual del botón Auto Skip
+        local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
+        local Label = Instance.new("TextLabel", ScreenGui)
+        Label.Size = UDim2.new(0, 300, 0, 50)
+        Label.Position = UDim2.new(0.5, -150, 0.1, 0)
+        Label.BackgroundColor3 = Color3.fromRGB(0,0,0)
+        Label.BackgroundTransparency = 0.5
+        Label.TextColor3 = Color3.fromRGB(255,255,255)
+        Label.Font = Enum.Font.GothamBold
+        Label.TextSize = 18
 
-    -- Destruir pop-up después de 2.5 segundos
-    task.delay(2.5, function()
-        screenGui:Destroy()
+        local c = autoSkipButton.BackgroundColor3
+        Label.Text = string.format("Auto Skip ON Color RGB: %d, %d, %d", math.floor(c.R*255), math.floor(c.G*255), math.floor(c.B*255))
+
+        -- Destruir pop-up después de 15 segundos
+        task.delay(15, function()
+            ScreenGui:Destroy()
+        end)
     end)
-end
-
--- Guardar color inicial
-local lastColor = autoSkipButton.BackgroundColor3
-
--- Detectar cambios de color
-autoSkipButton:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
-    local currentColor = autoSkipButton.BackgroundColor3
-    if currentColor ~= lastColor then
-        lastColor = currentColor
-        -- Convertir a RGB 0-255
-        local r = math.floor(currentColor.R * 255)
-        local g = math.floor(currentColor.G * 255)
-        local b = math.floor(currentColor.B * 255)
-        showPopup("Auto Skip Color Changed!\nRGB: ("..r..","..g..","..b..")")
-    end
 end)
