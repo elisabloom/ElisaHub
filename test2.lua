@@ -61,17 +61,69 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== GAME SCRIPTS ===--
-function loadGameScript(speed)
-    remotes.ChangeTickSpeed:InvokeServer(speed)
+--=== AUTO SKIP SETUP ===--
+local function setupAutoSkip()
+    task.delay(6, function() -- 6s después de seleccionar dificultad
+        pcall(function()
+            local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
+            local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+            print("[AutoSkip] Activated 6s after difficulty selection")
+            -- Monitor ON
+            spawn(function()
+                while true do
+                    task.wait(0.8)
+                    pcall(function()
+                        local c = autoSkipButton.ImageColor3
+                        -- OFF naranja: R>0.8,G>0.5
+                        if c.R > 0.8 and c.G > 0.5 then
+                            local conns = getconnections(autoSkipButton.MouseButton1Click)
+                            if conns and #conns > 0 then
+                                conns[1]:Fire()
+                                print("[AutoSkip] Reactivated ON automatically")
+                            end
+                        end
+                    end)
+                end
+            end)
+        end)
+    end)
+end
 
+--=== GAME SCRIPTS ===--
+function load2xScript()
+    warn("[System] Loaded 2x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(2)
     local difficulty = "dif_impossible"
+
     local placements = {
-        -- Ejemplo de placements, puedes ajustarlos según tu estrategia
-        {time=29, unit="unit_lawnmower", slot="1", data={Valid=true, PathIndex=3, Position=Vector3.new(-843.87384,62.1803055,-123.052032)}},
-        {time=47, unit="unit_rafflesia", slot="2", data={Valid=true, PathIndex=3, Position=Vector3.new(-842.381287,62.1803055,-162.012131)}},
-        {time=85, unit="unit_rafflesia", slot="2", data={Valid=true, PathIndex=3, Position=Vector3.new(-842.381287,62.1803055,-164.507538)}},
-        {time=110, unit="unit_rafflesia", slot="2", data={Valid=true, PathIndex=2, Position=Vector3.new(-864.724426,62.1803055,-199.052032)}},
+        {
+            time = 29, unit = "unit_lawnmower", slot = "1",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+                Rotation=180}
+        },
+        {
+            time = 47, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
+                DistanceAlongPath=180.53,
+                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 85, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
+                DistanceAlongPath=178.04,
+                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 110, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
+                DistanceAlongPath=100.65,
+                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
+                Rotation=180}
+        }
     }
 
     local function placeUnit(unitName, slot, data)
@@ -81,34 +133,7 @@ function loadGameScript(speed)
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-
-        -- Activar Auto Skip 6 segundos después de seleccionar dificultad
-        task.delay(6, function()
-            local player = game.Players.LocalPlayer
-            local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-            local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
-
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire() -- Activar ON
-            end
-
-            -- Seguro: mantener siempre en ON
-            spawn(function()
-                while true do
-                    task.wait(0.8)
-                    local c = autoSkipButton.ImageColor3
-                    -- OFF es naranja: R>0.4 y G>0.8, ON es verde: R=1, G~0.66
-                    if c.R > 0.4 and c.G > 0.8 then
-                        if connections and #connections > 0 then
-                            connections[1]:Fire()
-                            print("[AutoSkip Monitor] Reactivated automatically")
-                        end
-                    end
-                end
-            end)
-        end)
-
+        setupAutoSkip()
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -118,11 +143,65 @@ function loadGameScript(speed)
 
     while true do
         startGame()
-        if speed == 2 then
-            task.wait(174.5)
-        else
-            task.wait(128)
+        task.wait(174.5)
+        remotes.RestartGame:InvokeServer()
+    end
+end
+
+function load3xScript()
+    warn("[System] Loaded 3x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(3)
+    local difficulty = "dif_impossible"
+
+    local placements = {
+        {
+            time = 23, unit = "unit_lawnmower", slot = "1",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+                Rotation=180}
+        },
+        {
+            time = 32, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
+                DistanceAlongPath=180.53,
+                CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 57, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538),
+                DistanceAlongPath=178.04,
+                CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1),
+                Rotation=180}
+        },
+        {
+            time = 77, unit = "unit_rafflesia", slot = "2",
+            data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
+                DistanceAlongPath=100.65,
+                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
+                Rotation=180}
+        }
+    }
+
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
+    end
+
+    local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        setupAutoSkip()
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
+            end)
         end
+    end
+
+    while true do
+        startGame()
+        task.wait(128)
         remotes.RestartGame:InvokeServer()
     end
 end
@@ -147,12 +226,12 @@ local function showSpeedMenu()
 
     btn2x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        loadGameScript(2)
+        load2xScript()
     end)
 
     btn3x.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-        loadGameScript(3)
+        load3xScript()
     end)
 end
 
