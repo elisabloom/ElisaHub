@@ -61,15 +61,6 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
--- Helper para Auto Skip
-local function getAutoSkipButton()
-    local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
-    local screen = gui:WaitForChild("Screen")
-    local top = screen:WaitForChild("Top")
-    local waveControls = top:WaitForChild("WaveControls")
-    return waveControls:WaitForChild("AutoSkip")
-end
-
 --=== GAME SCRIPTS ===--
 
 function load2xScript()
@@ -115,16 +106,6 @@ function load2xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        task.delay(6, function()
-            -- Activar Auto Skip 6s después de votar dificultad
-            local autoSkipButton = getAutoSkipButton()
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if autoSkipButton.Image == "rbxassetid://591983921855852" and connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip] Activado automáticamente")
-            end
-        end)
-
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -132,16 +113,37 @@ function load2xScript()
         end
     end
 
-    -- Mantener Auto Skip en ON
-    spawn(function()
-        while task.wait(1) do
-            local autoSkipButton = getAutoSkipButton()
+    --=== Auto Skip Seguro (inicia después de dificultad) ===
+    task.delay(6, function()
+        local player = game.Players.LocalPlayer
+        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+
+        -- Activar Auto Skip inicial
+        pcall(function()
             local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if autoSkipButton.Image == "rbxassetid://591983921855852" and connections and #connections > 0 then
+            if connections and #connections > 0 then
                 connections[1]:Fire()
-                print("[AutoSkip] Reactivado automáticamente")
+                print("[AutoSkip Monitor] Auto Skip activado")
             end
-        end
+        end)
+
+        -- Loop de seguridad cada 0.8s para mantener ON
+        task.spawn(function()
+            while task.wait(0.8) do
+                pcall(function()
+                    local c = autoSkipButton.ImageColor3
+                    -- OFF detectado (naranja)
+                    if c.R > 0.4 and c.G > 0.6 and c.B < 0.1 then
+                        local connections = getconnections(autoSkipButton.MouseButton1Click)
+                        if connections and #connections > 0 then
+                            connections[1]:Fire()
+                            print("[AutoSkip Monitor] Auto Skip reactivado automáticamente")
+                        end
+                    end
+                end)
+            end
+        end)
     end)
 
     while true do
@@ -180,96 +182,4 @@ function load3xScript()
         },
         {
             time = 77, unit = "unit_rafflesia", slot = "2",
-            data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032),
-                DistanceAlongPath=100.65,
-                CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0),
-                Rotation=180}
-        }
-    }
-
-    local function placeUnit(unitName, slot, data)
-        remotes.PlaceUnit:InvokeServer(unitName, data)
-        warn("[Placing] "..unitName.." at "..os.clock())
-    end
-
-    local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        task.delay(6, function()
-            local autoSkipButton = getAutoSkipButton()
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if autoSkipButton.Image == "rbxassetid://591983921855852" and connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip] Activado automáticamente")
-            end
-        end)
-
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function()
-                placeUnit(p.unit, p.slot, p.data)
-            end)
-        end
-    end
-
-    -- Mantener Auto Skip en ON
-    spawn(function()
-        while task.wait(1) do
-            local autoSkipButton = getAutoSkipButton()
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if autoSkipButton.Image == "rbxassetid://591983921855852" and connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip] Reactivado automáticamente")
-            end
-        end
-    end)
-
-    while true do
-        startGame()
-        task.wait(128)
-        remotes.RestartGame:InvokeServer()
-    end
-end
-
---=== SPEED MENU ===--
-local function showSpeedMenu()
-    Title.Text = "Select Speed"
-    TextBox.Visible = false
-    CheckBtn.Visible = false
-
-    local btn2x = Instance.new("TextButton", Frame)
-    btn2x.Size = UDim2.new(0.45, 0, 0, 50)
-    btn2x.Position = UDim2.new(0.05, 0, 0.5, -25)
-    btn2x.Text = "2x Speed"
-    btn2x.BackgroundColor3 = Color3.fromRGB(80,160,250)
-
-    local btn3x = Instance.new("TextButton", Frame)
-    btn3x.Size = UDim2.new(0.45, 0, 0, 50)
-    btn3x.Position = UDim2.new(0.5, 0, 0.5, -25)
-    btn3x.Text = "3x Speed"
-    btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
-
-    btn2x.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-        load2xScript()
-    end)
-
-    btn3x.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-        load3xScript()
-    end)
-end
-
---=== KEY CHECK ===--
-CheckBtn.MouseButton1Click:Connect(function()
-    if TextBox.Text == "test" then
-        Label.Text = "Key Accepted!"
-        Label.TextColor3 = Color3.fromRGB(0,255,0)
-        task.delay(1, showSpeedMenu)
-    else
-        TextBox.Text = ""
-        Label.Text = "Invalid Key!"
-        Label.TextColor3 = Color3.fromRGB(255,0,0)
-    end
-end)
-
-loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
+            data = {Valid=true,Path
