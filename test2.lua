@@ -1,11 +1,25 @@
--- Detector de color Auto Skip ON/OFF
 local player = game.Players.LocalPlayer
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
-local lastColor = autoSkipButton.BackgroundColor3
+-- Función para obtener el color visible del botón
+local function getButtonColor(btn)
+    -- Si es un TextButton usa su BackgroundColor3
+    if btn:IsA("TextButton") or btn:IsA("ImageButton") then
+        return btn.BackgroundColor3
+    end
+    -- Si tiene Frames internos con color
+    for _, child in ipairs(btn:GetChildren()) do
+        if child:IsA("Frame") then
+            return child.BackgroundColor3
+        end
+    end
+    return Color3.new(1,1,1) -- blanco por defecto si no encuentra
+end
 
--- Función para mostrar pop-up temporal
+local lastColor = getButtonColor(autoSkipButton)
+
+-- Función para mostrar pop-up
 local function showColorPopup(color)
     local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
     local Label = Instance.new("TextLabel", ScreenGui)
@@ -31,11 +45,11 @@ end
 -- Loop para detectar cambios de color
 task.spawn(function()
     while true do
-        local currentColor = autoSkipButton.BackgroundColor3
+        local currentColor = getButtonColor(autoSkipButton)
         if currentColor ~= lastColor then
             lastColor = currentColor
             showColorPopup(currentColor)
         end
-        task.wait(0.5) -- revisa cada medio segundo
+        task.wait(0.5)
     end
 end)
