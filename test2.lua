@@ -1,4 +1,3 @@
---=== EXISTING SCRIPT ===--
 --// Whitelist system
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
@@ -62,48 +61,91 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
--- Auto Skip (enable once at start)
-task.delay(6, function()
-    pcall(function()
-        local player = game.Players.LocalPlayer
-        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-        local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+--=== GAME SCRIPTS ===--
+function load2xScript()
+    warn("[System] Loaded 2x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(2)
 
-        local connections = getconnections(autoSkipButton.MouseButton1Click)
-        if connections and #connections > 0 then
-            connections[1]:Fire()
-        end
-    end)
-end)
+    local difficulty = "dif_impossible"
+    local placements = {
+        {time = 29, unit = "unit_lawnmower", slot = "1", data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032), DistanceAlongPath=248.0065, CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0), Rotation=180}},
+        {time = 47, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131), DistanceAlongPath=180.53, CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1), Rotation=180}},
+        {time = 85, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538), DistanceAlongPath=178.04, CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1), Rotation=180}},
+        {time = 110, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032), DistanceAlongPath=100.65, CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0), Rotation=180}}
+    }
 
---=== AUTO SKIP MONITOR ===--
-task.delay(7, function() -- Se ejecuta después de activar inicialmente
-    local player = game.Players.LocalPlayer
-    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-    local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
+    end
 
-    print("[AutoSkip Monitor] Monitoring Auto Skip automatically...")
-
-    local function reactivateIfOff()
-        local c = autoSkipButton.ImageColor3
-        -- Detectar OFF (naranja)
-        if c.R > 0.9 and c.G > 0.6 and c.G < 0.7 and c.B < 0.1 then
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
-                print("[AutoSkip Monitor] Auto Skip reactivated automatically")
-            end
+    local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function() placeUnit(p.unit, p.slot, p.data) end)
         end
     end
 
-    -- Conectar al evento Changed del ImageColor3
-    autoSkipButton:GetPropertyChangedSignal("ImageColor3"):Connect(function()
-        pcall(reactivateIfOff)
+    while true do
+        startGame()
+        task.wait(174.5)
+        remotes.RestartGame:InvokeServer()
+    end
+end
+
+function load3xScript()
+    warn("[System] Loaded 3x Speed Script")
+    remotes.ChangeTickSpeed:InvokeServer(3)
+
+    local difficulty = "dif_impossible"
+    local placements = {
+        {time = 23, unit = "unit_lawnmower", slot = "1", data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032), DistanceAlongPath=248.0065, CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0), Rotation=180}},
+        {time = 32, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131), DistanceAlongPath=180.53, CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1), Rotation=180}},
+        {time = 57, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-164.507538), DistanceAlongPath=178.04, CF=CFrame.new(-842.381287,62.1803055,-164.507538,1,0,0,0,1,0,0,0,1), Rotation=180}},
+        {time = 77, unit = "unit_rafflesia", slot = "2", data = {Valid=true,PathIndex=2,Position=Vector3.new(-864.724426,62.1803055,-199.052032), DistanceAlongPath=100.65, CF=CFrame.new(-864.724426,62.1803055,-199.052032,-0,0,1,0,1,0,-1,0,0), Rotation=180}}
+    }
+
+    local function placeUnit(unitName, slot, data)
+        remotes.PlaceUnit:InvokeServer(unitName, data)
+        warn("[Placing] "..unitName.." at "..os.clock())
+    end
+
+    local function startGame()
+        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function() placeUnit(p.unit, p.slot, p.data) end)
+        end
+    end
+
+    while true do
+        startGame()
+        task.wait(128)
+        remotes.RestartGame:InvokeServer()
+    end
+end
+
+--=== SPEED MENU ===--
+local function showSpeedMenu()
+    Title.Text = "Select Speed"
+    TextBox.Visible = false
+    CheckBtn.Visible = false
+
+    local btn2x = Instance.new("TextButton", Frame)
+    btn2x.Size = UDim2.new(0.45, 0, 0, 50)
+    btn2x.Position = UDim2.new(0.05, 0, 0.5, -25)
+    btn2x.Text = "2x Speed"
+    btn2x.BackgroundColor3 = Color3.fromRGB(80,160,250)
+
+    local btn3x = Instance.new("TextButton", Frame)
+    btn3x.Size = UDim2.new(0.45, 0, 0, 50)
+    btn3x.Position = UDim2.new(0.5, 0, 0.5, -25)
+    btn3x.Text = "3x Speed"
+    btn3x.BackgroundColor3 = Color3.fromRGB(250,120,120)
+
+    btn2x.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+        load2xScript()
     end)
 
-    -- Chequeo inicial por si ya estaba Off
-    pcall(reactivateIfOff)
-end)
-
---=== GAME SCRIPTS ===--
--- [Aquí van tus funciones load2xScript, load3xScript, showSpeedMenu, y key check tal como están en tu script original]
+    btn3x.MouseButton1Click:Connect(function()
+        ScreenGui
