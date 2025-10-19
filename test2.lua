@@ -2,7 +2,6 @@ local player = game.Players.LocalPlayer
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
--- Función para mostrar el pop-up en pantalla
 local function showPopup(text, color)
     local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
     local Frame = Instance.new("Frame", ScreenGui)
@@ -24,28 +23,16 @@ local function showPopup(text, color)
     end)
 end
 
--- Estado previo
-local prevState = nil
-
--- Loop que revisa cambios cada 0.5 segundos
-task.spawn(function()
-    while true do
-        local stateText = autoSkipButton.Text -- Usa el texto para detectar ON/OFF
-        local stateColor
-
-        if stateText:lower():find("on") then
-            stateColor = Color3.fromRGB(95, 189, 0) -- verde
-        elseif stateText:lower():find("off") then
-            stateColor = Color3.fromRGB(219, 145, 0) -- naranja
-        else
-            stateColor = Color3.fromRGB(255,255,255) -- fallback
-        end
-
-        if stateText ~= prevState then
-            showPopup("Auto Skip: "..stateText, stateColor)
-            prevState = stateText
-        end
-
-        task.wait(0.5)
+-- Detecta cambios en el color real
+autoSkipButton:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
+    local col = autoSkipButton.BackgroundColor3
+    local text
+    if col == Color3.fromRGB(95, 189, 0) then
+        text = "ON"
+    elseif col == Color3.fromRGB(219, 145, 0) then
+        text = "OFF"
+    else
+        text = "UNKNOWN"
     end
+    showPopup("Auto Skip: "..text, col)
 end)
