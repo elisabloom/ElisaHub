@@ -73,39 +73,36 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
---=== AUTO SKIP ===--
-local player = game.Players.LocalPlayer
-local function setupAutoSkip()
-    local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
-    local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
+--=== AUTO SKIP SYSTEM ===--
+task.delay(2, function()
+    local success, err = pcall(function()
+        -- Inicializar Auto Skip
+        remotes.ToggleAutoSkip:InvokeServer(true)
+        warn("[System] Auto Skip Enabled")
 
-    local function isAutoSkipOn()
-        -- Ajusta esta condición según cómo indique el juego que está activado
-        return autoSkipButton.BackgroundColor3 == Color3.fromRGB(100,200,100)
-    end
+        -- Mantenerlo encendido si se desactiva
+        local player = game.Players.LocalPlayer
+        local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
+        local autoSkipButton = gui.Screen.Top.WaveControls.AutoSkip
 
-    local function ensureAutoSkip()
-        if not isAutoSkipOn() then
-            local connections = getconnections(autoSkipButton.MouseButton1Click)
-            if connections and #connections > 0 then
-                connections[1]:Fire()
+        task.spawn(function()
+            while true do
+                -- Color naranja = Off, Color verde = On
+                if autoSkipButton.BackgroundColor3 == Color3.fromRGB(255, 165, 0) then
+                    local connections = getconnections(autoSkipButton.MouseButton1Click)
+                    if connections and #connections > 0 then
+                        connections[1]:Fire()
+                        warn("[System] Auto Skip was Off, turned On")
+                    end
+                end
+                task.wait(1)
             end
-        end
-    end
-
-    -- Activar una vez al inicio
-    pcall(ensureAutoSkip)
-
-    -- Revisar cada 1 segundo si alguien lo apaga
-    task.spawn(function()
-        while true do
-            task.wait(1)
-            pcall(ensureAutoSkip)
-        end
+        end)
     end)
-end
-
-setupAutoSkip()
+    if not success then
+        warn("[Auto Skip Error] "..err)
+    end
+end)
 
 --=== GAME SCRIPTS ===--
 function load2xScript()
