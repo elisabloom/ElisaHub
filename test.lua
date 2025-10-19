@@ -4,7 +4,7 @@ local plr = Players.LocalPlayer
 
 local whitelist = {
 
-    ["holasoy_kier"]= true,
+    ["kierbot2"]= true,
     ["67cheesy"] = true
 }
 
