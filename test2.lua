@@ -2,26 +2,27 @@ local player = game.Players.LocalPlayer
 local gui = player.PlayerGui:WaitForChild("GameGuiNoInset")
 local btn = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
 
-local ok, vim = pcall(function() return game:GetService("VirtualInputManager") end)
-if not ok or not vim then
-    print("VirtualInputManager no disponible en este entorno.")
+local conns = {}
+local ok, tmp = pcall(function() return getconnections(btn.MouseButton1Click) end)
+if not ok or not tmp then
+    print("No se pudieron obtener conexiones o no existen.")
     return
 end
 
-local ok2, pos, size = pcall(function() return btn.AbsolutePosition, btn.AbsoluteSize end)
-if not ok2 or not pos or not size then
-    -- try waiting a bit then re-read
-    task.wait(0.2)
-    pos = btn.AbsolutePosition
-    size = btn.AbsoluteSize
+print("Connections found:", #tmp)
+for i, c in ipairs(tmp) do
+    print(("---- conn %d ----"):format(i))
+    pcall(function()
+        print("  Connected:", tostring(c.Connected))
+    end)
+    pcall(function()
+        print("  Function tostring:", tostring(c.Function))
+    end)
+    pcall(function()
+        -- some environments allow printing closure env/source
+        if c.Function then
+            print("  Function source dump:", debug and debug.getinfo and debug.getinfo(c.Function) or "no debug.getinfo")
+        end
+    end)
 end
-
-local cx = pos.X + size.X/2
-local cy = pos.Y + size.Y/2
-print("Simulating mouse click at", cx, cy)
-pcall(function()
-    vim:SendMouseButtonEvent(cx, cy, 0, true, game, 0)
-    task.wait(0.05)
-    vim:SendMouseButtonEvent(cx, cy, 0, false, game, 0)
-end)
-print("Done simulated click")
+_G._AutoSkipConnections = tmp
