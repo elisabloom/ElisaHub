@@ -24,6 +24,7 @@ local whitelist = {
    -- ["tc2active"]= true,
     ["Derick12401"]= true,
     ["FleonelF100mil"]= true,
+    ["67cheesy"]= true,
     ["keraieu"] = true
 }
 
@@ -80,21 +81,40 @@ Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 local rs = game:GetService("ReplicatedStorage")
 local remotes = rs:WaitForChild("RemoteFunctions")
 
--- Auto Skip (enable once at start)
-task.delay(2, function()
-    pcall(function()
-        remotes.ToggleAutoSkip:InvokeServer(true)
-        warn("[System] Auto Skip Enabled")
+--=== AUTO SKIP SETUP ===--
+local function setupAutoSkip()
+    task.delay(6, function() -- 6s después de seleccionar dificultad
+        pcall(function()
+            local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
+            local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
+            print("[AutoSkip] Activated 6s after difficulty selection")
+            -- Monitor ON
+            spawn(function()
+                while true do
+                    task.wait(0.8)
+                    pcall(function()
+                        local c = autoSkipButton.ImageColor3
+                        -- OFF naranja: R>0.8,G>0.5
+                        if c.R > 0.8 and c.G > 0.5 then
+                            local conns = getconnections(autoSkipButton.MouseButton1Click)
+                            if conns and #conns > 0 then
+                                conns[1]:Fire()
+                                print("[AutoSkip] Reactivated ON automatically")
+                            end
+                        end
+                    end)
+                end
+            end)
+        end)
     end)
-end)
+end
 
 --=== GAME SCRIPTS ===--
-
 function load2xScript()
     warn("[System] Loaded 2x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(2)
-
     local difficulty = "dif_impossible"
+
     local placements = {
         {
             time = 29, unit = "unit_lawnmower", slot = "1",
@@ -133,6 +153,7 @@ function load2xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        setupAutoSkip()
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -150,8 +171,8 @@ end
 function load3xScript()
     warn("[System] Loaded 3x Speed Script")
     remotes.ChangeTickSpeed:InvokeServer(3)
-
     local difficulty = "dif_impossible"
+
     local placements = {
         {
             time = 23, unit = "unit_lawnmower", slot = "1",
@@ -190,6 +211,7 @@ function load3xScript()
 
     local function startGame()
         remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+        setupAutoSkip()
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
@@ -209,17 +231,6 @@ local function showSpeedMenu()
     Title.Text = "Select Speed"
     TextBox.Visible = false
     CheckBtn.Visible = false
-
-    -- Reminder label directly below title
-    local AutoSkipMsg = Instance.new("TextLabel", Frame)
-    AutoSkipMsg.Size = UDim2.new(1, -20, 0, 30)
-    AutoSkipMsg.Position = UDim2.new(0, 10, 0, 40)
-    AutoSkipMsg.BackgroundTransparency = 1
-    AutoSkipMsg.Text = "Please enable auto skip manually or you will get banned."
-    AutoSkipMsg.Font = Enum.Font.GothamBold
-    AutoSkipMsg.TextSize = 14
-    AutoSkipMsg.TextColor3 = Color3.fromRGB(255, 200, 0)
-    AutoSkipMsg.TextWrapped = true
 
     local btn2x = Instance.new("TextButton", Frame)
     btn2x.Size = UDim2.new(0.45, 0, 0, 50)
@@ -257,5 +268,6 @@ CheckBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+--=== LOADSTRINGS ===--
 loadstring(game:HttpGet("https://pastebin.com/raw/HkAmPckQ"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))();
