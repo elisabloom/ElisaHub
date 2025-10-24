@@ -118,10 +118,15 @@ function load2xScript()
     local placements = {
         {
             time = 32.10, unit = "unit_lawnmower", slot = "1",
-            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
-                DistanceAlongPath=248.0065,
-                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
-                Rotation=180}
+            data = {local args = {
+    "unit_lawnmower",
+    {
+        Valid = true,
+        PathIndex = 2,
+       Position = vector.create(-857.3809814453125, 62.18030548095703, -120.12993621826172),
+        DistanceAlongPath = 216.9214859008789,
+        CF = CFrame.new(-857.3809814453125, 62.18030548095703, -120.12993621826172, 1, 0, -0, -0, 1, -0, -0, 0, 1),
+        Rotation = 180}
         },
         {
             time = 47, unit = "unit_rafflesia", slot = "2",
