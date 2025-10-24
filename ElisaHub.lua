@@ -154,7 +154,7 @@ function load2xScript()
     local function startGame()
     remotes.PlaceDifficultyVote:InvokeServer(difficulty)
     setupAutoSkip()
-    task.wait(1) -- wait 1 second before starting placements
+    task.delay(1) -- wait 1 second before starting placements
     for _, p in ipairs(placements) do
         task.delay(p.time, function()
             placeUnit(p.unit, p.slot, p.data)
@@ -215,7 +215,7 @@ function load3xScript()
     local function startGame()
     remotes.PlaceDifficultyVote:InvokeServer(difficulty)
     setupAutoSkip()
-    task.wait(1) -- wait 1 second before starting placements
+    task.delay(1) -- wait 1 second before starting placements
     for _, p in ipairs(placements) do
         task.delay(p.time, function()
             placeUnit(p.unit, p.slot, p.data)
