@@ -122,7 +122,7 @@ function load2xScript()
         PathIndex = 1,
         Position = Vector3.new(-894, 62, -123),
         DistanceAlongPath = 283.0053997039795,
-        CF = CFrame.new(-894, 62, -123, -0, -0, -1, -0, 1, -0, 1, 0, -0)
+        CF = CFrame.new(-894, 62, -123, -0, -0, -1, -0, 1, -0, 1, 0, -0),
         Rotation = 180}
         },
         {
