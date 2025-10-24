@@ -3,29 +3,9 @@ local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
 local whitelist = {
-    ["wasaorchiquito"] = true,
-    ["PurpPom"] = true,
-    ["Girthentersmyvergona"] = true,
-    ["Sugaplum753"] = true,
-    ["Nstub1234"] = true,
-   -- ["0kHiper"] = true,
-  --  ["HaydenPaul0"] = true,
-   -- ["VladimirMercer"]= true,
-   -- ["ilyprame"]= true,
-   -- ["lyrachanx"]=true,
-   -- ["cyecylll"]= true,
-   -- ["chandra0302"]= true,
-    ["menorbom928373"]= true,
-    ["holasoy_kier"]= true,
-    ["LOSTRALALA771"]= true,
-   -- ["freetc2active"]= true,
-   -- ["kaique91919"]= true,
-    --["kaki56000"]= true,
-   -- ["tc2active"]= true,
-    ["Derick12401"]= true,
-    ["FleonelF100mil"]= true,
-    ["67cheesy"]= true,
-    ["keraieu"] = true
+    ["wasaorchiquito"]= true,
+    ["kierbot2"]= true,
+    ["67cheesy"] = true
 }
 
 if not whitelist[plr.Name] then
@@ -115,7 +95,7 @@ function load2xScript()
     remotes.ChangeTickSpeed:InvokeServer(2)
     local difficulty = "dif_impossible"
 
-   local placements = {
+    local placements = {
         {
             time = 29, unit = "unit_lawnmower", slot = "1",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
@@ -176,10 +156,12 @@ function load3xScript()
     local placements = {
         {
             time = 23, unit = "unit_lawnmower", slot = "1",
-            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
-                DistanceAlongPath=248.0065,
-                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
-                Rotation=180}
+            data = {Valid = true,
+        PathIndex = 1,
+        Position = Vector3.new(-894, 62, -123),
+        DistanceAlongPath = 283.0053997039795,
+        Rotation = 180,
+        CF = CFrame.new(-894, 62, -123, -0, -0, -1, -0, 1, -0, 1, 0, -0)}
         },
         {
             time = 32, unit = "unit_rafflesia", slot = "2",
