@@ -115,15 +115,13 @@ function load2xScript()
     remotes.ChangeTickSpeed:InvokeServer(2)
     local difficulty = "dif_impossible"
 
-    local placements = {
+   local placements = {
         {
             time = 29, unit = "unit_lawnmower", slot = "1",
-            data = { Valid = true,
-        PathIndex = 1,
-        Position = Vector3.new(-894, 62, -123),
-        DistanceAlongPath = 283.0053997039795,
-        CF = CFrame.new(-894, 62, -123, -0, -0, -1, -0, 1, -0, 1, 0, -0),
-        Rotation = 180}
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+                Rotation=180}
         },
         {
             time = 47, unit = "unit_rafflesia", slot = "2",
