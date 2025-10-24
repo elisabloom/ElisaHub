@@ -126,6 +126,15 @@ function load2xScript()
         CF = CFrame.new(-894, 62, -123, -0, -0, -1, -0, 1, -0, 1, 0, -0)}
         },
         {
+            time = 59, unit = "unit_lawnmower", slot = "1",
+            data = {Valid = true,
+        PathIndex = 3,
+        Position = Vector3.new(-813, 62, -123),
+        DistanceAlongPath = 278.81842041015625,
+        Rotation = 180,
+        CF = CFrame.new(-813, 62, -123, -0, 0, 1, 0, 1, -0, -1, 0, -0)}
+        },
+        {
             time = 47, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
                 DistanceAlongPath=180.53,
