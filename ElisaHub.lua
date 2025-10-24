@@ -135,7 +135,7 @@ function load2xScript()
         CF = CFrame.new(-813, 62, -123, -0, 0, 1, 0, 1, -0, -1, 0, -0)}
         },
         {
-            time = 47, unit = "unit_rafflesia", slot = "2",
+            time = 60, unit = "unit_rafflesia", slot = "2",
             data = {Valid=true,PathIndex=3,Position=Vector3.new(-842.381287,62.1803055,-162.012131),
                 DistanceAlongPath=180.53,
                 CF=CFrame.new(-842.381287,62.1803055,-162.012131,1,0,0,0,1,0,0,0,1),
