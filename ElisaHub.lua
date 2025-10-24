@@ -117,7 +117,7 @@ function load2xScript()
 
     local placements = {
         {
-            time = 29, unit = "unit_lawnmower", slot = "1",
+            time = 31, unit = "unit_lawnmower", slot = "1",
             data = {Valid = true,
         PathIndex = 1,
         Position = Vector3.new(-894, 62, -123),
