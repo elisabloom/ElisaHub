@@ -1,4 +1,4 @@
---// Garden Tower Defense - Macro Recorder
+--// Garden Tower Defense - FULL MACRO WITH FIXED RECORDER
 local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/Libraries/main/Shaman/Library.lua'))()
 local Flags = Library.Flags
 
@@ -86,13 +86,13 @@ FarmSection:Toggle({
     Callback = function(enabled)
         Settings.MacroEnabled = enabled
         if enabled then
-            warn("macro started")
+            warn("🚀 MACRO STARTED!")
             if StatusLabel then
                 StatusLabel:Set({Text = "Status: Running", Color = Color3.fromRGB(0, 255, 100)})
             end
             task.spawn(runMacro)
         else
-            warn("macro stopped")
+            warn("⏹️ MACRO STOPPED!")
             if StatusLabel then
                 StatusLabel:Set({Text = "Status: Stopped", Color = Color3.fromRGB(255, 100, 100)})
             end
@@ -116,7 +116,7 @@ AntiBanSection:Slider({
     Maximum = 5,
     Callback = function(value)
         Settings.PositionOffset = value
-        warn("position offset: " .. value)
+        warn("[SETTINGS] Position offset: " .. value)
     end
 })
 
@@ -126,12 +126,12 @@ MovementSection:Toggle({
     Callback = function(enabled)
         Settings.AutoWalk = enabled
         if enabled then
-            warn("auto walk enabled")
+            warn("[AUTO WALK] Enabled")
             if _G.trackingEnabled then
                 startAutoWalk()
             end
         else
-            warn("auto walk disabled")
+            warn("[AUTO WALK] Disabled")
             stopAutoWalk()
         end
     end
@@ -143,7 +143,7 @@ RecorderSection:Input({
     Flag = "MacroName",
     Callback = function(text)
         Recorder.MacroName = text
-        warn("macro name: " .. text)
+        warn("[RECORDER] Macro name set to: " .. text)
     end
 })
 
@@ -269,7 +269,7 @@ entities.ChildAdded:Connect(function(child)
                 local unitID = getUnitID(child)
                 if unitID then
                     table.insert(_G.myUnitIDs, unitID)
-                    warn("tracked unit: " .. unitID)
+                    warn("[✓ TRACKED] Unit ID: " .. unitID)
                 end
             end
         end)
@@ -283,7 +283,7 @@ entities.ChildAdded:Connect(function(child)
                 local unitID = getUnitID(child)
                 if unitID then
                     table.insert(_G.recordedUnits, unitID)
-                    warn("recorder tracked: " .. unitID)
+                    warn("[✓ RECORDER] Tracked unit ID: " .. unitID .. " for recording")
                 end
             end
         end)
@@ -301,7 +301,7 @@ local function setupAutoSkip()
             pcall(function()
                 remotes.ToggleAutoSkip:InvokeServer(true)
             end)
-            warn("auto skip enabled")
+            warn("[AUTO SKIP] Enabled")
             
             while _G.trackingEnabled do
                 task.wait(0.8)
@@ -323,7 +323,7 @@ local function setupGame()
     remotes.PlaceDifficultyVote:InvokeServer("dif_normal")
     remotes.ChangeTickSpeed:InvokeServer(3)
     setupAutoSkip()
-    warn("game setup complete")
+    warn("[GAME SETUP] Complete")
 end
 
 -- Base placements for Auto Normal
@@ -396,7 +396,7 @@ local function placeUnits(placements)
                 end)
                 
                 if success then
-                    warn("placed " .. placement.unit)
+                    warn("[PLACED] " .. placement.unit)
                 end
             end
         end)
@@ -429,7 +429,9 @@ end
 
 function runMacro()
     while Settings.MacroEnabled do
-        warn("starting new game...")
+        warn("========================================")
+        warn("[GAME START] Starting new game...")
+        warn("========================================")
         
         _G.myUnitIDs = {}
         _G.trackingEnabled = true
@@ -453,7 +455,7 @@ function runMacro()
         
         task.wait(2)
         
-        warn("restarting game...")
+        warn("[RESTART] Restarting game...")
         pcall(function()
             remotes.RestartGame:InvokeServer()
         end)
@@ -483,13 +485,13 @@ function startRecording()
     Recorder.StartTime = tick()
     Recorder.Actions = {}
     _G.recordedUnits = {}
-    warn("recording started")
+    warn("[RECORDER] 🔴 Started recording!")
     RecorderStatusLabel:Set({Text = "🔴 Recording... (0 actions)", Color = Color3.fromRGB(255, 100, 100)})
 end
 
 function stopRecording()
     Recorder.IsRecording = false
-    warn("recording stopped, total actions: " .. #Recorder.Actions)
+    warn("[RECORDER] ⏹️ Stopped recording! Total actions: " .. #Recorder.Actions)
     RecorderStatusLabel:Set({Text = "⏹️ Stopped (" .. #Recorder.Actions .. " actions)", Color = Color3.fromRGB(255, 200, 0)})
 end
 
@@ -525,7 +527,7 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
         -- Now safely add to table in a deferred thread
         task.defer(function()
             table.insert(Recorder.Actions, recordData)
-            warn(string.format("recorded: placed %s at %.1fs", unitType, elapsedTime))
+            warn(string.format("[RECORDED] 📍 Placed %s at %.1fs", unitType, elapsedTime))
             
             -- Update status safely
             pcall(function()
@@ -554,7 +556,7 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
             
             task.defer(function()
                 table.insert(Recorder.Actions, recordData)
-                warn(string.format("recorded: sold unit #%d at %.1fs", unitIndex, elapsedTime))
+                warn(string.format("[RECORDED] 💰 Sold unit #%d at %.1fs", unitIndex, elapsedTime))
                 
                 pcall(function()
                     if Recorder.IsRecording and RecorderStatusLabel then
@@ -573,7 +575,7 @@ end)
 
 function saveRecording()
     if #Recorder.Actions == 0 then
-        warn("no actions to save")
+        warn("[RECORDER] ❌ No actions to save!")
         RecorderStatusLabel:Set({Text = "❌ No actions recorded!", Color = Color3.fromRGB(255, 0, 0)})
         return
     end
@@ -608,14 +610,14 @@ function saveRecording()
     end)
     
     if success then
-        warn("saved macro: " .. macroName)
-        warn("actions recorded: " .. #Recorder.Actions)
+        warn("[RECORDER] ✅ Saved macro: " .. macroName)
+        warn("[RECORDER] 📊 Actions recorded: " .. #Recorder.Actions)
         RecorderStatusLabel:Set({Text = "✅ Saved: " .. macroName, Color = Color3.fromRGB(0, 255, 100)})
         
         task.wait(1)
         loadSavedMacros()
     else
-        warn("failed to save: " .. tostring(err))
+        warn("[RECORDER] ❌ Failed to save: " .. tostring(err))
         RecorderStatusLabel:Set({Text = "❌ Save failed!", Color = Color3.fromRGB(255, 0, 0)})
     end
 end
@@ -659,17 +661,17 @@ function loadSavedMacros()
         end
     end)
     
-    warn("loading saved macros...")
+    warn("[RECORDER] 📂 Loading saved macros...")
     
     -- Create folders if they don't exist
     pcall(function()
         if not isfolder("SimpleSpy") then
             makefolder("SimpleSpy")
-            warn("created simplespy folder")
+            warn("[RECORDER] Created SimpleSpy folder")
         end
         if not isfolder("SimpleSpy/Macros") then
             makefolder("SimpleSpy/Macros")
-            warn("created macros folder")
+            warn("[RECORDER] Created Macros folder")
         end
     end)
     
@@ -678,7 +680,7 @@ function loadSavedMacros()
     end)
     
     if not success or not macros then
-        warn("no macros found")
+        warn("[RECORDER] ⚠️ No macros found or can't access folder")
         SavedMacrosSection:Label({
             Text = "No macros saved yet",
             Color = Color3.fromRGB(150, 150, 150)
@@ -697,7 +699,7 @@ function loadSavedMacros()
                 Text = "▶️ " .. macroName,
                 Tooltip = "Click to play this macro",
                 Callback = function()
-                    warn("playing macro: " .. macroName)
+                    warn("[RECORDER] Playing macro: " .. macroName)
                     playMacro(file)
                 end
             })
@@ -709,7 +711,7 @@ function loadSavedMacros()
                 Callback = function()
                     pcall(function()
                         delfile(file)
-                        warn("deleted: " .. macroName)
+                        warn("[RECORDER] 🗑️ Deleted: " .. macroName)
                     end)
                     task.wait(0.2)
                     loadSavedMacros()
@@ -718,7 +720,7 @@ function loadSavedMacros()
         end
     end
     
-    warn("loaded " .. macroCount .. " macros")
+    warn("[RECORDER] ✅ Loaded " .. macroCount .. " macro(s)")
     
     if macroCount == 0 then
         SavedMacrosSection:Label({
@@ -734,14 +736,16 @@ function playMacro(file)
     end)
     
     if not success then
-        warn("failed to read file")
+        warn("[MACRO] ❌ Failed to read file!")
         return
     end
     
     local macroData = loadstring(macroScript)()
     
-    warn("playing: " .. macroData.name)
-    warn("actions: " .. #macroData.actions)
+    warn("========================================")
+    warn("[MACRO] ▶️ Playing: " .. macroData.name)
+    warn("[MACRO] Actions: " .. #macroData.actions)
+    warn("========================================")
     
     _G.myUnitIDs = {}
     _G.trackingEnabled = true
@@ -778,7 +782,7 @@ function playMacro(file)
                     end)
                     if success then
                         table.insert(_G.recordedUnits, result)
-                        warn("placed " .. action.unit)
+                        warn("[MACRO] 📍 Placed " .. action.unit)
                     end
                 end
             elseif action.type == "sell" then
@@ -786,7 +790,7 @@ function playMacro(file)
                     pcall(function()
                         remotes.SellUnit:InvokeServer(_G.recordedUnits[action.unitIndex])
                     end)
-                    warn("sold unit #" .. action.unitIndex)
+                    warn("[MACRO] 💰 Sold unit #" .. action.unitIndex)
                 end
             end
         end)
@@ -803,4 +807,4 @@ task.wait(1)
 loadSavedMacros()
 
 FarmTab:Select()
-warn("ui loaded")
+warn("✅ GTD Macro UI Loaded with Fixed Recorder!")
