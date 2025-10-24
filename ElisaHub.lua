@@ -220,7 +220,7 @@ function load3xScript()
     setupAutoSkip()
 
     -- Delay 1 second before starting placements
-    task.delay(1, function()
+    task.delay(1.5, function()
         for _, p in ipairs(placements) do
             task.delay(p.time, function()
                 placeUnit(p.unit, p.slot, p.data)
