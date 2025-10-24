@@ -151,15 +151,18 @@ function load2xScript()
         warn("[Placing] "..unitName.." at "..os.clock())
     end
 
-    local function startGame()
+   local function startGame()
     remotes.PlaceDifficultyVote:InvokeServer(difficulty)
     setupAutoSkip()
-    task.delay(1) -- wait 1 second before starting placements
-    for _, p in ipairs(placements) do
-        task.delay(p.time, function()
-            placeUnit(p.unit, p.slot, p.data)
-        end)
-    end
+
+    -- Delay 1 second before starting placements
+    task.delay(1, function()
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
+            end)
+        end
+    end)
 end
 
     while true do
@@ -215,12 +218,15 @@ function load3xScript()
     local function startGame()
     remotes.PlaceDifficultyVote:InvokeServer(difficulty)
     setupAutoSkip()
-    task.delay(1) -- wait 1 second before starting placements
-    for _, p in ipairs(placements) do
-        task.delay(p.time, function()
-            placeUnit(p.unit, p.slot, p.data)
-        end)
-    end
+
+    -- Delay 1 second before starting placements
+    task.delay(1, function()
+        for _, p in ipairs(placements) do
+            task.delay(p.time, function()
+                placeUnit(p.unit, p.slot, p.data)
+            end)
+        end
+    end)
 end
 
     while true do
