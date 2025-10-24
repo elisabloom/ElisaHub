@@ -117,22 +117,11 @@ function load2xScript()
 
     local placements = {
         {
-            time = 33, unit = "unit_lawnmower", slot = "1",
-            data = {Valid = true,
-        PathIndex = 1,
-        Position = Vector3.new(-894, 62, -123),
-        DistanceAlongPath = 283.0053997039795,
-        Rotation = 180,
-        CF = CFrame.new(-894, 62, -123, -0, -0, -1, -0, 1, -0, 1, 0, -0)}
-        },
-        {
-            time = 59, unit = "unit_lawnmower", slot = "1",
-            data = {Valid = true,
-        PathIndex = 3,
-        Position = Vector3.new(-813, 62, -123),
-        DistanceAlongPath = 278.81842041015625,
-        Rotation = 180,
-        CF = CFrame.new(-813, 62, -123, -0, 0, 1, 0, 1, -0, -1, 0, -0)}
+              time = 29, unit = "unit_lawnmower", slot = "1",
+            data = {Valid=true,PathIndex=3,Position=Vector3.new(-843.87384,62.1803055,-123.052032),
+                DistanceAlongPath=248.0065,
+                CF=CFrame.new(-843.87384,62.1803055,-123.052032,-0,0,1,0,1,-0,-1,0,-0),
+                Rotation=180}
         },
         {
             time = 60, unit = "unit_rafflesia", slot = "2",
@@ -163,14 +152,15 @@ function load2xScript()
     end
 
     local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        setupAutoSkip()
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function()
-                placeUnit(p.unit, p.slot, p.data)
-            end)
-        end
+    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+    setupAutoSkip()
+    task.wait(1) -- wait 1 second before starting placements
+    for _, p in ipairs(placements) do
+        task.delay(p.time, function()
+            placeUnit(p.unit, p.slot, p.data)
+        end)
     end
+end
 
     while true do
         startGame()
@@ -223,14 +213,15 @@ function load3xScript()
     end
 
     local function startGame()
-        remotes.PlaceDifficultyVote:InvokeServer(difficulty)
-        setupAutoSkip()
-        for _, p in ipairs(placements) do
-            task.delay(p.time, function()
-                placeUnit(p.unit, p.slot, p.data)
-            end)
-        end
+    remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+    setupAutoSkip()
+    task.wait(1) -- wait 1 second before starting placements
+    for _, p in ipairs(placements) do
+        task.delay(p.time, function()
+            placeUnit(p.unit, p.slot, p.data)
+        end)
     end
+end
 
     while true do
         startGame()
