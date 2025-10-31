@@ -12,6 +12,95 @@ _G.myUnitIDs = _G.myUnitIDs or {}
 _G.trackingEnabled = false
 _G.gamesCompleted = _G.gamesCompleted or 0
 
+--=== MILESTONE ALERT FUNCTION ===--
+local function showMilestoneAlert(games)
+    local color, message, subtext
+    
+    if games == 1 then
+        color = Color3.fromRGB(0, 255, 0) -- Verde
+        message = "25 GAMES COMPLETED!"
+        subtext = "Trade System Unlocked 🔓"
+    elseif games == 2 then
+        color = Color3.fromRGB(0, 150, 255) -- Azul
+        message = "50 GAMES COMPLETED!"
+        subtext = "Scripts Now Safer 🛡️"
+    else
+        return
+    end
+    
+    warn("========================================")
+    warn("[🎉 MILESTONE] " .. message)
+    warn("========================================")
+    
+    -- Create fullscreen overlay
+    local AlertGui = Instance.new("ScreenGui")
+    AlertGui.Name = "MilestoneAlert"
+    AlertGui.ResetOnSpawn = false
+    AlertGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    AlertGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local Overlay = Instance.new("Frame")
+    Overlay.Size = UDim2.new(1, 0, 1, 0)
+    Overlay.Position = UDim2.new(0, 0, 0, 0)
+    Overlay.BackgroundColor3 = color
+    Overlay.BackgroundTransparency = 0.3
+    Overlay.BorderSizePixel = 0
+    Overlay.ZIndex = 999
+    Overlay.Parent = AlertGui
+    
+    -- Main message
+    local MessageLabel = Instance.new("TextLabel")
+    MessageLabel.Size = UDim2.new(0, 800, 0, 100)
+    MessageLabel.Position = UDim2.new(0.5, -400, 0.4, -50)
+    MessageLabel.BackgroundTransparency = 1
+    MessageLabel.Text = message
+    MessageLabel.Font = Enum.Font.GothamBold
+    MessageLabel.TextSize = 60
+    MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MessageLabel.TextStrokeTransparency = 0.5
+    MessageLabel.ZIndex = 1000
+    MessageLabel.Parent = AlertGui
+    
+    -- Subtext
+    local SubLabel = Instance.new("TextLabel")
+    SubLabel.Size = UDim2.new(0, 800, 0, 50)
+    SubLabel.Position = UDim2.new(0.5, -400, 0.5, 0)
+    SubLabel.BackgroundTransparency = 1
+    SubLabel.Text = subtext
+    SubLabel.Font = Enum.Font.Gotham
+    SubLabel.TextSize = 30
+    SubLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SubLabel.TextStrokeTransparency = 0.5
+    SubLabel.ZIndex = 1000
+    SubLabel.Parent = AlertGui
+    
+    -- Fade in effect
+    Overlay.BackgroundTransparency = 1
+    MessageLabel.TextTransparency = 1
+    SubLabel.TextTransparency = 1
+    
+    for i = 1, 20 do
+        Overlay.BackgroundTransparency = 1 - (i / 20 * 0.7)
+        MessageLabel.TextTransparency = 1 - (i / 20)
+        SubLabel.TextTransparency = 1 - (i / 20)
+        task.wait(0.05)
+    end
+    
+    -- Hold for 8 seconds
+    task.wait(8)
+    
+    -- Fade out effect
+    for i = 1, 20 do
+        Overlay.BackgroundTransparency = 0.3 + (i / 20 * 0.7)
+        MessageLabel.TextTransparency = i / 20
+        SubLabel.TextTransparency = i / 20
+        task.wait(0.05)
+    end
+    
+    AlertGui:Destroy()
+    warn("[MILESTONE] Alert dismissed")
+end
+
 --=== AFK INFO GUI ===--
 local function createAFKGui()
     -- Wait until leaderstats & Seeds exist (with timeout)
@@ -22,6 +111,7 @@ local function createAFKGui()
     local AFKGui = Instance.new("ScreenGui")
     AFKGui.Name = "AFK_Info"
     AFKGui.ResetOnSpawn = false
+    AFKGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     AFKGui.Parent = plr:WaitForChild("PlayerGui")
     
     local InfoFrame = Instance.new("Frame")
@@ -32,6 +122,7 @@ local function createAFKGui()
     InfoFrame.BorderSizePixel = 0
     InfoFrame.Active = true
     InfoFrame.Draggable = true
+    InfoFrame.ZIndex = 10000
     InfoFrame.Parent = AFKGui
     
     local UICorner = Instance.new("UICorner", InfoFrame)
@@ -46,6 +137,7 @@ local function createAFKGui()
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextSize = 16
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.ZIndex = 10001
     TitleLabel.Parent = InfoFrame
     
     -- Seeds Display
@@ -57,6 +149,7 @@ local function createAFKGui()
     SeedLabel.TextSize = 14
     SeedLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
     SeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SeedLabel.ZIndex = 10001
     SeedLabel.Parent = InfoFrame
     
     -- Games Counter Display
@@ -68,6 +161,7 @@ local function createAFKGui()
     GamesLabel.TextSize = 14
     GamesLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
     GamesLabel.TextXAlignment = Enum.TextXAlignment.Left
+    GamesLabel.ZIndex = 10001
     GamesLabel.Parent = InfoFrame
     
     -- Timer Display
@@ -79,6 +173,7 @@ local function createAFKGui()
     TimerLabel.TextSize = 14
     TimerLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
     TimerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TimerLabel.ZIndex = 10001
     TimerLabel.Parent = InfoFrame
     
     -- Function to update Seeds
@@ -554,6 +649,121 @@ function loadRainbow3x()
         -- Update GUI counter
         if _G.updateGamesCounter then
             _G.updateGamesCounter(_G.gamesCompleted)
+        end
+        
+        -- Check for milestones
+        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
+        
+        -- ✅ AUTO CLICK PLAY AGAIN
+        clickPlayAgain()
+        
+        task.wait(4)
+    end
+end
+
+--=== TOMATO PLANT SCRIPTS ===--
+function loadTomatoPlant3x()
+    warn("========================================")
+    warn("[SYSTEM] Starting 3x Speed - Tomato Plant")
+    warn("[MODE] Auto-detection enabled")
+    warn("========================================")
+    
+    -- Create AFK GUI once at start
+    task.spawn(function()
+        pcall(createAFKGui)
+    end)
+    
+    while true do
+        _G.myUnitIDs = {}
+        unitLevels = {}
+        _G.trackingEnabled = true
+        
+        generateRandomDelays("TomatoPlant")
+        
+        setupGame(3)
+        task.wait(1.5)
+        
+        placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
+        
+        -- ✅ AUTO DETECTION
+        waitForGameEnd()
+        
+        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
+        task.wait(3)
+        
+        _G.trackingEnabled = false
+        
+        -- Increment games counter
+        _G.gamesCompleted = _G.gamesCompleted + 1
+        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
+        
+        -- Update GUI counter
+        if _G.updateGamesCounter then
+            _G.updateGamesCounter(_G.gamesCompleted)
+        end
+        
+        -- Check for milestones
+        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
+        
+        -- ✅ AUTO CLICK PLAY AGAIN
+        clickPlayAgain()
+        
+        task.wait(2)
+    end
+end
+
+function loadTomatoPlant2x()
+    warn("========================================")
+    warn("[SYSTEM] Starting 2x Speed - Tomato Plant")
+    warn("[MODE] Auto-detection enabled")
+    warn("========================================")
+    
+    -- Create AFK GUI once at start
+    task.spawn(function()
+        pcall(createAFKGui)
+    end)
+    
+    while true do
+        _G.myUnitIDs = {}
+        unitLevels = {}
+        _G.trackingEnabled = true
+        
+        generateRandomDelays("TomatoPlant")
+        
+        setupGame(2)
+        task.wait(1.5)
+        
+        placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
+        
+        -- ✅ AUTO DETECTION
+        waitForGameEnd()
+        
+        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
+        task.wait(3)
+        
+        _G.trackingEnabled = false
+        
+        -- Increment games counter
+        _G.gamesCompleted = _G.gamesCompleted + 1
+        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
+        
+        -- Update GUI counter
+        if _G.updateGamesCounter then
+            _G.updateGamesCounter(_G.gamesCompleted)
+        end
+        
+        -- Check for milestones
+        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
+        
+        -- Check for milestones
+        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
+            showMilestoneAlert(_G.gamesCompleted)
         end
         
         -- ✅ AUTO CLICK PLAY AGAIN
