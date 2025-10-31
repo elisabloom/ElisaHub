@@ -13,17 +13,21 @@ _G.trackingEnabled = false
 _G.gamesCompleted = _G.gamesCompleted or 0
 
 --=== MILESTONE ALERT FUNCTION ===--
+local currentMilestoneGui = nil
+
 local function showMilestoneAlert(games)
-    local color, message, subtext
+    local color, message, subtext, isPermanent
     
     if games == 1 then
         color = Color3.fromRGB(0, 255, 0) -- Verde
         message = "1 GAME COMPLETED!"
         subtext = "Trade System Unlocked 🔓"
-    elseif games == 2 then
+        isPermanent = false -- Se mantiene hasta el siguiente milestone
+    elseif games == 3 then
         color = Color3.fromRGB(0, 150, 255) -- Azul
-        message = "2 GAMES COMPLETED!"
+        message = "3 GAMES COMPLETED!"
         subtext = "Scripts Now Safer 🛡️"
+        isPermanent = true -- Se mantiene hasta salir del juego
     else
         return
     end
@@ -32,6 +36,12 @@ local function showMilestoneAlert(games)
     warn("[🎉 MILESTONE] " .. message)
     warn("========================================")
     
+    -- Destroy previous milestone GUI if exists
+    if currentMilestoneGui then
+        currentMilestoneGui:Destroy()
+        currentMilestoneGui = nil
+    end
+    
     -- Create fullscreen overlay
     local AlertGui = Instance.new("ScreenGui")
     AlertGui.Name = "MilestoneAlert"
@@ -39,6 +49,8 @@ local function showMilestoneAlert(games)
     AlertGui.IgnoreGuiInset = true
     AlertGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     AlertGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    currentMilestoneGui = AlertGui
     
     local Overlay = Instance.new("Frame")
     Overlay.Size = UDim2.new(1, 0, 1, 0)
@@ -100,19 +112,26 @@ local function showMilestoneAlert(games)
         task.wait(0.05)
     end
     
-    -- Hold for 8 seconds
-    task.wait(8)
+    -- Hold message for 5 seconds
+    task.wait(5)
     
-    -- Fade out effect
+    -- Fade out text but keep overlay
     for i = 1, 20 do
-        Overlay.BackgroundTransparency = 0.3 + (i / 20 * 0.7)
         MessageLabel.TextTransparency = i / 20
         SubLabel.TextTransparency = i / 20
         task.wait(0.05)
     end
     
-    AlertGui:Destroy()
-    warn("[MILESTONE] Alert dismissed")
+    MessageLabel:Destroy()
+    SubLabel:Destroy()
+    
+    -- Keep overlay visible until next milestone or game close
+    if isPermanent then
+        warn("[MILESTONE] Blue overlay will remain until you close the game")
+    else
+        warn("[MILESTONE] Green overlay will remain until next milestone")
+    end
+end
 end
 
 --=== AFK INFO GUI ===--
@@ -666,7 +685,7 @@ function loadRainbow3x()
         end
         
         -- Check for milestones
-        if _G.gamesCompleted == 1 or _G.gamesCompleted == 2 then
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
             showMilestoneAlert(_G.gamesCompleted)
         end
         
