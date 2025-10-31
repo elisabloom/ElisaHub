@@ -125,7 +125,7 @@ UICorner.CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.BackgroundTransparency = 1
-Title.Text = "Select Unit Type - Farm"
+Title.Text = "Select Unit Type"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 20
@@ -133,7 +133,7 @@ Title.TextSize = 20
 local btnRainbow = Instance.new("TextButton", Frame)
 btnRainbow.Size = UDim2.new(0.9, 0, 0, 60)
 btnRainbow.Position = UDim2.new(0.05, 0, 0.35, 0)
-btnRainbow.Text = "Rainbow Tomato (10 units)"
+btnRainbow.Text = "Rainbow Tomato"
 btnRainbow.Font = Enum.Font.GothamBold
 btnRainbow.TextSize = 18
 btnRainbow.BackgroundColor3 = Color3.fromRGB(255, 100, 180)
@@ -144,7 +144,7 @@ UICorner2.CornerRadius = UDim.new(0, 8)
 local btnTomatoPlant = Instance.new("TextButton", Frame)
 btnTomatoPlant.Size = UDim2.new(0.9, 0, 0, 60)
 btnTomatoPlant.Position = UDim2.new(0.05, 0, 0.65, 0)
-btnTomatoPlant.Text = "Tomato Plant (18 units)"
+btnTomatoPlant.Text = "Tomato Plant"
 btnTomatoPlant.Font = Enum.Font.GothamBold
 btnTomatoPlant.TextSize = 18
 btnTomatoPlant.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
@@ -185,7 +185,7 @@ local function showSpeedMenu(unitType)
 end
 
 local function setupAutoSkip()
-    task.delay(6, function()
+    task.delay(3.5, function()
         pcall(function()
             local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
@@ -437,7 +437,7 @@ function loadRainbow3x()
             end
         end)
         clickPlayAgain()
-        task.wait(4)
+        task.wait(2)
     end
 end
 
@@ -460,7 +460,7 @@ function loadRainbow2x()
             end
         end)
         clickPlayAgain()
-        task.wait(4)
+        task.wait(2)
     end
 end
 
