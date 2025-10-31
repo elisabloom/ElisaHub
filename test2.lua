@@ -1,4 +1,4 @@
---// Garden Tower Defense - FARM MAP UNIFIED (UNIT + SPEED SELECTION) - AUTO DETECTION - FINAL
+--// Garden Tower Defense - FARM MAP UNIFIED (UNIT + SPEED SELECTION) - AUTO DETECTION
 
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
@@ -7,11 +7,232 @@ local remotes = rs:WaitForChild("RemoteFunctions")
 local Workspace = game:GetService("Workspace")
 local entities = Workspace:WaitForChild("Map"):WaitForChild("Entities")
 
--- Track our placed units
 _G.myUnitIDs = _G.myUnitIDs or {}
 _G.trackingEnabled = false
+_G.gamesCompleted = _G.gamesCompleted or 0
 
---=== UNIT SELECTION GUI ===--
+--=== AFK INFO GUI (CREADO PRIMERO) ===--
+local function createAFKGui()
+    local existingGui = plr.PlayerGui:FindFirstChild("AFK_Info")
+    if existingGui then
+        existingGui:Destroy()
+    end
+    
+    local leaderstats = plr:WaitForChild("leaderstats", 10)
+    local seeds = leaderstats and leaderstats:FindFirstChild("Seeds")
+    
+    local AFKGui = Instance.new("ScreenGui")
+    AFKGui.Name = "AFK_Info"
+    AFKGui.ResetOnSpawn = false
+    AFKGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    AFKGui.DisplayOrder = 999999
+    AFKGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local InfoFrame = Instance.new("Frame")
+    InfoFrame.Size = UDim2.new(0, 180, 0, 105)
+    InfoFrame.Position = UDim2.new(1, -190, 0, 10)
+    InfoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    InfoFrame.BackgroundTransparency = 0.2
+    InfoFrame.BorderSizePixel = 0
+    InfoFrame.Active = true
+    InfoFrame.Draggable = true
+    InfoFrame.ZIndex = 999999
+    InfoFrame.Parent = AFKGui
+    
+    local UICorner = Instance.new("UICorner", InfoFrame)
+    UICorner.CornerRadius = UDim.new(0, 8)
+    
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, 0, 0, 20)
+    TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = "AFK Info"
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextSize = 16
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.ZIndex = 1000000
+    TitleLabel.Parent = InfoFrame
+    
+    local SeedLabel = Instance.new("TextLabel")
+    SeedLabel.Size = UDim2.new(1, -10, 0, 25)
+    SeedLabel.Position = UDim2.new(0, 5, 0, 25)
+    SeedLabel.BackgroundTransparency = 1
+    SeedLabel.Font = Enum.Font.Gotham
+    SeedLabel.TextSize = 14
+    SeedLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
+    SeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SeedLabel.ZIndex = 1000000
+    SeedLabel.Parent = InfoFrame
+    
+    local GamesLabel = Instance.new("TextLabel")
+    GamesLabel.Size = UDim2.new(1, -10, 0, 25)
+    GamesLabel.Position = UDim2.new(0, 5, 0, 50)
+    GamesLabel.BackgroundTransparency = 1
+    GamesLabel.Font = Enum.Font.Gotham
+    GamesLabel.TextSize = 14
+    GamesLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    GamesLabel.TextXAlignment = Enum.TextXAlignment.Left
+    GamesLabel.ZIndex = 1000000
+    GamesLabel.Parent = InfoFrame
+    
+    local TimerLabel = Instance.new("TextLabel")
+    TimerLabel.Size = UDim2.new(1, -10, 0, 25)
+    TimerLabel.Position = UDim2.new(0, 5, 0, 75)
+    TimerLabel.BackgroundTransparency = 1
+    TimerLabel.Font = Enum.Font.Gotham
+    TimerLabel.TextSize = 14
+    TimerLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    TimerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TimerLabel.ZIndex = 1000000
+    TimerLabel.Parent = InfoFrame
+    
+    if seeds then
+        local function updateSeeds()
+            SeedLabel.Text = "Seeds: " .. tostring(seeds.Value)
+        end
+        updateSeeds()
+        seeds:GetPropertyChangedSignal("Value"):Connect(updateSeeds)
+    else
+        SeedLabel.Text = "Seeds: N/A"
+    end
+    
+    _G.updateGamesCounter = function(count)
+        GamesLabel.Text = "Games: " .. tostring(count)
+    end
+    _G.updateGamesCounter(_G.gamesCompleted or 0)
+    
+    local startTime = os.clock()
+    task.spawn(function()
+        while task.wait(1) do
+            local elapsed = math.floor(os.clock() - startTime)
+            local mins = math.floor(elapsed / 60)
+            local secs = elapsed % 60
+            TimerLabel.Text = string.format("AFK Time: %02d:%02d", mins, secs)
+        end
+    end)
+    
+    warn("[AFK GUI] Successfully created with max priority")
+end
+
+task.spawn(function()
+    task.wait(2)
+    pcall(createAFKGui)
+end)
+
+--=== MILESTONE ALERT FUNCTION ===--
+local currentMilestoneGui = nil
+
+local function showMilestoneAlert(games)
+    local color, message, subtext, isPermanent
+    
+    if games == 1 then
+        color = Color3.fromRGB(0, 255, 0)
+        message = "1 GAME COMPLETED!"
+        subtext = "Trade System Unlocked 🔓"
+        isPermanent = false
+    elseif games == 3 then
+        color = Color3.fromRGB(0, 150, 255)
+        message = "3 GAMES COMPLETED!"
+        subtext = "Scripts Now Safer 🛡️ | Trade Unlocked 🔓"
+        isPermanent = true
+    else
+        return
+    end
+    
+    warn("========================================")
+    warn("[🎉 MILESTONE] " .. message)
+    warn("========================================")
+    
+    if currentMilestoneGui then
+        currentMilestoneGui:Destroy()
+        currentMilestoneGui = nil
+    end
+    
+    local AlertGui = Instance.new("ScreenGui")
+    AlertGui.Name = "MilestoneAlert"
+    AlertGui.ResetOnSpawn = false
+    AlertGui.IgnoreGuiInset = true
+    AlertGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    AlertGui.DisplayOrder = 1
+    AlertGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    currentMilestoneGui = AlertGui
+    
+    local Overlay = Instance.new("Frame")
+    Overlay.Size = UDim2.new(1, 0, 1, 0)
+    Overlay.Position = UDim2.new(0, 0, 0, 0)
+    Overlay.AnchorPoint = Vector2.new(0, 0)
+    Overlay.BackgroundColor3 = color
+    Overlay.BackgroundTransparency = 0.3
+    Overlay.BorderSizePixel = 0
+    Overlay.ZIndex = 1
+    Overlay.Parent = AlertGui
+    
+    local MessageLabel = Instance.new("TextLabel")
+    MessageLabel.Size = UDim2.new(0.8, 0, 0, 100)
+    MessageLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
+    MessageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    MessageLabel.BackgroundTransparency = 1
+    MessageLabel.Text = message
+    MessageLabel.Font = Enum.Font.GothamBold
+    MessageLabel.TextSize = 60
+    MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MessageLabel.TextStrokeTransparency = 0.5
+    MessageLabel.TextScaled = true
+    MessageLabel.ZIndex = 2
+    MessageLabel.Parent = AlertGui
+    
+    local MessageConstraint = Instance.new("UITextSizeConstraint")
+    MessageConstraint.MaxTextSize = 60
+    MessageConstraint.Parent = MessageLabel
+    
+    local SubLabel = Instance.new("TextLabel")
+    SubLabel.Size = UDim2.new(0.8, 0, 0, 50)
+    SubLabel.Position = UDim2.new(0.5, 0, 0.55, 0)
+    SubLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    SubLabel.BackgroundTransparency = 1
+    SubLabel.Text = subtext
+    SubLabel.Font = Enum.Font.Gotham
+    SubLabel.TextSize = 30
+    SubLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SubLabel.TextStrokeTransparency = 0.5
+    SubLabel.TextScaled = true
+    SubLabel.ZIndex = 2
+    SubLabel.Parent = AlertGui
+    
+    local SubConstraint = Instance.new("UITextSizeConstraint")
+    SubConstraint.MaxTextSize = 30
+    SubConstraint.Parent = SubLabel
+    
+    Overlay.BackgroundTransparency = 1
+    MessageLabel.TextTransparency = 1
+    SubLabel.TextTransparency = 1
+    
+    for i = 1, 20 do
+        Overlay.BackgroundTransparency = 1 - (i / 20 * 0.7)
+        MessageLabel.TextTransparency = 1 - (i / 20)
+        SubLabel.TextTransparency = 1 - (i / 20)
+        task.wait(0.05)
+    end
+    
+    task.wait(5)
+    
+    for i = 1, 20 do
+        MessageLabel.TextTransparency = i / 20
+        SubLabel.TextTransparency = i / 20
+        task.wait(0.05)
+    end
+    
+    MessageLabel:Destroy()
+    SubLabel:Destroy()
+    
+    if isPermanent then
+        warn("[MILESTONE] Blue overlay will remain until you close the game")
+    else
+        warn("[MILESTONE] Green overlay will remain until next milestone")
+    end
+end
+
 local ScreenGui = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
 local Frame = Instance.new("Frame", ScreenGui)
 Frame.Size = UDim2.new(0, 350, 0, 200)
@@ -51,7 +272,6 @@ btnTomatoPlant.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
 local UICorner3 = Instance.new("UICorner", btnTomatoPlant)
 UICorner3.CornerRadius = UDim.new(0, 8)
 
---=== SPEED SELECTION GUI ===--
 local function showSpeedMenu(unitType)
     Frame:ClearAllChildren()
     
@@ -91,9 +311,8 @@ local function showSpeedMenu(unitType)
     return btn2x, btn3x
 end
 
---=== AUTO SKIP SETUP ===--
 local function setupAutoSkip()
-    task.delay(4, function()
+    task.delay(6, function()
         pcall(function()
             local gui = plr.PlayerGui:WaitForChild("GameGuiNoInset")
             local autoSkipButton = gui.Screen.Top.WaveControls:WaitForChild("AutoSkip")
@@ -117,12 +336,10 @@ local function setupAutoSkip()
     end)
 end
 
--- Get current money
 local function getMoney()
     return plr:GetAttribute("Cash") or 0
 end
 
--- Get unit ID
 local function getUnitID(unit)
     for attempt = 1, 10 do
         for _, v in ipairs(unit:GetDescendants()) do
@@ -140,7 +357,6 @@ local function getUnitID(unit)
     return nil
 end
 
--- Monitor for new units
 entities.ChildAdded:Connect(function(child)
     if _G.trackingEnabled then
         task.spawn(function()
@@ -168,7 +384,6 @@ local function generateRandomDelays(unitType)
     warn("[DELAYS] Generated random upgrade delays for " .. unitType)
 end
 
--- Generate random position
 local function randomizePosition(basePosition, variation)
     variation = variation or 1.5
     local randomX = basePosition.X + (math.random() * variation * 2 - variation)
@@ -176,7 +391,6 @@ local function randomizePosition(basePosition, variation)
     return Vector3.new(randomX, basePosition.Y, randomZ)
 end
 
--- Try to place unit
 local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts, isFast)
     maxAttempts = maxAttempts or 10
     
@@ -205,7 +419,6 @@ local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts, isFast)
     return false
 end
 
--- Rainbow Tomato positions (10 units)
 local rainbowPositions = {
     Vector3.new(-345.869873046875, 61.68030548095703, -116.59803771972656),
     Vector3.new(-341.4617004394531, 61.68030548095703, -105.65262603759766),
@@ -219,7 +432,6 @@ local rainbowPositions = {
     Vector3.new(-341.5750732421875, 61.68030548095703, -115.53831481933594)
 }
 
--- Tomato Plant positions (18 units)
 local tomatoPlantPositions = {
     Vector3.new(-326.81658935546875, 61.68030548095703, -105.2947998046875),
     Vector3.new(-326.57305908203125, 61.68030548095703, -110.16496276855469),
@@ -241,7 +453,6 @@ local tomatoPlantPositions = {
     Vector3.new(-329.318115234375, 61.68030548095703, -125.80452728271484)
 }
 
--- Costs
 local placementCost = 100
 local upgradeCosts = {125, 175, 350, 500}
 
@@ -325,7 +536,6 @@ local function placeAndUpgradeSequentially(unitType, unitName, positions, isFast
     end)
 end
 
--- WAIT FOR GAME END - AUTO DETECTION
 local function waitForGameEnd()
     local startTime = tick()
     warn("[WAITING] Monitoring for game completion...")
@@ -343,16 +553,14 @@ local function waitForGameEnd()
     return true
 end
 
--- CLICK PLAY AGAIN BUTTON - FINAL VERSION
 local function clickPlayAgain()
-    warn("[RESTART] Waiting for game to fully finish...")
+    warn("[RESTART] Waiting 0.5s before clicking...")
     task.wait(0.5)
     
     warn("[RESTART] Searching for Play Again button...")
     
     local clicked = false
     
-    -- Método 1: Buscar y clickear el botón en el GUI PRIMERO
     for attempt = 1, 15 do
         pcall(function()
             local gui = plr.PlayerGui:FindFirstChild("GameGui")
@@ -378,7 +586,6 @@ local function clickPlayAgain()
         task.wait(0.3)
     end
     
-    -- Método 2: Si el GUI no funcionó, usar el remote como backup
     if not clicked then
         warn("[BACKUP] GUI button not found, using RestartGame remote...")
         pcall(function()
@@ -414,7 +621,6 @@ local function setupGame(tickSpeed)
     setupAutoSkip()
 end
 
---=== RAINBOW TOMATO SCRIPTS ===--
 function loadRainbow3x()
     warn("========================================")
     warn("[SYSTEM] Starting 3x Speed - Rainbow Tomato")
@@ -435,10 +641,17 @@ function loadRainbow3x()
         
         waitForGameEnd()
         
-        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
-        task.wait(3)
+        warn("[GAME ENDED] Waiting 1 second before restarting...")
+        task.wait(1)
         
         _G.trackingEnabled = false
+        
+        _G.gamesCompleted = _G.gamesCompleted + 1
+        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
+        
+        if _G.updateGamesCounter then
+            _G.updateGamesCounter(_G.gamesCompleted)
+        end
         
         clickPlayAgain()
         
@@ -466,10 +679,16 @@ function loadRainbow2x()
         
         waitForGameEnd()
         
-        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
-        task.wait(3)
-        
+        warn("[GAME ENDED] Waiting 1 second before restarting...")
+        task.wait(1)
         _G.trackingEnabled = false
+        
+        _G.gamesCompleted = _G.gamesCompleted + 1
+        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
+        
+        if _G.updateGamesCounter then
+            _G.updateGamesCounter(_G.gamesCompleted)
+        end
         
         clickPlayAgain()
         
@@ -477,11 +696,10 @@ function loadRainbow2x()
     end
 end
 
---=== TOMATO PLANT SCRIPTS ===--
 function loadTomatoPlant3x()
     warn("========================================")
     warn("[SYSTEM] Starting 3x Speed - Tomato Plant")
-    warn("[MODE] Auto-detection enabled")
+    warn("[MODE] Auto-detection enabled + Milestones")
     warn("========================================")
     
     while true do
@@ -498,10 +716,21 @@ function loadTomatoPlant3x()
         
         waitForGameEnd()
         
-        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
-        task.wait(3)
+        warn("[GAME ENDED] Waiting 1 second before restarting...")
+        task.wait(1)
         
         _G.trackingEnabled = false
+        
+        _G.gamesCompleted = _G.gamesCompleted + 1
+        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
+        
+        if _G.updateGamesCounter then
+            _G.updateGamesCounter(_G.gamesCompleted)
+        end
+        
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
         
         clickPlayAgain()
         
@@ -512,7 +741,7 @@ end
 function loadTomatoPlant2x()
     warn("========================================")
     warn("[SYSTEM] Starting 2x Speed - Tomato Plant")
-    warn("[MODE] Auto-detection enabled")
+    warn("[MODE] Auto-detection enabled + Milestones")
     warn("========================================")
     
     while true do
@@ -529,10 +758,21 @@ function loadTomatoPlant2x()
         
         waitForGameEnd()
         
-        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
-        task.wait(3)
+        warn("[GAME ENDED] Waiting 1 second before restarting...")
+        task.wait(1)
         
         _G.trackingEnabled = false
+        
+        _G.gamesCompleted = _G.gamesCompleted + 1
+        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
+        
+        if _G.updateGamesCounter then
+            _G.updateGamesCounter(_G.gamesCompleted)
+        end
+        
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
         
         clickPlayAgain()
         
@@ -540,7 +780,6 @@ function loadTomatoPlant2x()
     end
 end
 
---=== BUTTON HANDLERS - UNIT SELECTION ===--
 btnRainbow.MouseButton1Click:Connect(function()
     local btn2x, btn3x = showSpeedMenu("Rainbow Tomato")
     
@@ -569,7 +808,6 @@ btnTomatoPlant.MouseButton1Click:Connect(function()
     end)
 end)
 
---=== ANTI-AFK (Loaded once at start) ===--
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
@@ -579,6 +817,8 @@ end)
 
 warn("========================================")
 warn("[SYSTEM] Ready! Select your unit type.")
-warn("[NEW] Auto game-end detection enabled")
-warn("[VERSION] Final - GUI button priority")
+warn("[AUTO] Game-end detection enabled")
+warn("[GUI] AFK Info created at startup")
+warn("[TOMATO PLANT] Milestones at 1 & 3 games")
+warn("[RAINBOW] No milestone alerts")
 warn("========================================")
