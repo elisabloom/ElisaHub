@@ -22,12 +22,12 @@ local function showMilestoneAlert(games)
         color = Color3.fromRGB(0, 255, 0) -- Verde
         message = "1 GAME COMPLETED!"
         subtext = "Trade System Unlocked 🔓"
-        isPermanent = false -- Se mantiene hasta el siguiente milestone
+        isPermanent = false
     elseif games == 3 then
         color = Color3.fromRGB(0, 150, 255) -- Azul
         message = "3 GAMES COMPLETED!"
         subtext = "Scripts Now Safer 🛡️"
-        isPermanent = true -- Se mantiene hasta salir del juego
+        isPermanent = true
     else
         return
     end
@@ -36,13 +36,11 @@ local function showMilestoneAlert(games)
     warn("[🎉 MILESTONE] " .. message)
     warn("========================================")
     
-    -- Destroy previous milestone GUI if exists
     if currentMilestoneGui then
         currentMilestoneGui:Destroy()
         currentMilestoneGui = nil
     end
     
-    -- Create fullscreen overlay
     local AlertGui = Instance.new("ScreenGui")
     AlertGui.Name = "MilestoneAlert"
     AlertGui.ResetOnSpawn = false
@@ -62,7 +60,6 @@ local function showMilestoneAlert(games)
     Overlay.ZIndex = 999
     Overlay.Parent = AlertGui
     
-    -- Main message
     local MessageLabel = Instance.new("TextLabel")
     MessageLabel.Size = UDim2.new(0.8, 0, 0, 100)
     MessageLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
@@ -81,7 +78,6 @@ local function showMilestoneAlert(games)
     MessageConstraint.MaxTextSize = 60
     MessageConstraint.Parent = MessageLabel
     
-    -- Subtext
     local SubLabel = Instance.new("TextLabel")
     SubLabel.Size = UDim2.new(0.8, 0, 0, 50)
     SubLabel.Position = UDim2.new(0.5, 0, 0.55, 0)
@@ -100,7 +96,6 @@ local function showMilestoneAlert(games)
     SubConstraint.MaxTextSize = 30
     SubConstraint.Parent = SubLabel
     
-    -- Fade in effect
     Overlay.BackgroundTransparency = 1
     MessageLabel.TextTransparency = 1
     SubLabel.TextTransparency = 1
@@ -112,10 +107,8 @@ local function showMilestoneAlert(games)
         task.wait(0.05)
     end
     
-    -- Hold message for 5 seconds
     task.wait(5)
     
-    -- Fade out text but keep overlay
     for i = 1, 20 do
         MessageLabel.TextTransparency = i / 20
         SubLabel.TextTransparency = i / 20
@@ -125,22 +118,18 @@ local function showMilestoneAlert(games)
     MessageLabel:Destroy()
     SubLabel:Destroy()
     
-    -- Keep overlay visible until next milestone or game close
     if isPermanent then
         warn("[MILESTONE] Blue overlay will remain until you close the game")
     else
         warn("[MILESTONE] Green overlay will remain until next milestone")
     end
 end
-end
 
 --=== AFK INFO GUI ===--
 local function createAFKGui()
-    -- Wait until leaderstats & Seeds exist (with timeout)
     local leaderstats = plr:WaitForChild("leaderstats", 10)
     local seeds = leaderstats and leaderstats:FindFirstChild("Seeds")
     
-    -- Create GUI
     local AFKGui = Instance.new("ScreenGui")
     AFKGui.Name = "AFK_Info"
     AFKGui.ResetOnSpawn = false
@@ -161,7 +150,6 @@ local function createAFKGui()
     local UICorner = Instance.new("UICorner", InfoFrame)
     UICorner.CornerRadius = UDim.new(0, 8)
     
-    -- Title
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(1, 0, 0, 20)
     TitleLabel.Position = UDim2.new(0, 0, 0, 0)
@@ -173,7 +161,6 @@ local function createAFKGui()
     TitleLabel.ZIndex = 10001
     TitleLabel.Parent = InfoFrame
     
-    -- Seeds Display
     local SeedLabel = Instance.new("TextLabel")
     SeedLabel.Size = UDim2.new(1, -10, 0, 25)
     SeedLabel.Position = UDim2.new(0, 5, 0, 25)
@@ -185,7 +172,6 @@ local function createAFKGui()
     SeedLabel.ZIndex = 10001
     SeedLabel.Parent = InfoFrame
     
-    -- Games Counter Display
     local GamesLabel = Instance.new("TextLabel")
     GamesLabel.Size = UDim2.new(1, -10, 0, 25)
     GamesLabel.Position = UDim2.new(0, 5, 0, 50)
@@ -197,7 +183,6 @@ local function createAFKGui()
     GamesLabel.ZIndex = 10001
     GamesLabel.Parent = InfoFrame
     
-    -- Timer Display
     local TimerLabel = Instance.new("TextLabel")
     TimerLabel.Size = UDim2.new(1, -10, 0, 25)
     TimerLabel.Position = UDim2.new(0, 5, 0, 75)
@@ -209,7 +194,6 @@ local function createAFKGui()
     TimerLabel.ZIndex = 10001
     TimerLabel.Parent = InfoFrame
     
-    -- Function to update Seeds
     if seeds then
         local function updateSeeds()
             SeedLabel.Text = "Seeds: " .. tostring(seeds.Value)
@@ -220,13 +204,11 @@ local function createAFKGui()
         SeedLabel.Text = "Seeds: N/A"
     end
     
-    -- Function to update Games Counter
     _G.updateGamesCounter = function(count)
         GamesLabel.Text = "Games: " .. tostring(count)
     end
     _G.updateGamesCounter(_G.gamesCompleted or 0)
     
-    -- AFK Timer
     local startTime = os.clock()
     task.spawn(function()
         while task.wait(1) do
@@ -346,12 +328,10 @@ local function setupAutoSkip()
     end)
 end
 
--- Get current money
 local function getMoney()
     return plr:GetAttribute("Cash") or 0
 end
 
--- Get unit ID
 local function getUnitID(unit)
     for attempt = 1, 10 do
         for _, v in ipairs(unit:GetDescendants()) do
@@ -369,7 +349,6 @@ local function getUnitID(unit)
     return nil
 end
 
--- Monitor for new units
 entities.ChildAdded:Connect(function(child)
     if _G.trackingEnabled then
         task.spawn(function()
@@ -397,7 +376,6 @@ local function generateRandomDelays(unitType)
     warn("[DELAYS] Generated random upgrade delays for " .. unitType)
 end
 
--- Generate random position
 local function randomizePosition(basePosition, variation)
     variation = variation or 1.5
     local randomX = basePosition.X + (math.random() * variation * 2 - variation)
@@ -405,7 +383,6 @@ local function randomizePosition(basePosition, variation)
     return Vector3.new(randomX, basePosition.Y, randomZ)
 end
 
--- Try to place unit
 local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts, isFast)
     maxAttempts = maxAttempts or 10
     
@@ -434,7 +411,6 @@ local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts, isFast)
     return false
 end
 
--- Rainbow Tomato positions (10 units)
 local rainbowPositions = {
     Vector3.new(-345.869873046875, 61.68030548095703, -116.59803771972656),
     Vector3.new(-341.4617004394531, 61.68030548095703, -105.65262603759766),
@@ -448,7 +424,6 @@ local rainbowPositions = {
     Vector3.new(-341.5750732421875, 61.68030548095703, -115.53831481933594)
 }
 
--- Tomato Plant positions (18 units)
 local tomatoPlantPositions = {
     Vector3.new(-326.81658935546875, 61.68030548095703, -105.2947998046875),
     Vector3.new(-326.57305908203125, 61.68030548095703, -110.16496276855469),
@@ -470,7 +445,6 @@ local tomatoPlantPositions = {
     Vector3.new(-329.318115234375, 61.68030548095703, -125.80452728271484)
 }
 
--- Costs
 local placementCost = 100
 local upgradeCosts = {125, 175, 350, 500}
 
@@ -554,7 +528,6 @@ local function placeAndUpgradeSequentially(unitType, unitName, positions, isFast
     end)
 end
 
--- WAIT FOR GAME END - AUTO DETECTION
 local function waitForGameEnd()
     local startTime = tick()
     warn("[WAITING] Monitoring for game completion...")
@@ -572,7 +545,6 @@ local function waitForGameEnd()
     return true
 end
 
--- CLICK PLAY AGAIN BUTTON
 local function clickPlayAgain()
     warn("[RESTART] Clicking Play Again...")
     
@@ -643,14 +615,12 @@ local function setupGame(tickSpeed)
     setupAutoSkip()
 end
 
---=== RAINBOW TOMATO SCRIPTS ===--
 function loadRainbow3x()
     warn("========================================")
     warn("[SYSTEM] Starting 3x Speed - Rainbow Tomato")
     warn("[MODE] Auto-detection enabled")
     warn("========================================")
     
-    -- Create AFK GUI once at start
     task.spawn(function()
         pcall(createAFKGui)
     end)
@@ -667,7 +637,6 @@ function loadRainbow3x()
         
         placeAndUpgradeSequentially("Rainbow Tomatoes", "unit_tomato_rainbow", rainbowPositions, true)
         
-        -- ✅ AUTO DETECTION
         waitForGameEnd()
         
         warn("[GAME ENDED] Waiting 3 seconds before restarting...")
@@ -675,131 +644,17 @@ function loadRainbow3x()
         
         _G.trackingEnabled = false
         
-        -- Increment games counter
         _G.gamesCompleted = _G.gamesCompleted + 1
         warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
         
-        -- Update GUI counter
         if _G.updateGamesCounter then
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        -- Check for milestones
         if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
             showMilestoneAlert(_G.gamesCompleted)
         end
         
-        -- ✅ AUTO CLICK PLAY AGAIN
-        clickPlayAgain()
-        
-        task.wait(4)
-    end
-end
-
---=== TOMATO PLANT SCRIPTS ===--
-function loadTomatoPlant3x()
-    warn("========================================")
-    warn("[SYSTEM] Starting 3x Speed - Tomato Plant")
-    warn("[MODE] Auto-detection enabled")
-    warn("========================================")
-    
-    -- Create AFK GUI once at start
-    task.spawn(function()
-        pcall(createAFKGui)
-    end)
-    
-    while true do
-        _G.myUnitIDs = {}
-        unitLevels = {}
-        _G.trackingEnabled = true
-        
-        generateRandomDelays("TomatoPlant")
-        
-        setupGame(3)
-        task.wait(1.5)
-        
-        placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
-        
-        -- ✅ AUTO DETECTION
-        waitForGameEnd()
-        
-        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
-        task.wait(3)
-        
-        _G.trackingEnabled = false
-        
-        -- Increment games counter
-        _G.gamesCompleted = _G.gamesCompleted + 1
-        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
-        
-        -- Update GUI counter
-        if _G.updateGamesCounter then
-            _G.updateGamesCounter(_G.gamesCompleted)
-        end
-        
-        -- Check for milestones
-        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
-            showMilestoneAlert(_G.gamesCompleted)
-        end
-        
-        -- ✅ AUTO CLICK PLAY AGAIN
-        clickPlayAgain()
-        
-        task.wait(2)
-    end
-end
-
-function loadTomatoPlant2x()
-    warn("========================================")
-    warn("[SYSTEM] Starting 2x Speed - Tomato Plant")
-    warn("[MODE] Auto-detection enabled")
-    warn("========================================")
-    
-    -- Create AFK GUI once at start
-    task.spawn(function()
-        pcall(createAFKGui)
-    end)
-    
-    while true do
-        _G.myUnitIDs = {}
-        unitLevels = {}
-        _G.trackingEnabled = true
-        
-        generateRandomDelays("TomatoPlant")
-        
-        setupGame(2)
-        task.wait(1.5)
-        
-        placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
-        
-        -- ✅ AUTO DETECTION
-        waitForGameEnd()
-        
-        warn("[GAME ENDED] Waiting 3 seconds before restarting...")
-        task.wait(3)
-        
-        _G.trackingEnabled = false
-        
-        -- Increment games counter
-        _G.gamesCompleted = _G.gamesCompleted + 1
-        warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
-        
-        -- Update GUI counter
-        if _G.updateGamesCounter then
-            _G.updateGamesCounter(_G.gamesCompleted)
-        end
-        
-        -- Check for milestones
-        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
-            showMilestoneAlert(_G.gamesCompleted)
-        end
-        
-        -- Check for milestones
-        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
-            showMilestoneAlert(_G.gamesCompleted)
-        end
-        
-        -- ✅ AUTO CLICK PLAY AGAIN
         clickPlayAgain()
         
         task.wait(4)
@@ -812,7 +667,6 @@ function loadRainbow2x()
     warn("[MODE] Auto-detection enabled")
     warn("========================================")
     
-    -- Create AFK GUI once at start
     task.spawn(function()
         pcall(createAFKGui)
     end)
@@ -829,7 +683,6 @@ function loadRainbow2x()
         
         placeAndUpgradeSequentially("Rainbow Tomatoes", "unit_tomato_rainbow", rainbowPositions, true)
         
-        -- ✅ AUTO DETECTION
         waitForGameEnd()
         
         warn("[GAME ENDED] Waiting 3 seconds before restarting...")
@@ -837,30 +690,29 @@ function loadRainbow2x()
         
         _G.trackingEnabled = false
         
-        -- Increment games counter
         _G.gamesCompleted = _G.gamesCompleted + 1
         warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
         
-        -- Update GUI counter
         if _G.updateGamesCounter then
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        -- ✅ AUTO CLICK PLAY AGAIN
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
+        
         clickPlayAgain()
         
         task.wait(4)
     end
 end
 
---=== TOMATO PLANT SCRIPTS ===--
 function loadTomatoPlant3x()
     warn("========================================")
     warn("[SYSTEM] Starting 3x Speed - Tomato Plant")
     warn("[MODE] Auto-detection enabled")
     warn("========================================")
     
-    -- Create AFK GUI once at start
     task.spawn(function()
         pcall(createAFKGui)
     end)
@@ -877,7 +729,6 @@ function loadTomatoPlant3x()
         
         placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
         
-        -- ✅ AUTO DETECTION
         waitForGameEnd()
         
         warn("[GAME ENDED] Waiting 3 seconds before restarting...")
@@ -885,16 +736,17 @@ function loadTomatoPlant3x()
         
         _G.trackingEnabled = false
         
-        -- Increment games counter
         _G.gamesCompleted = _G.gamesCompleted + 1
         warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
         
-        -- Update GUI counter
         if _G.updateGamesCounter then
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        -- ✅ AUTO CLICK PLAY AGAIN
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
+        
         clickPlayAgain()
         
         task.wait(2)
@@ -907,7 +759,6 @@ function loadTomatoPlant2x()
     warn("[MODE] Auto-detection enabled")
     warn("========================================")
     
-    -- Create AFK GUI once at start
     task.spawn(function()
         pcall(createAFKGui)
     end)
@@ -924,7 +775,6 @@ function loadTomatoPlant2x()
         
         placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
         
-        -- ✅ AUTO DETECTION
         waitForGameEnd()
         
         warn("[GAME ENDED] Waiting 3 seconds before restarting...")
@@ -932,23 +782,23 @@ function loadTomatoPlant2x()
         
         _G.trackingEnabled = false
         
-        -- Increment games counter
         _G.gamesCompleted = _G.gamesCompleted + 1
         warn("[COUNTER] Games completed: " .. _G.gamesCompleted)
         
-        -- Update GUI counter
         if _G.updateGamesCounter then
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        -- ✅ AUTO CLICK PLAY AGAIN
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+            showMilestoneAlert(_G.gamesCompleted)
+        end
+        
         clickPlayAgain()
         
         task.wait(2)
     end
 end
 
---=== BUTTON HANDLERS - UNIT SELECTION ===--
 btnRainbow.MouseButton1Click:Connect(function()
     local btn2x, btn3x = showSpeedMenu("Rainbow Tomato")
     
@@ -977,7 +827,6 @@ btnTomatoPlant.MouseButton1Click:Connect(function()
     end)
 end)
 
---=== ANTI-AFK (Loaded once at start) ===--
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
@@ -989,4 +838,5 @@ warn("========================================")
 warn("[SYSTEM] Ready! Select your unit type.")
 warn("[NEW] Auto game-end detection enabled")
 warn("[NEW] AFK Info & Games Counter added")
+warn("[NEW] Milestone alerts at 1 and 3 games")
 warn("========================================")
