@@ -18,11 +18,11 @@ local function showMilestoneAlert(games)
     
     if games == 1 then
         color = Color3.fromRGB(0, 255, 0) -- Verde
-        message = "25 GAMES COMPLETED!"
+        message = "1 GAME COMPLETED!"
         subtext = "Trade System Unlocked 🔓"
     elseif games == 2 then
         color = Color3.fromRGB(0, 150, 255) -- Azul
-        message = "50 GAMES COMPLETED!"
+        message = "2 GAMES COMPLETED!"
         subtext = "Scripts Now Safer 🛡️"
     else
         return
@@ -652,7 +652,7 @@ function loadRainbow3x()
         end
         
         -- Check for milestones
-        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
+        if _G.gamesCompleted == 1 or _G.gamesCompleted == 2 then
             showMilestoneAlert(_G.gamesCompleted)
         end
         
