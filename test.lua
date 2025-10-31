@@ -36,12 +36,14 @@ local function showMilestoneAlert(games)
     local AlertGui = Instance.new("ScreenGui")
     AlertGui.Name = "MilestoneAlert"
     AlertGui.ResetOnSpawn = false
+    AlertGui.IgnoreGuiInset = true
     AlertGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     AlertGui.Parent = plr:WaitForChild("PlayerGui")
     
     local Overlay = Instance.new("Frame")
     Overlay.Size = UDim2.new(1, 0, 1, 0)
     Overlay.Position = UDim2.new(0, 0, 0, 0)
+    Overlay.AnchorPoint = Vector2.new(0, 0)
     Overlay.BackgroundColor3 = color
     Overlay.BackgroundTransparency = 0.3
     Overlay.BorderSizePixel = 0
@@ -50,29 +52,41 @@ local function showMilestoneAlert(games)
     
     -- Main message
     local MessageLabel = Instance.new("TextLabel")
-    MessageLabel.Size = UDim2.new(0, 800, 0, 100)
-    MessageLabel.Position = UDim2.new(0.5, -400, 0.4, -50)
+    MessageLabel.Size = UDim2.new(0.8, 0, 0, 100)
+    MessageLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
+    MessageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
     MessageLabel.BackgroundTransparency = 1
     MessageLabel.Text = message
     MessageLabel.Font = Enum.Font.GothamBold
     MessageLabel.TextSize = 60
     MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     MessageLabel.TextStrokeTransparency = 0.5
+    MessageLabel.TextScaled = true
     MessageLabel.ZIndex = 1000
     MessageLabel.Parent = AlertGui
     
+    local MessageConstraint = Instance.new("UITextSizeConstraint")
+    MessageConstraint.MaxTextSize = 60
+    MessageConstraint.Parent = MessageLabel
+    
     -- Subtext
     local SubLabel = Instance.new("TextLabel")
-    SubLabel.Size = UDim2.new(0, 800, 0, 50)
-    SubLabel.Position = UDim2.new(0.5, -400, 0.5, 0)
+    SubLabel.Size = UDim2.new(0.8, 0, 0, 50)
+    SubLabel.Position = UDim2.new(0.5, 0, 0.55, 0)
+    SubLabel.AnchorPoint = Vector2.new(0.5, 0.5)
     SubLabel.BackgroundTransparency = 1
     SubLabel.Text = subtext
     SubLabel.Font = Enum.Font.Gotham
     SubLabel.TextSize = 30
     SubLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     SubLabel.TextStrokeTransparency = 0.5
+    SubLabel.TextScaled = true
     SubLabel.ZIndex = 1000
     SubLabel.Parent = AlertGui
+    
+    local SubConstraint = Instance.new("UITextSizeConstraint")
+    SubConstraint.MaxTextSize = 30
+    SubConstraint.Parent = SubLabel
     
     -- Fade in effect
     Overlay.BackgroundTransparency = 1
