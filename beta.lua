@@ -1,4 +1,4 @@
---// Garden Tower Defense - DOJO MAP AUTO FARM (WHITELIST + KEY SYSTEM)
+--// Garden Tower Defense - GRAVEYARD MAP AUTO FARM (WHITELIST + KEY SYSTEM)
 
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
@@ -11,8 +11,8 @@ local whitelist = {
     ["Derick12401"] = true,
     ["Threldor"] = true,
     ["keraieu"] = true,
-    ["xpIPhGhoyFL"] = true,
     ["PurpPom"] = true,
+    ["xpIPhGhoyFL"] = true,
     ["niceone10075"] = true,
     ["lyrachanx"] = true,
     ["BLACK_UNNIE1"] = true,
@@ -131,48 +131,87 @@ entities.ChildAdded:Connect(function(child)
     end
 end)
 
-local function getRandomPositionPath1()
-    local minPos = Vector3.new(46.63258361816406, -21.75, -49.71086502075195)
-    local maxPos = Vector3.new(52.49168014526367, -21.75, -55.56996154785156)
-    local randomX = minPos.X + math.random() * (maxPos.X - minPos.X)
-    local randomZ = minPos.Z + math.random() * (maxPos.Z - minPos.Z)
-    local position = Vector3.new(randomX, -21.75, randomZ)
-    return {
-        Valid = true,
-        PathIndex = 1,
-        Position = position,
-        CF = CFrame.new(position.X, position.Y, position.Z, 0.7071068286895752, 0, -0.7071067690849304, -0, 1, -0, 0.7071068286895752, 0, 0.7071067690849304),
-        Rotation = 180
-    }
+local placements = {}
+local completedActions = {}
+local unitLevels = {}
+local upgradeDelays = {}
+local waitingForLevel = {}
+
+local function generateRandomDelays()
+    upgradeDelays = {}
+    for i = 1, #placements do
+        if placements[i].type == "upgrade" then
+            upgradeDelays[i] = 0.4 + (math.random() * 0.59)
+        end
+    end
 end
 
-local function getRandomPositionPath2()
-    local minPos = Vector3.new(-54.49039077758789, -21.75, -53.30671691894531)
-    local maxPos = Vector3.new(-42.14012908935547, -21.74989891052246, -40.86867141723633)
-    local randomX = minPos.X + math.random() * (maxPos.X - minPos.X)
-    local randomZ = minPos.Z + math.random() * (maxPos.Z - minPos.Z)
-    local position = Vector3.new(randomX, -21.75, randomZ)
-    return {
-        Valid = true,
-        PathIndex = 2,
-        Position = position,
-        CF = CFrame.new(position.X, position.Y, position.Z, 0.7071068286895752, 0, 0.7071067690849304, -0, 1, -0, -0.7071068286895752, 0, 0.7071067690849304),
-        Rotation = 180
-    }
+local function hasReachedLevel(unitIndex, targetLevel)
+    return (unitLevels[unitIndex] or 1) >= targetLevel
 end
 
-local unitPlacements = {
-    {requiredMoney = 1250, unit = "unit_rafflesia", data = "RANDOM_PATH1", id = 1},
-    {requiredMoney = 1250, unit = "unit_rafflesia", data = "RANDOM_PATH2", id = 2}
-}
+local function randomizePosition(basePosition, variation)
+    variation = variation or 2
+    local randomX = basePosition.X + (math.random() * variation * 2 - variation)
+    local randomZ = basePosition.Z + (math.random() * variation * 2 - variation)
+    return Vector3.new(randomX, basePosition.Y, randomZ)
+end
 
-local upgradeQueue = {
-    {unitIndex = 1, requiredMoney = 8000},
-    {unitIndex = 2, requiredMoney = 8000}
-}
+local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts)
+    maxAttempts = maxAttempts or 5
+    for attempt = 1, maxAttempts do
+        local randomPos = randomizePosition(basePosition, 2.5)
+        local data = {
+            CF = CFrame.new(randomPos.X, randomPos.Y, randomPos.Z, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1),
+            Rotation = 180,
+            Valid = true,
+            Position = randomPos
+        }
+        local success, result = pcall(function()
+            return remotes.PlaceUnit:InvokeServer(unit, data)
+        end)
+        if success and result then
+            return true, unitIndex
+        else
+            local errorMsg = tostring(result)
+            if errorMsg:find("can't place") or errorMsg:find("Cannot place") or not result then
+                task.wait(0.15)
+            else
+                return true, unitIndex
+            end
+        end
+    end
+    return false, nil
+end
 
-local placedUnits = {}
-local upgradedUnits = {}
+local function generateRandomPlacements()
+    local randomPlacements = {
+        {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-344.7191162109375, 61.680301666259766, -702.30859375), unitIndex = 1},
+        {type = "upgrade", requiredMoney = 125, unitIndex = 1, targetLevel = 2},
+        {type = "upgrade", requiredMoney = 175, unitIndex = 1, targetLevel = 3},
+        {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-351.1462097167969, 61.68030548095703, -711.151123046875), unitIndex = 2, waitForUnit = 1, waitForLevel = 3},
+        {type = "upgrade", requiredMoney = 125, unitIndex = 2, targetLevel = 2},
+        {type = "upgrade", requiredMoney = 175, unitIndex = 2, targetLevel = 3},
+        {type = "upgrade", requiredMoney = 350, unitIndex = 2, targetLevel = 4},
+        {type = "upgrade", requiredMoney = 500, unitIndex = 2, targetLevel = 5},
+        {type = "upgrade", requiredMoney = 350, unitIndex = 1, targetLevel = 4, waitForUnit = 2, waitForLevel = 5},
+        {type = "upgrade", requiredMoney = 500, unitIndex = 1, targetLevel = 5},
+        {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-334.91607666015625, 61.6803092956543, -721.29736328125), unitIndex = 3, waitForUnit = 1, waitForLevel = 5},
+        {type = "upgrade", requiredMoney = 125, unitIndex = 3, targetLevel = 2},
+        {type = "upgrade", requiredMoney = 175, unitIndex = 3, targetLevel = 3},
+        {type = "upgrade", requiredMoney = 350, unitIndex = 3, targetLevel = 4},
+        {type = "upgrade", requiredMoney = 500, unitIndex = 3, targetLevel = 5},
+        {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-319.2539978027344, 61.68030548095703, -720.3961181640625), unitIndex = 4},
+        {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-331.4523620605469, 61.680301666259766, -735.6544799804688), unitIndex = 5},
+        {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-319.48638916015625, 61.68030548095703, -734.1026000976562), unitIndex = 6}
+    }
+    for i, action in ipairs(randomPlacements) do
+        if action.type == "place" and action.basePosition then
+            action.needsPlacement = true
+        end
+    end
+    return randomPlacements
+end
 
 local function moneyBasedActions(sellTime)
     local gameStartTime = tick()
@@ -181,39 +220,42 @@ local function moneyBasedActions(sellTime)
             task.wait(0.2)
             local currentMoney = getMoney()
             local elapsedTime = tick() - gameStartTime
-            for i, placement in ipairs(unitPlacements) do
-                if not placedUnits[i] then
-                    currentMoney = getMoney()
-                    if currentMoney >= placement.requiredMoney then
-                        local placementData = placement.data
-                        if placementData == "RANDOM_PATH1" then
-                            placementData = getRandomPositionPath1()
-                        elseif placementData == "RANDOM_PATH2" then
-                            placementData = getRandomPositionPath2()
+            for i, action in ipairs(placements) do
+                if not completedActions[i] then
+                    if action.waitForUnit and action.waitForLevel then
+                        if not hasReachedLevel(action.waitForUnit, action.waitForLevel) then
+                            continue
                         end
-                        local success, result = pcall(function()
-                            return remotes.PlaceUnit:InvokeServer(placement.unit, placementData)
-                        end)
-                        if success then
-                            placedUnits[i] = true
-                        end
-                        task.wait(0.3)
                     end
-                end
-            end
-            for i, upgrade in ipairs(upgradeQueue) do
-                if not upgradedUnits[i] then
                     currentMoney = getMoney()
-                    if currentMoney >= upgrade.requiredMoney then
-                        if #_G.myUnitIDs >= upgrade.unitIndex then
-                            local unitID = _G.myUnitIDs[upgrade.unitIndex]
-                            local success = pcall(function()
-                                remotes.UpgradeUnit:InvokeServer(unitID)
-                            end)
-                            if success then
-                                upgradedUnits[i] = true
+                    if currentMoney >= action.requiredMoney then
+                        if action.type == "place" then
+                            local success, placedUnitIndex = tryPlaceUnit(action.unit, action.basePosition, action.unitIndex, 5)
+                            if success and placedUnitIndex then
+                                completedActions[i] = true
+                                unitLevels[action.unitIndex] = 1
+                            else
+                                completedActions[i] = true
                             end
                             task.wait(0.3)
+                        elseif action.type == "upgrade" then
+                            if #_G.myUnitIDs >= action.unitIndex then
+                                local unitID = _G.myUnitIDs[action.unitIndex]
+                                local currentLevel = unitLevels[action.unitIndex] or 1
+                                if currentLevel < action.targetLevel then
+                                    local success = pcall(function()
+                                        remotes.UpgradeUnit:InvokeServer(unitID)
+                                    end)
+                                    if success then
+                                        completedActions[i] = true
+                                        unitLevels[action.unitIndex] = action.targetLevel
+                                    end
+                                    local delay = upgradeDelays[i] or 0.5
+                                    task.wait(delay)
+                                else
+                                    completedActions[i] = true
+                                end
+                            end
                         end
                     end
                 end
@@ -223,10 +265,10 @@ local function moneyBasedActions(sellTime)
                 local randomDelay = 0.5 + (math.random() * 0.5)
                 task.wait(randomDelay)
                 local soldCount = 0
-                local targetCount = 2
+                local targetCount = 6
                 if #_G.myUnitIDs > 0 then
                     for i, unitID in ipairs(_G.myUnitIDs) do
-                        local success, err = pcall(function()
+                        local success = pcall(function()
                             remotes.SellUnit:InvokeServer(unitID)
                         end)
                         if success then
@@ -236,7 +278,7 @@ local function moneyBasedActions(sellTime)
                         task.wait(0.05)
                     end
                 else
-                    for unitID = 1, 20 do
+                    for unitID = 1, 30 do
                         local success = pcall(function()
                             remotes.SellUnit:InvokeServer(unitID)
                         end)
@@ -296,10 +338,10 @@ end
 
 local function setupGame(tickSpeed)
     pcall(function()
-        remotes.LobbySetMap_6:InvokeServer("map_dojo")
+        remotes.LobbySetMap_6:InvokeServer("map_graveyard")
     end)
     task.wait(0.25)
-    remotes.PlaceDifficultyVote:InvokeServer("dif_apocalypse")
+    remotes.PlaceDifficultyVote:InvokeServer("dif_impossible")
     task.wait(0.25)
     remotes.ChangeTickSpeed:InvokeServer(tickSpeed)
     setupAutoSkip()
@@ -309,12 +351,14 @@ function load3xScript()
     while true do
         _G.myUnitIDs = {}
         _G.unitsSold = false
-        placedUnits = {}
-        upgradedUnits = {}
+        completedActions = {}
+        unitLevels = {}
         _G.trackingEnabled = true
+        generateRandomDelays()
         setupGame(3)
         task.wait(1.5)
-        moneyBasedActions(69)
+        placements = generateRandomPlacements()
+        moneyBasedActions(137.5)
         waitForGameEnd()
         task.wait(0.5)
         _G.trackingEnabled = false
@@ -327,12 +371,14 @@ function load2xScript()
     while true do
         _G.myUnitIDs = {}
         _G.unitsSold = false
-        placedUnits = {}
-        upgradedUnits = {}
+        completedActions = {}
+        unitLevels = {}
         _G.trackingEnabled = true
+        generateRandomDelays()
         setupGame(2)
         task.wait(1.5)
-        moneyBasedActions(96)
+        placements = generateRandomPlacements()
+        moneyBasedActions(205.5)
         waitForGameEnd()
         task.wait(0.5)
         _G.trackingEnabled = false
@@ -342,7 +388,7 @@ function load2xScript()
 end
 
 local function showSpeedMenu()
-    Title.Text = "Select Speed - Dojo"
+    Title.Text = "Select Speed - Graveyard"
     TextBox.Visible = false
     CheckBtn.Visible = false
     Label.Visible = false
@@ -371,7 +417,7 @@ local function showSpeedMenu()
 end
 
 CheckBtn.MouseButton1Click:Connect(function()
-    if TextBox.Text == "dojo" then
+    if TextBox.Text == "candy" then
         Label.Text = "Key Accepted!"
         Label.TextColor3 = Color3.fromRGB(0, 255, 0)
         task.delay(1, showSpeedMenu)
