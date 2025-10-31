@@ -12,30 +12,61 @@ _G.myUnitIDs = _G.myUnitIDs or {}
 _G.trackingEnabled = false
 _G.gamesCompleted = _G.gamesCompleted or 0
 
---=== MILESTONE ALERT FUNCTION ===--
+--=== MILESTONE ALERT FUNCTION (SOLO PARA TOMATO PLANT) ===--
 local currentMilestoneGui = nil
+
+--[[
+    ========================================
+    📍 MODIFICAR MILESTONES AQUÍ:
+    ========================================
+    Para cambiar los milestones, edita estos valores:
+    
+    1. En la función showMilestoneAlert():
+       - Cambia "games == 1" por el número que quieras
+       - Cambia "games == 3" por el número que quieras
+       - Puedes agregar más con "elseif games == 5 then"
+    
+    2. En las funciones loadTomatoPlant2x() y loadTomatoPlant3x():
+       - Busca: if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+       - Cambia los números 1 y 3 por los que quieras
+       - Ejemplo: if _G.gamesCompleted == 2 or _G.gamesCompleted == 5 or _G.gamesCompleted == 10 then
+    
+    ========================================
+]]--
 
 local function showMilestoneAlert(games)
     local color, message, subtext, isPermanent
     
+    -- 🔧 MILESTONE 1: Cambiar el número aquí
     if games == 1 then
         color = Color3.fromRGB(0, 255, 0) -- Verde
         message = "1 GAME COMPLETED!"
         subtext = "Trade System Unlocked 🔓"
-        isPermanent = false
+        isPermanent = false -- Se mantiene hasta el siguiente milestone
+    
+    -- 🔧 MILESTONE 2: Cambiar el número aquí
     elseif games == 3 then
         color = Color3.fromRGB(0, 150, 255) -- Azul
         message = "3 GAMES COMPLETED!"
-        subtext = "Scripts Now Safer 🛡️"
-        isPermanent = true
+        subtext = "Scripts Now Safer 🛡️ | Trade Unlocked 🔓"
+        isPermanent = true -- Se mantiene hasta cerrar el juego
+    
+    -- 🔧 AGREGAR MÁS MILESTONES AQUÍ (ejemplo):
+    -- elseif games == 5 then
+    --     color = Color3.fromRGB(255, 215, 0) -- Dorado
+    --     message = "5 GAMES COMPLETED!"
+    --     subtext = "Expert Farmer! 🌟"
+    --     isPermanent = true
+    
     else
-        return
+        return -- No hacer nada si no es un milestone
     end
     
     warn("========================================")
     warn("[🎉 MILESTONE] " .. message)
     warn("========================================")
     
+    -- Destruir overlay anterior si existe
     if currentMilestoneGui then
         currentMilestoneGui:Destroy()
         currentMilestoneGui = nil
@@ -50,6 +81,7 @@ local function showMilestoneAlert(games)
     
     currentMilestoneGui = AlertGui
     
+    -- Overlay de fondo (debajo del GUI de counter)
     local Overlay = Instance.new("Frame")
     Overlay.Size = UDim2.new(1, 0, 1, 0)
     Overlay.Position = UDim2.new(0, 0, 0, 0)
@@ -57,9 +89,10 @@ local function showMilestoneAlert(games)
     Overlay.BackgroundColor3 = color
     Overlay.BackgroundTransparency = 0.3
     Overlay.BorderSizePixel = 0
-    Overlay.ZIndex = 999
+    Overlay.ZIndex = 1 -- Debajo del GUI de counter (que tiene ZIndex 10000)
     Overlay.Parent = AlertGui
     
+    -- Mensaje principal
     local MessageLabel = Instance.new("TextLabel")
     MessageLabel.Size = UDim2.new(0.8, 0, 0, 100)
     MessageLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
@@ -71,13 +104,14 @@ local function showMilestoneAlert(games)
     MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     MessageLabel.TextStrokeTransparency = 0.5
     MessageLabel.TextScaled = true
-    MessageLabel.ZIndex = 1000
+    MessageLabel.ZIndex = 2
     MessageLabel.Parent = AlertGui
     
     local MessageConstraint = Instance.new("UITextSizeConstraint")
     MessageConstraint.MaxTextSize = 60
     MessageConstraint.Parent = MessageLabel
     
+    -- Submensaje
     local SubLabel = Instance.new("TextLabel")
     SubLabel.Size = UDim2.new(0.8, 0, 0, 50)
     SubLabel.Position = UDim2.new(0.5, 0, 0.55, 0)
@@ -89,13 +123,14 @@ local function showMilestoneAlert(games)
     SubLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     SubLabel.TextStrokeTransparency = 0.5
     SubLabel.TextScaled = true
-    SubLabel.ZIndex = 1000
+    SubLabel.ZIndex = 2
     SubLabel.Parent = AlertGui
     
     local SubConstraint = Instance.new("UITextSizeConstraint")
     SubConstraint.MaxTextSize = 30
     SubConstraint.Parent = SubLabel
     
+    -- Fade in del overlay y textos
     Overlay.BackgroundTransparency = 1
     MessageLabel.TextTransparency = 1
     SubLabel.TextTransparency = 1
@@ -107,14 +142,17 @@ local function showMilestoneAlert(games)
         task.wait(0.05)
     end
     
+    -- Mantener el mensaje visible por 5 segundos
     task.wait(5)
     
+    -- Fade out SOLO de los textos (el overlay se mantiene)
     for i = 1, 20 do
         MessageLabel.TextTransparency = i / 20
         SubLabel.TextTransparency = i / 20
         task.wait(0.05)
     end
     
+    -- Eliminar los textos pero MANTENER el overlay
     MessageLabel:Destroy()
     SubLabel:Destroy()
     
@@ -144,7 +182,7 @@ local function createAFKGui()
     InfoFrame.BorderSizePixel = 0
     InfoFrame.Active = true
     InfoFrame.Draggable = true
-    InfoFrame.ZIndex = 10000
+    InfoFrame.ZIndex = 10000 -- Por encima de las alertas
     InfoFrame.Parent = AFKGui
     
     local UICorner = Instance.new("UICorner", InfoFrame)
@@ -480,7 +518,7 @@ local function placeAndUpgradeSequentially(unitType, unitName, positions, isFast
             local waitTime = 0
             while #_G.myUnitIDs < unitIndex and waitTime < trackTimeout do
                 task.wait(waitCheckTime)
-                waitTime = waitTime + waitCheckTime
+                waitTime = waitTime + waitCheckTimeout
             end
             
             if #_G.myUnitIDs >= unitIndex then
@@ -546,22 +584,14 @@ local function waitForGameEnd()
 end
 
 local function clickPlayAgain()
-    warn("[RESTART] Clicking Play Again...")
+    warn("[RESTART] Waiting for game to fully finish...")
+    task.wait(1.5)
+    
+    warn("[RESTART] Searching for Play Again button...")
     
     local clicked = false
-    local maxAttempts = 20
     
-    for attempt = 1, maxAttempts do
-        pcall(function()
-            remotes.RestartGame:InvokeServer()
-            clicked = true
-            warn("[✓ CLICKED] Play Again via RestartGame remote")
-        end)
-        
-        if clicked then
-            break
-        end
-        
+    for attempt = 1, 15 do
         pcall(function()
             local gui = plr.PlayerGui:FindFirstChild("GameGui")
             if gui then
@@ -574,7 +604,7 @@ local function clickPlayAgain()
                                 conns[1]:Fire()
                                 clicked = true
                                 warn("[✓ CLICKED] Play Again button in GUI")
-                                break
+                                return
                             end
                         end
                     end
@@ -582,11 +612,17 @@ local function clickPlayAgain()
             end
         end)
         
-        if clicked then
-            break
-        end
-        
-        task.wait(0.5)
+        if clicked then break end
+        task.wait(0.3)
+    end
+    
+    if not clicked then
+        warn("[BACKUP] GUI button not found, using RestartGame remote...")
+        pcall(function()
+            remotes.RestartGame:InvokeServer()
+            clicked = true
+            warn("[✓ CLICKED] Play Again via RestartGame remote")
+        end)
     end
     
     if not clicked then
@@ -609,12 +645,13 @@ local function setupGame(tickSpeed)
     
     task.wait(0.25)
     
-    remotes.ChangeTickSpeed:InvokeServer(tickSpeed)
+remotes.ChangeTickSpeed:InvokeServer(tickSpeed)
     warn("[SPEED] Set to " .. tickSpeed .. "x")
     
     setupAutoSkip()
 end
 
+--=== RAINBOW TOMATO SCRIPTS (SIN ALERTAS) ===--
 function loadRainbow3x()
     warn("========================================")
     warn("[SYSTEM] Starting 3x Speed - Rainbow Tomato")
@@ -651,9 +688,7 @@ function loadRainbow3x()
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
-            showMilestoneAlert(_G.gamesCompleted)
-        end
+        -- SIN ALERTAS PARA RAINBOW
         
         clickPlayAgain()
         
@@ -697,9 +732,7 @@ function loadRainbow2x()
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
-            showMilestoneAlert(_G.gamesCompleted)
-        end
+        -- SIN ALERTAS PARA RAINBOW
         
         clickPlayAgain()
         
@@ -707,10 +740,11 @@ function loadRainbow2x()
     end
 end
 
+--=== TOMATO PLANT SCRIPTS (CON ALERTAS) ===--
 function loadTomatoPlant3x()
     warn("========================================")
     warn("[SYSTEM] Starting 3x Speed - Tomato Plant")
-    warn("[MODE] Auto-detection enabled")
+    warn("[MODE] Auto-detection enabled + Milestones")
     warn("========================================")
     
     task.spawn(function()
@@ -743,6 +777,7 @@ function loadTomatoPlant3x()
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
+        -- 🔧 MODIFICAR MILESTONES AQUÍ: Cambia los números 1 y 3 por los que quieras
         if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
             showMilestoneAlert(_G.gamesCompleted)
         end
@@ -756,7 +791,7 @@ end
 function loadTomatoPlant2x()
     warn("========================================")
     warn("[SYSTEM] Starting 2x Speed - Tomato Plant")
-    warn("[MODE] Auto-detection enabled")
+    warn("[MODE] Auto-detection enabled + Milestones")
     warn("========================================")
     
     task.spawn(function()
@@ -789,6 +824,7 @@ function loadTomatoPlant2x()
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
+        -- 🔧 MODIFICAR MILESTONES AQUÍ: Cambia los números 1 y 3 por los que quieras
         if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
             showMilestoneAlert(_G.gamesCompleted)
         end
@@ -799,6 +835,7 @@ function loadTomatoPlant2x()
     end
 end
 
+--=== BUTTON HANDLERS ===--
 btnRainbow.MouseButton1Click:Connect(function()
     local btn2x, btn3x = showSpeedMenu("Rainbow Tomato")
     
@@ -827,6 +864,7 @@ btnTomatoPlant.MouseButton1Click:Connect(function()
     end)
 end)
 
+--=== ANTI-AFK ===--
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
@@ -836,7 +874,8 @@ end)
 
 warn("========================================")
 warn("[SYSTEM] Ready! Select your unit type.")
-warn("[NEW] Auto game-end detection enabled")
-warn("[NEW] AFK Info & Games Counter added")
-warn("[NEW] Milestone alerts at 1 and 3 games")
+warn("[AUTO] Game-end detection enabled")
+warn("[GUI] AFK Info & Games Counter")
+warn("[TOMATO PLANT] Milestones at 1 & 3 games")
+warn("[RAINBOW] No milestone alerts")
 warn("========================================")
