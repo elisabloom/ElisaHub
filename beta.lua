@@ -396,7 +396,7 @@ local function clickPlayAgain()
             end
         end)
         if clicked then break end
-        task.wait(0.3)
+        task.wait(0.15)
     end
     if not clicked then
         pcall(function()
@@ -428,7 +428,7 @@ function loadRainbow3x()
         task.wait(1.5)
         placeAndUpgradeSequentially("Rainbow Tomatoes", "unit_tomato_rainbow", rainbowPositions, true)
         waitForGameEnd()
-        task.wait(1)
+        task.wait(0.5)
         _G.trackingEnabled = false
         task.spawn(function()
             _G.gamesCompleted = _G.gamesCompleted + 1
@@ -451,7 +451,7 @@ function loadRainbow2x()
         task.wait(1.5)
         placeAndUpgradeSequentially("Rainbow Tomatoes", "unit_tomato_rainbow", rainbowPositions, true)
         waitForGameEnd()
-        task.wait(1)
+        task.wait(0.5)
         _G.trackingEnabled = false
         task.spawn(function()
             _G.gamesCompleted = _G.gamesCompleted + 1
@@ -474,7 +474,7 @@ function loadTomatoPlant3x()
         task.wait(1.5)
         placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
         waitForGameEnd()
-        task.wait(1)
+        task.wait(0.5)
         _G.trackingEnabled = false
         task.spawn(function()
             _G.gamesCompleted = _G.gamesCompleted + 1
@@ -497,7 +497,7 @@ function loadTomatoPlant2x()
         task.wait(1.5)
         placeAndUpgradeSequentially("Tomato Plants", "unit_tomato_plant", tomatoPlantPositions, true)
         waitForGameEnd()
-        task.wait(1)
+        task.wait(0.5)
         _G.trackingEnabled = false
         task.spawn(function()
             _G.gamesCompleted = _G.gamesCompleted + 1
