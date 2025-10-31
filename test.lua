@@ -34,12 +34,12 @@ local currentMilestoneGui = nil
 local function showMilestoneAlert(games)
     local color, message, subtext, isPermanent
     
-    if games == 1 then
+    if games == 25 then
         color = Color3.fromRGB(0, 255, 0)
         message = "1 GAME COMPLETED!"
         subtext = "Trade System Unlocked 🔓"
         isPermanent = false
-    elseif games == 3 then
+    elseif games == 50 then
         color = Color3.fromRGB(0, 150, 255)
         message = "3 GAMES COMPLETED!"
         subtext = "Scripts Now Safer 🛡️ | Trade Unlocked 🔓"
@@ -791,7 +791,7 @@ function loadTomatoPlant2x()
             _G.updateGamesCounter(_G.gamesCompleted)
         end
         
-        if _G.gamesCompleted == 1 or _G.gamesCompleted == 3 then
+        if _G.gamesCompleted == 25 or _G.gamesCompleted == 50 then
             showMilestoneAlert(_G.gamesCompleted)
         end
         
