@@ -346,7 +346,7 @@ end
 -- CLICK PLAY AGAIN BUTTON - FINAL VERSION
 local function clickPlayAgain()
     warn("[RESTART] Waiting for game to fully finish...")
-    task.wait(1.5)
+    task.wait(0.5)
     
     warn("[RESTART] Searching for Play Again button...")
     
