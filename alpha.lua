@@ -376,8 +376,8 @@ local function sendHook(endFrame)
         local userName = "||" .. plr.Name .. "||"
         
         local description = string.format(
-            "**Garden Tower Defense**\n\n" ..
-            "**User:** %s\n\n" ..
+            "**Garden Tower Defense**\n" ..
+            "**User:** %s\n" ..
             "**Games Played:** %d\n\n" ..
             "**Player Stats**\n" ..
             "🌱 Seeds: %s\n" ..
