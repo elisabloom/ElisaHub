@@ -1,4 +1,3 @@
--- Webhook Tracker
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
@@ -371,11 +370,15 @@ local function sendHook(endFrame)
         
         local color = result == "Victory" and 3066993 or 15158332
         
+        local userName = "||" .. plr.Name .. "||"
+        local description = string.format("User: %s\nSeed: %s\nCandy: %s\nRun Time: %s\nResult: %s", 
+            userName, seeds, candy, runTime, result)
+        
         local data = {
             embeds = {{
                 title = "Seed Tracker",
                 color = color,
-                description = "User: ||" .. plr.Name .. "||\nSeed: " .. seeds .. "\nCandy: " .. candy .. "\nRun Time: " .. runTime .. "\nResult: " .. result,
+                description = description,
                 footer = {text = "Noah Hub | " .. time}
             }}
         }
