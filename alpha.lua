@@ -11,20 +11,8 @@ local PlayerGui = plr:WaitForChild("PlayerGui")
 getgenv().isTracking = getgenv().isTracking or false
 getgenv().webhookURL = getgenv().webhookURL or ""
 getgenv().gamesPlayed = getgenv().gamesPlayed or 0
-getgenv().lastSeeds = getgenv().lastSeeds or 0
-getgenv().lastCandy = getgenv().lastCandy or 0
 
 local WEBHOOK_FILE = "webhook_config.txt"
-
-local MAP_NAMES = {
-    ["map_dojo"] = "Dojo",
-    ["map_back_garden"] = "Back Garden",
-    ["map_toxic"] = "Toxic",
-    ["map_island"] = "Island",
-    ["map_jungle"] = "Jungle",
-    ["map_farm"] = "Farm",
-    ["map_graveyard"] = "Graveyard"
-}
 
 local function loadWebhook()
     if isfile and readfile then
@@ -49,124 +37,62 @@ end
 
 loadWebhook()
 
-local function getCurrentMapAndDifficulty()
-    local success, map, difficulty, wave = pcall(function()
-        local gui = PlayerGui:FindFirstChild("GameGui")
-        if not gui then return "Unknown", "Unknown", "XX" end
-        
-        local foundMap = "Unknown"
-        local foundDifficulty = "Unknown"
-        local foundWave = "XX"
-        
-        for _, obj in pairs(gui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
-                
-                if txt:match("(%a+):%s*Wave%s*(%d+)%s*/%s*(%d+)") then
-                    local dif, currentWave, totalWaves = txt:match("(%a+):%s*Wave%s*(%d+)%s*/%s*(%d+)")
-                    if dif then
-                        foundDifficulty = dif
-                        foundWave = currentWave or "XX"
-                    end
-                end
-            end
-        end
-        
-        local workspace = game:GetService("Workspace")
-        for mapId, mapName in pairs(MAP_NAMES) do
-            if workspace:FindFirstChild(mapId) then
-                foundMap = mapName
-                break
-            end
-        end
-        
-        if foundMap == "Unknown" then
-            for _, obj in pairs(gui:GetDescendants()) do
-                if obj:IsA("TextLabel") then
-                    local txt = obj.Text
-                    if txt:find("Graveyard") then foundMap = "Graveyard" break end
-                    if txt:find("Dojo") then foundMap = "Dojo" break end
-                    if txt:find("Back Garden") then foundMap = "Back Garden" break end
-                    if txt:find("Toxic") then foundMap = "Toxic" break end
-                    if txt:find("Island") then foundMap = "Island" break end
-                    if txt:find("Jungle") then foundMap = "Jungle" break end
-                    if txt:find("Farm") then foundMap = "Farm" break end
-                end
-            end
-        end
-        
-        return foundMap, foundDifficulty, foundWave
-    end)
-    
-    if success then 
-        return map or "Unknown", difficulty or "Unknown", wave or "XX"
-    else 
-        return "Unknown", "Unknown", "XX" 
-    end
-end
-
-local function getTotalSeedsFromLeaderstats()
+local function getSeedsFromScreen()
     local success, result = pcall(function()
-        local leaderstats = plr:FindFirstChild("leaderstats")
-        if leaderstats then
-            local seeds = leaderstats:FindFirstChild("Seeds")
-            if seeds and seeds:IsA("StringValue") then
-                local num = seeds.Value:match("(%d+)")
-                if num then return tonumber(num) end
-            end
-        end
-        return 0
-    end)
-    
-    return (success and result) or 0
-end
-
-local function getTotalCandyFromLeaderstats()
-    local success, result = pcall(function()
-        local leaderstats = plr:FindFirstChild("leaderstats")
-        if leaderstats then
-            local cash = leaderstats:FindFirstChild("Cash")
-            if cash and cash:IsA("StringValue") then
-                local num = cash.Value:match("(%d+)")
-                if num then return tonumber(num) end
-            end
-        end
-        return 0
-    end)
-    
-    return (success and result) or 0
-end
-
-local function getRewardsFromNotification()
-    local success, seedsReward, candyReward = pcall(function()
         local gui = PlayerGui:FindFirstChild("GameGui")
-        if not gui then return 0, 0 end
+        if not gui then return "N/A" end
         
-        local seeds = 0
-        local candy = 0
+        local seedsDisplay = gui:FindFirstChild("SeedsDisplay", true)
         
-        for _, obj in pairs(gui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
-                
-                if txt:match("You got (%d+) Seeds") then
-                    seeds = tonumber(txt:match("You got (%d+) Seeds")) or 0
-                end
-                
-                if txt:match("You got (%d+) Candy") or txt:match("You got (%d+) candy") then
-                    candy = tonumber(txt:match("You got (%d+) [Cc]andy")) or 0
+        if seedsDisplay then
+            local titleLabel = seedsDisplay:FindFirstChild("Title")
+            if titleLabel and titleLabel:IsA("TextLabel") then
+                local num = titleLabel.Text:match("(%d+)")
+                if num then
+                    return num
                 end
             end
         end
         
-        return seeds, candy
+        local currencyDisplay = gui:FindFirstChild("CurrencyDisplay", true)
+        if currencyDisplay then
+            local seedsDisplay = currencyDisplay:FindFirstChild("SeedsDisplay")
+            if seedsDisplay then
+                local titleLabel = seedsDisplay:FindFirstChild("Title")
+                if titleLabel and titleLabel:IsA("TextLabel") then
+                    local num = titleLabel.Text:match("(%d+)")
+                    if num then return num end
+                end
+            end
+        end
+        
+        return "N/A"
     end)
     
-    if success then 
-        return seedsReward or 0, candyReward or 0
-    else 
-        return 0, 0
-    end
+    if success then return result else return "N/A" end
+end
+
+local function getCandyCornFromScreen()
+    local success, result = pcall(function()
+        local gui = PlayerGui:FindFirstChild("GameGui")
+        if not gui then return "N/A" end
+        
+        local candyDisplay = gui:FindFirstChild("CandyCornsDisplay", true)
+        
+        if candyDisplay then
+            local titleLabel = candyDisplay:FindFirstChild("Title")
+            if titleLabel and titleLabel:IsA("TextLabel") then
+                local num = titleLabel.Text:match("(%d+)")
+                if num then
+                    return num
+                end
+            end
+        end
+        
+        return "N/A"
+    end)
+    
+    if success then return result else return "N/A" end
 end
 
 local function getGameResult(endFrame)
@@ -359,28 +285,9 @@ local function sendHook(endFrame)
         
         local time = os.date("%Y-%m-%d %H:%M:%S")
         
-        local currentTotalSeeds = getTotalSeedsFromLeaderstats()
-        local currentTotalCandy = getTotalCandyFromLeaderstats()
-        
-        local seedsReward, candyReward = getRewardsFromNotification()
-        
-        if seedsReward == 0 and getgenv().lastSeeds > 0 then
-            seedsReward = math.max(0, currentTotalSeeds - getgenv().lastSeeds)
-        end
-        
-        if candyReward == 0 and getgenv().lastCandy > 0 then
-            candyReward = math.max(0, currentTotalCandy - getgenv().lastCandy)
-        end
-        
-        getgenv().lastSeeds = currentTotalSeeds
-        getgenv().lastCandy = currentTotalCandy
-        
-        local result = getGameResult(endFrame) or "Unknown"
-        local map, difficulty, wave = getCurrentMapAndDifficulty()
-        
-        map = map or "Unknown"
-        difficulty = difficulty or "Unknown"
-        wave = wave or "XX"
+        local seeds = getSeedsFromScreen()
+        local candy = getCandyCornFromScreen()
+        local result = getGameResult(endFrame)
         
         local runTime = "N/A"
         
@@ -406,30 +313,23 @@ local function sendHook(endFrame)
         local color = result == "Victory" and 3066993 or 15158332
         
         local userName = tostring(plr.Name)
-        local totalSeeds = tostring(currentTotalSeeds)
-        local totalCandy = tostring(currentTotalCandy)
-        local rewardSeeds = tostring(seedsReward)
-        local rewardCandy = tostring(candyReward)
-        local gamesPlayedStr = tostring(getgenv().gamesPlayed)
         
         local description = string.format(
             "**Garden Tower Defense**\n\n" ..
             "**User:** ||%s||\n\n" ..
-            "**Total Replays:** %s\n\n" ..
-            "**Player Stats               Rewards**\n" ..
-            "🌱 %s                           🌱 +%s\n" ..
-            "🍬 %s                           🍬 +%s\n\n" ..
+            "**Games Played:** %d\n\n" ..
+            "**Player Stats**\n" ..
+            "🌱 Seeds: %s\n" ..
+            "🍬 Candy: %s\n\n" ..
             "**Match Results**\n" ..
             "**%s**\n" ..
-            "**%s - Wave %s**\n" ..
-            "**%s - %s**",
+            "**Run Time: %s**",
             userName,
-            gamesPlayedStr,
-            totalSeeds, rewardSeeds,
-            totalCandy, rewardCandy,
+            getgenv().gamesPlayed,
+            seeds,
+            candy,
             result,
-            runTime, wave,
-            map, difficulty
+            runTime
         )
         
         local data = {
@@ -450,7 +350,7 @@ local function sendHook(endFrame)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: +" .. rewardSeeds .. " | Candy: +" .. rewardCandy .. " | Time: " .. runTime .. " | Map: " .. map .. " | Difficulty: " .. difficulty .. " | Wave: " .. wave .. " | Games: " .. gamesPlayedStr)
+        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy .. " | Time: " .. runTime .. " | Games: " .. getgenv().gamesPlayed)
     end)
     
     if not success then
@@ -487,10 +387,25 @@ startTracking()
 print("Webhook Tracker loaded! Games Played: " .. getgenv().gamesPlayed)
 ```
 
-Cambié el espaciado de:
+## Cambios realizados:
+
+✅ **Eliminados Rewards** - Solo Player Stats
+✅ **"Total Replays"** → **"Games Played"**
+✅ **Match Results simplificado** - Solo resultado y tiempo
+✅ **Sin mapa, wave ni dificultad** por ahora
+
+El webhook ahora mostrará:
 ```
-"**Player Stats          Rewards**\n"
-```
-a:
-```
-"**Player Stats               Rewards**\n"
+Garden Tower Defense
+
+User: ||nombre||
+
+Games Played: 1
+
+Player Stats
+🌱 Seeds: 44
+🍬 Candy: 1
+
+Match Results
+Victory
+Run Time: 0:26
