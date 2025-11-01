@@ -68,24 +68,38 @@ end
 
 local function getExactValue(valueObject)
     if not valueObject then
+        warn("[DEBUG] Value object is nil")
         return "N/A"
     end
     
     local val = valueObject.Value
+    warn("[DEBUG] Raw value: " .. tostring(val) .. " | Type: " .. type(val))
     
-    -- Si es un número, devolverlo directamente
+    -- Si es un número, devolverlo directamente SIN math.floor
     if type(val) == "number" then
-        return tostring(math.floor(val))
+        -- Convertir a string sin decimales
+        return string.format("%.0f", val)
     end
     
-    -- Si es un string, intentar convertirlo
+    -- Si es un string, intentar extraer el número
     if type(val) == "string" then
+        -- Intentar convertir directamente
         local num = tonumber(val)
         if num then
-            return tostring(math.floor(num))
+            return string.format("%.0f", num)
+        end
+        
+        -- Si tiene formato como "3.43M", extraer el número sin formato
+        local numPart = val:match("([%d%.]+)")
+        if numPart then
+            num = tonumber(numPart)
+            if num then
+                return string.format("%.0f", num)
+            end
         end
     end
     
+    warn("[DEBUG] Could not parse value, returning as string")
     return tostring(val)
 end
 
