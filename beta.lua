@@ -1,28 +1,22 @@
-–// Discord Webhook Tracker v3 - Error-Safe Version
-–// Wait for game to load completely
 repeat task.wait() until game:IsLoaded()
-task.wait(2) – Extra safety delay
+task.wait(2)
 
 local Players = game:GetService(“Players”)
 local plr = Players.LocalPlayer
 local HttpService = game:GetService(“HttpService”)
 
-– Wait for player to be fully loaded
 repeat task.wait() until plr and plr.Parent
 repeat task.wait() until plr:FindFirstChild(“PlayerGui”)
 
-warn(”[INIT] Player and services loaded successfully”)
+warn(”[INIT] Starting Webhook Tracker…”)
 
-– Variables globales
 _G.isTracking = _G.isTracking or false
 _G.gameStartTime = _G.gameStartTime or nil
 _G.isMinimized = _G.isMinimized or false
 _G.webhookURL = _G.webhookURL or “”
 
-– Nombre del archivo donde se guardará el webhook
 local WEBHOOK_FILE = “webhook_tracker_config.txt”
 
-– Cargar el webhook guardado del archivo
 local function loadWebhook()
 if readfile and isfile then
 local success, result = pcall(function()
@@ -30,7 +24,7 @@ if isfile(WEBHOOK_FILE) then
 local savedURL = readfile(WEBHOOK_FILE)
 if savedURL and savedURL ~= “” then
 _G.webhookURL = savedURL
-warn(”[WEBHOOK] ✓ Webhook cargado desde archivo”)
+warn(”[WEBHOOK] Loaded from file”)
 return true
 end
 end
@@ -39,16 +33,13 @@ end)
 
 ```
     if not success then
-        warn("[WEBHOOK] ⚠️ Error al cargar webhook: " .. tostring(result))
+        warn("[WEBHOOK] Load error: " .. tostring(result))
     end
-else
-    warn("[WEBHOOK] ⚠️ writefile/readfile no disponible en este ejecutor")
 end
 ```
 
 end
 
-– Guardar el webhook en archivo permanente
 local function saveWebhook(url)
 if writefile then
 local success, err = pcall(function()
@@ -57,24 +48,20 @@ end)
 
 ```
     if success then
-        warn("[WEBHOOK] ✓ Webhook guardado permanentemente")
+        warn("[WEBHOOK] Saved")
         return true
     else
-        warn("[WEBHOOK] ❌ Error al guardar webhook: " .. tostring(err))
+        warn("[WEBHOOK] Save error: " .. tostring(err))
         return false
     end
-else
-    warn("[WEBHOOK] ⚠️ writefile no disponible")
-    return false
 end
+return false
 ```
 
 end
 
-– Cargar el webhook al iniciar
 pcall(loadWebhook)
 
-– Función para obtener valores del GUI del juego
 local function getValueSafe(valueObject)
 if not valueObject then
 return “N/A”
@@ -102,28 +89,24 @@ return tostring(val)
 
 end
 
-– NUEVA FUNCIÓN: Buscar Candy en el GUI del juego
 local function getCandyFromGameGui()
 local success, result = pcall(function()
 local gameGui = plr.PlayerGui:FindFirstChild(“GameGui”)
 if not gameGui then return “N/A” end
 
 ```
-    -- Buscar en todos los descendientes
     for _, descendant in pairs(gameGui:GetDescendants()) do
         if descendant:IsA("TextLabel") then
             local text = descendant.Text
             
-            -- Buscar el icono de candy (🍬) o el patrón numérico cerca de él
             if text:match("🍬") or descendant.Name:lower():find("candy") then
                 local number = text:match("%d+")
                 if number then
-                    warn("[DEBUG] Candy encontrado en GUI: " .. number)
+                    warn("[DEBUG] Candy found: " .. number)
                     return number
                 end
             end
             
-            -- También buscar en elementos hermanos si este es el icono
             if text == "🍬" or text:match("🍬") then
                 local parent = descendant.Parent
                 if parent then
@@ -131,7 +114,7 @@ if not gameGui then return “N/A” end
                         if sibling:IsA("TextLabel") and sibling ~= descendant then
                             local candyNum = sibling.Text:match("%d+")
                             if candyNum then
-                                warn("[DEBUG] Candy encontrado en sibling: " .. candyNum)
+                                warn("[DEBUG] Candy in sibling: " .. candyNum)
                                 return candyNum
                             end
                         end
@@ -147,7 +130,7 @@ end)
 if success then
     return result
 else
-    warn("[ERROR] getCandyFromGameGui failed: " .. tostring(result))
+    warn("[ERROR] getCandyFromGameGui: " .. tostring(result))
     return "N/A"
 end
 ```
@@ -192,7 +175,7 @@ if existingGui then existingGui:Destroy() end
     local MinimizeButton = Instance.new("TextButton")
     MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
     MinimizeButton.Position = UDim2.new(1, -25, 0, 0)
-    MinimizeButton.Text = "−"
+    MinimizeButton.Text = "-"
     MinimizeButton.Font = Enum.Font.GothamBold
     MinimizeButton.TextSize = 18
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -226,7 +209,7 @@ if existingGui then existingGui:Destroy() end
     local SaveButton = Instance.new("TextButton")
     SaveButton.Size = UDim2.new(0, 60, 0, 25)
     SaveButton.Position = UDim2.new(0, 10, 0, 65)
-    SaveButton.Text = "💾 Save"
+    SaveButton.Text = "Save"
     SaveButton.Font = Enum.Font.GothamBold
     SaveButton.TextSize = 10
     SaveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -240,7 +223,7 @@ if existingGui then existingGui:Destroy() end
     local ClearButton = Instance.new("TextButton")
     ClearButton.Size = UDim2.new(0, 60, 0, 25)
     ClearButton.Position = UDim2.new(0, 75, 0, 65)
-    ClearButton.Text = "🗑️ Clear"
+    ClearButton.Text = "Clear"
     ClearButton.Font = Enum.Font.GothamBold
     ClearButton.TextSize = 10
     ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -256,7 +239,7 @@ if existingGui then existingGui:Destroy() end
     StatusLabel.Size = UDim2.new(1, -20, 0, 35)
     StatusLabel.Position = UDim2.new(0, 10, 0, 95)
     StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = "⏸️ Waiting for game..."
+    StatusLabel.Text = "Waiting for game..."
     StatusLabel.Font = Enum.Font.Gotham
     StatusLabel.TextSize = 10
     StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -265,7 +248,6 @@ if existingGui then existingGui:Destroy() end
     StatusLabel.TextWrapped = true
     StatusLabel.Parent = WebhookFrame
     
-    -- Funcionalidad de minimizar
     MinimizeButton.MouseButton1Click:Connect(function()
         _G.isMinimized = not _G.isMinimized
         
@@ -278,7 +260,7 @@ if existingGui then existingGui:Destroy() end
             StatusLabel.Visible = false
         else
             WebhookFrame:TweenSize(UDim2.new(0, 210, 0, 132), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
-            MinimizeButton.Text = "−"
+            MinimizeButton.Text = "-"
             WebhookInput.Visible = true
             SaveButton.Visible = true
             ClearButton.Visible = true
@@ -289,10 +271,10 @@ if existingGui then existingGui:Destroy() end
     SaveButton.MouseButton1Click:Connect(function()
         _G.webhookURL = WebhookInput.Text
         saveWebhook(_G.webhookURL)
-        SaveButton.Text = "✓ Saved!"
+        SaveButton.Text = "Saved!"
         SaveButton.BackgroundColor3 = Color3.fromRGB(30, 100, 30)
         task.wait(1.5)
-        SaveButton.Text = "💾 Save"
+        SaveButton.Text = "Save"
         SaveButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
     end)
     
@@ -300,9 +282,9 @@ if existingGui then existingGui:Destroy() end
         _G.webhookURL = ""
         saveWebhook("")
         WebhookInput.Text = ""
-        ClearButton.Text = "✓ Cleared!"
+        ClearButton.Text = "Cleared!"
         task.wait(1)
-        ClearButton.Text = "🗑️ Clear"
+        ClearButton.Text = "Clear"
     end)
     
     return StatusLabel
@@ -311,7 +293,7 @@ end)
 if success then
     return gui
 else
-    warn("[ERROR] Failed to create GUI: " .. tostring(gui))
+    warn("[ERROR] GUI creation failed: " .. tostring(gui))
     return nil
 end
 ```
@@ -320,9 +302,9 @@ end
 
 local function sendWebhook(gameEndFrame, statusLabel)
 if _G.webhookURL == “” or not _G.webhookURL then
-warn(”[WEBHOOK] No webhook URL configured!”)
+warn(”[WEBHOOK] No URL configured”)
 if statusLabel then
-statusLabel.Text = “⚠️ No webhook URL set!”
+statusLabel.Text = “No webhook URL set!”
 end
 return
 end
@@ -331,7 +313,6 @@ end
 local success, err = pcall(function()
     local currentTime = os.date("%Y-%m-%d %H:%M:%S")
     
-    -- Obtener Seeds de leaderstats
     local leaderstats = plr:WaitForChild("leaderstats", 5)
     local totalSeeds = "N/A"
     
@@ -339,18 +320,15 @@ local success, err = pcall(function()
         local seedsValue = leaderstats:FindFirstChild("Seeds")
         if seedsValue then
             totalSeeds = getValueSafe(seedsValue)
-            warn("[DEBUG] Seeds Value: " .. totalSeeds)
+            warn("[DEBUG] Seeds: " .. totalSeeds)
         end
     end
     
-    -- Obtener Candy del GUI del juego
     local totalCandy = getCandyFromGameGui()
-    warn("[DEBUG] Candy Value (from GUI): " .. totalCandy)
+    warn("[DEBUG] Candy: " .. totalCandy)
     
-    -- Buscar el resultado del juego
     local resultText = "Unknown"
     
-    -- Método 1: Buscar en el label "Result"
     local resultLabel = gameEndFrame:FindFirstChild("Result", true)
     if resultLabel and resultLabel:IsA("TextLabel") then
         local text = resultLabel.Text:lower()
@@ -361,10 +339,9 @@ local success, err = pcall(function()
         else
             resultText = resultLabel.Text
         end
-        warn("[DEBUG] Result from Result label: " .. resultText)
+        warn("[DEBUG] Result: " .. resultText)
     end
     
-    -- Método 2: Buscar en TODOS los TextLabels
     if resultText == "Unknown" then
         for _, child in pairs(gameEndFrame:GetDescendants()) do
             if child:IsA("TextLabel") then
@@ -373,21 +350,20 @@ local success, err = pcall(function()
                 if text:find("victory") or text:find("win") or text:find("won") or 
                    text:find("success") or text:find("complete") then
                     resultText = "Victory"
-                    warn("[DEBUG] Victory detected in: " .. child.Name .. " - " .. child.Text)
+                    warn("[DEBUG] Victory in: " .. child.Name)
                     break
                 end
                 
                 if text:find("defeat") or text:find("lost") or text:find("lose") or 
                    text:find("fail") or text:find("game over") then
                     resultText = "Defeat"
-                    warn("[DEBUG] Defeat detected in: " .. child.Name .. " - " .. child.Text)
+                    warn("[DEBUG] Defeat in: " .. child.Name)
                     break
                 end
             end
         end
     end
     
-    -- Buscar el Run Time
     local runTime = "00:00"
     
     for _, child in pairs(gameEndFrame:GetDescendants()) do
@@ -396,7 +372,7 @@ local success, err = pcall(function()
             local timeMatch = text:match("(%d+:%d+)")
             if timeMatch then
                 runTime = timeMatch
-                warn("[DEBUG] Run Time found: " .. runTime)
+                warn("[DEBUG] Time: " .. runTime)
                 break
             end
         end
@@ -406,7 +382,7 @@ local success, err = pcall(function()
     
     local data = {
         ["embeds"] = {{
-            ["title"] = "🎮 Seed Tracker",
+            ["title"] = "Seed Tracker",
             ["color"] = embedColor,
             ["fields"] = {
                 {
@@ -415,22 +391,22 @@ local success, err = pcall(function()
                     ["inline"] = false
                 },
                 {
-                    ["name"] = "💎 Seeds:",
+                    ["name"] = "Seeds:",
                     ["value"] = totalSeeds,
                     ["inline"] = true
                 },
                 {
-                    ["name"] = "🍬 Candy:",
+                    ["name"] = "Candy:",
                     ["value"] = totalCandy,
                     ["inline"] = true
                 },
                 {
-                    ["name"] = "⏱️ Run Time:",
+                    ["name"] = "Run Time:",
                     ["value"] = runTime,
                     ["inline"] = true
                 },
                 {
-                    ["name"] = "📊 Result:",
+                    ["name"] = "Result:",
                     ["value"] = resultText,
                     ["inline"] = true
                 }
@@ -451,9 +427,9 @@ local success, err = pcall(function()
         Body = jsonData
     })
     
-    warn("[WEBHOOK] ✅ Message sent! (" .. resultText .. " | Candy: " .. totalCandy .. ")")
+    warn("[WEBHOOK] Sent! " .. resultText)
     if statusLabel then
-        statusLabel.Text = "✅ Webhook sent!\n" .. resultText .. " | " .. runTime .. "\nCandy: " .. totalCandy
+        statusLabel.Text = "Webhook sent!\n" .. resultText .. " | " .. runTime
         statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
     end
 end)
@@ -461,7 +437,7 @@ end)
 if not success then
     warn("[WEBHOOK ERROR] " .. tostring(err))
     if statusLabel then
-        statusLabel.Text = "❌ Webhook failed!\n" .. tostring(err):sub(1, 40)
+        statusLabel.Text = "Webhook failed!"
         statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     end
 end
@@ -486,22 +462,20 @@ task.wait(2)
                     _G.gameStartTime = tick()
                     warn("[TRACKER] Game started!")
                     if statusLabel then
-                        statusLabel.Text = "🎮 Game in progress..."
+                        statusLabel.Text = "Game in progress..."
                         statusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
                     end
                     
-                    -- Esperar hasta que el juego termine
                     repeat
                         task.wait(0.5)
                     until gameEndFrame.Visible == true
                     
-                    -- Esperar para que se carguen todos los datos
                     task.wait(2.5)
                     
-                    warn("[TRACKER] Game ended! Collecting data...")
+                    warn("[TRACKER] Game ended!")
                     
                     if statusLabel then
-                        statusLabel.Text = "📤 Sending webhook..."
+                        statusLabel.Text = "Sending webhook..."
                         statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
                     end
                     
@@ -511,7 +485,7 @@ task.wait(2)
                     _G.isTracking = false
                     
                     if statusLabel then
-                        statusLabel.Text = "⏸️ Waiting for next game..."
+                        statusLabel.Text = "Waiting for next game..."
                         statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
                     end
                 end
@@ -523,20 +497,13 @@ end)
 
 end
 
-– Inicializar el tracker
 local statusLabel = createWebhookGui()
 if statusLabel then
 detectGameStart(statusLabel)
-
-```
-warn("========================================")
-warn("[WEBHOOK TRACKER] Initialized v3 (Error-Safe)")
-warn("[INFO] Ejecutor: " .. (writefile and "✓ Compatible" or "✗ No compatible"))
-warn("[INFO] Webhook: " .. (_G.webhookURL ~= "" and "✓ Cargado" or "⚠️ No configurado"))
-warn("[INFO] GUI loaded successfully!")
-warn("========================================")
-```
-
+warn(”=================================”)
+warn(”[TRACKER] Initialized successfully”)
+warn(”[INFO] Webhook: “ .. (_G.webhookURL ~= “” and “Loaded” or “Not configured”))
+warn(”=================================”)
 else
-warn(”[ERROR] Failed to initialize tracker - GUI creation failed”)
+warn(”[ERROR] Failed to initialize”)
 end
