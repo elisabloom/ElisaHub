@@ -66,43 +66,27 @@ local function formatNumber(num)
     return tostring(math.floor(num))
 end
 
-local function parseFormattedNumber(str)
-    -- Si ya es un número, devolverlo
-    if type(str) == "number" then
-        return tostring(math.floor(str))
+local function getExactValue(valueObject)
+    if not valueObject then
+        return "N/A"
     end
     
-    -- Convertir a string
-    str = tostring(str)
+    local val = valueObject.Value
     
-    -- Si no tiene sufijos, devolver tal cual
-    if not str:match("[KMBkmb]") then
-        local num = tonumber(str)
+    -- Si es un número, devolverlo directamente
+    if type(val) == "number" then
+        return tostring(math.floor(val))
+    end
+    
+    -- Si es un string, intentar convertirlo
+    if type(val) == "string" then
+        local num = tonumber(val)
         if num then
             return tostring(math.floor(num))
         end
-        return str
     end
     
-    -- Parsear números con sufijos (3.5M, 1.2K, etc)
-    local number = str:match("([%d%.]+)")
-    local suffix = str:match("[KMBkmb]")
-    
-    if not number or not suffix then
-        return str
-    end
-    
-    number = tonumber(number)
-    suffix = suffix:upper()
-    
-    local multipliers = {
-        K = 1000,
-        M = 1000000,
-        B = 1000000000
-    }
-    
-    local result = number * (multipliers[suffix] or 1)
-    return tostring(math.floor(result))
+    return tostring(val)
 end
 
 local function createWebhookGui()
