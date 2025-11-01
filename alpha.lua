@@ -141,6 +141,93 @@ local function getGameResult(endFrame)
     return "Unknown"
 end
 
+local function makeStatsGUI()
+    local old = PlayerGui:FindFirstChild("AFKStatsGUI")
+    if old then old:Destroy() end
+    
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "AFKStatsGUI"
+    sg.ResetOnSpawn = false
+    sg.Parent = PlayerGui
+    
+    local fr = Instance.new("Frame")
+    fr.Size = UDim2.new(0, 160, 0, 95)
+    fr.Position = UDim2.new(1, -170, 0, 10)
+    fr.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    fr.BackgroundTransparency = 0.1
+    fr.BorderSizePixel = 0
+    fr.Active = true
+    fr.Draggable = true
+    fr.Parent = sg
+    
+    local corner = Instance.new("UICorner", fr)
+    corner.CornerRadius = UDim.new(0, 10)
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 25)
+    title.BackgroundTransparency = 1
+    title.Text = "AFK Stats"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 12
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Parent = fr
+    
+    local separator = Instance.new("Frame")
+    separator.Size = UDim2.new(1, -20, 0, 1)
+    separator.Position = UDim2.new(0, 10, 0, 27)
+    separator.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    separator.BorderSizePixel = 0
+    separator.Parent = fr
+    
+    local seedsLabel = Instance.new("TextLabel")
+    seedsLabel.Name = "SeedsLabel"
+    seedsLabel.Size = UDim2.new(1, -20, 0, 20)
+    seedsLabel.Position = UDim2.new(0, 10, 0, 33)
+    seedsLabel.BackgroundTransparency = 1
+    seedsLabel.Text = "🌱 Seeds: " .. getSeedsFromScreen()
+    seedsLabel.Font = Enum.Font.Gotham
+    seedsLabel.TextSize = 10
+    seedsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    seedsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    seedsLabel.Parent = fr
+    
+    local candyLabel = Instance.new("TextLabel")
+    candyLabel.Name = "CandyLabel"
+    candyLabel.Size = UDim2.new(1, -20, 0, 20)
+    candyLabel.Position = UDim2.new(0, 10, 0, 53)
+    candyLabel.BackgroundTransparency = 1
+    candyLabel.Text = "🍬 Candy: " .. getCandyCornFromScreen()
+    candyLabel.Font = Enum.Font.Gotham
+    candyLabel.TextSize = 10
+    candyLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    candyLabel.TextXAlignment = Enum.TextXAlignment.Left
+    candyLabel.Parent = fr
+    
+    local matchesLabel = Instance.new("TextLabel")
+    matchesLabel.Name = "MatchesLabel"
+    matchesLabel.Size = UDim2.new(1, -20, 0, 20)
+    matchesLabel.Position = UDim2.new(0, 10, 0, 73)
+    matchesLabel.BackgroundTransparency = 1
+    matchesLabel.Text = "🎮 Matches: " .. getgenv().gamesPlayed
+    matchesLabel.Font = Enum.Font.Gotham
+    matchesLabel.TextSize = 10
+    matchesLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    matchesLabel.TextXAlignment = Enum.TextXAlignment.Left
+    matchesLabel.Parent = fr
+    
+    spawn(function()
+        while wait(2) do
+            pcall(function()
+                if sg and sg.Parent then
+                    seedsLabel.Text = "🌱 Seeds: " .. getSeedsFromScreen()
+                    candyLabel.Text = "🍬 Candy: " .. getCandyCornFromScreen()
+                    matchesLabel.Text = "🎮 Matches: " .. getgenv().gamesPlayed
+                end
+            end)
+        end
+    end)
+end
+
 local function makeGUI()
     local old = PlayerGui:FindFirstChild("WebhookGUI")
     if old then old:Destroy() end
@@ -444,5 +531,6 @@ local function startTracking()
 end
 
 makeGUI()
+makeStatsGUI()
 startTracking()
 print("Webhook Tracker loaded! Games Played: " .. getgenv().gamesPlayed)
