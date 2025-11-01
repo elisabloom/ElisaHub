@@ -136,7 +136,7 @@ local function createWebhookGui()
     local SaveButton = Instance.new("TextButton")
     SaveButton.Size = UDim2.new(0, 60, 0, 25)
     SaveButton.Position = UDim2.new(0, 10, 0, 65)
-    SaveButton.Text = "💾 Save"
+    SaveButton.Text = "Save"
     SaveButton.Font = Enum.Font.GothamBold
     SaveButton.TextSize = 10
     SaveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -150,7 +150,7 @@ local function createWebhookGui()
     local ClearButton = Instance.new("TextButton")
     ClearButton.Size = UDim2.new(0, 60, 0, 25)
     ClearButton.Position = UDim2.new(0, 75, 0, 65)
-    ClearButton.Text = "🗑️ Clear"
+    ClearButton.Text = "Clear"
     ClearButton.Font = Enum.Font.GothamBold
     ClearButton.TextSize = 10
     ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -202,7 +202,7 @@ local function createWebhookGui()
         SaveButton.Text = "✓ Saved!"
         SaveButton.BackgroundColor3 = Color3.fromRGB(30, 100, 30)
         task.wait(1.5)
-        SaveButton.Text = "💾 Save"
+        SaveButton.Text = "Save"
         SaveButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
     end)
     
@@ -212,7 +212,7 @@ local function createWebhookGui()
         WebhookInput.Text = ""
         ClearButton.Text = "✓ Cleared!"
         task.wait(1)
-        ClearButton.Text = "🗑️ Clear"
+        ClearButton.Text = "Clear"
     end)
     
     return StatusLabel
@@ -342,7 +342,7 @@ local function sendWebhook(gameEndFrame, statusLabel)
         
         warn("[WEBHOOK] Message sent! (" .. resultText .. ")")
         if statusLabel then
-            statusLabel.Text = "✅ Webhook sent!\n" .. resultText .. " | " .. runTime
+            statusLabel.Text = "Webhook sent!\n" .. resultText .. " | " .. runTime
             statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         end
     end)
@@ -350,7 +350,7 @@ local function sendWebhook(gameEndFrame, statusLabel)
     if not success then
         warn("[WEBHOOK ERROR] " .. tostring(err))
         if statusLabel then
-            statusLabel.Text = "❌ Webhook failed!"
+            statusLabel.Text = "Webhook failed!"
             statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
         end
     end
@@ -381,31 +381,47 @@ local function detectGameStart(statusLabel)
                             task.wait(0.5)
                         until gameEndFrame.Visible == true
                         
-                        -- Esperar un momento para que todos los datos se carguen
-                        task.wait(1)
+                        task.wait(0.5)
                         
-                        warn("[TRACKER] Game ended! Searching for data...")
-                        
-                        -- Debug: Imprimir todos los elementos del GameEnd
-                        warn("[DEBUG] GameEnd children:")
-                        for _, child in pairs(gameEndFrame:GetDescendants()) do
-                            if child:IsA("TextLabel") then
-                                warn("[DEBUG] " .. child.Name .. ": " .. child.Text)
+                        -- Obtener el resultado del juego
+                        local resultText = "Unknown"
+                        pcall(function()
+                            local resultLabel = gameEndFrame:FindFirstChild("Result")
+                            if resultLabel and resultLabel:IsA("TextLabel") then
+                                local text = resultLabel.Text
+                                if string.find(text:lower(), "defeat") then
+                                    resultText = "Defeat"
+                                elseif string.find(text:lower(), "victory") then
+                                    resultText = "Victory"
+                                else
+                                    resultText = text
+                                end
                             end
-                        end
+                        end)
+                        
+                        -- Obtener el run time del cuadro de juego
+                        local runTime = "00:00"
+                        pcall(function()
+                            local runTimeLabel = gameEndFrame:FindFirstChild("Run time")
+                            if runTimeLabel and runTimeLabel:IsA("TextLabel") then
+                                runTime = runTimeLabel.Text
+                            end
+                        end)
+                        
+                        warn("[TRACKER] Game ended! Result: " .. resultText .. " | Time: " .. runTime)
                         
                         if statusLabel then
-                            statusLabel.Text = "📤 Sending webhook..."
+                            statusLabel.Text = "Sending webhook..."
                             statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
                         end
                         
-                        sendWebhook(gameEndFrame, statusLabel)
+                        sendWebhook(runTime, resultText, statusLabel)
                         
                         task.wait(3)
                         _G.isTracking = false
                         
                         if statusLabel then
-                            statusLabel.Text = "⏸️ Waiting for next game..."
+                            statusLabel.Text = "Waiting for next game..."
                             statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
                         end
                     end
