@@ -13,7 +13,6 @@ getgenv().webhookURL = getgenv().webhookURL or ""
 getgenv().gamesPlayed = getgenv().gamesPlayed or 0
 
 local WEBHOOK_FILE = "webhook_config.txt"
-local GAMES_PLAYED_FILE = "games_played.txt"
 
 local MAP_NAMES = {
     ["map_dojo"] = "Dojo",
@@ -55,41 +54,15 @@ local function saveWebhook(url)
     end
 end
 
-local function loadGamesPlayed()
-    if isfile and readfile then
-        pcall(function()
-            if isfile(GAMES_PLAYED_FILE) then
-                local count = readfile(GAMES_PLAYED_FILE)
-                if count and count ~= "" then
-                    getgenv().gamesPlayed = tonumber(count) or 0
-                end
-            end
-        end)
-    end
-end
-
-local function saveGamesPlayed()
-    if writefile then
-        pcall(function()
-            writefile(GAMES_PLAYED_FILE, tostring(getgenv().gamesPlayed))
-        end)
-    end
-end
-
-local function incrementGamesPlayed()
-    getgenv().gamesPlayed = getgenv().gamesPlayed + 1
-    saveGamesPlayed()
-end
-
 loadWebhook()
-loadGamesPlayed()
 
 local function getCurrentMap()
     local success, result = pcall(function()
         local workspace = game:GetService("Workspace")
         
         for mapId, mapName in pairs(MAP_NAMES) do
-            if workspace:FindFirstChild(mapId) or workspace:FindFirstChild(mapName) then
+            local mapFolder = workspace:FindFirstChild(mapId)
+            if mapFolder then
                 return mapName
             end
         end
@@ -98,12 +71,15 @@ local function getCurrentMap()
         if gui then
             for _, obj in pairs(gui:GetDescendants()) do
                 if obj:IsA("TextLabel") then
-                    local txt = obj.Text:lower()
-                    for mapId, mapName in pairs(MAP_NAMES) do
-                        if txt:find(mapName:lower()) then
-                            return mapName
-                        end
-                    end
+                    local txt = obj.Text
+                    
+                    if txt:find("Graveyard") then return "Graveyard" end
+                    if txt:find("Dojo") then return "Dojo" end
+                    if txt:find("Back Garden") then return "Back Garden" end
+                    if txt:find("Toxic") then return "Toxic" end
+                    if txt:find("Island") then return "Island" end
+                    if txt:find("Jungle") then return "Jungle" end
+                    if txt:find("Farm") then return "Farm" end
                 end
             end
         end
@@ -123,25 +99,12 @@ local function getCurrentDifficulty()
             if obj:IsA("TextLabel") then
                 local txt = obj.Text
                 
-                for difId, difName in pairs(DIFFICULTY_NAMES) do
-                    if txt:find(difName) then
-                        return difName
-                    end
-                end
-                
-                if txt:match("Easy:") or txt:match("Easy ") then
-                    return "Easy"
-                elseif txt:match("Normal:") or txt:match("Normal ") then
-                    return "Normal"
-                elseif txt:match("Hard:") or txt:match("Hard ") then
-                    return "Hard"
-                elseif txt:match("Insane:") or txt:match("Insane ") then
-                    return "Insane"
-                elseif txt:match("Impossible:") or txt:match("Impossible ") then
-                    return "Impossible"
-                elseif txt:match("Apocalypse:") or txt:match("Apocalypse ") then
-                    return "Apocalypse"
-                end
+                if txt:find("Apocalypse") then return "Apocalypse" end
+                if txt:find("Impossible") then return "Impossible" end
+                if txt:find("Insane") then return "Insane" end
+                if txt:find("Hard") then return "Hard" end
+                if txt:find("Normal") then return "Normal" end
+                if txt:find("Easy") then return "Easy" end
             end
         end
         
@@ -395,7 +358,7 @@ local function sendHook(endFrame)
             return
         end
         
-        incrementGamesPlayed()
+        getgenv().gamesPlayed = getgenv().gamesPlayed + 1
         
         local time = os.date("%Y-%m-%d %H:%M:%S")
         
@@ -490,13 +453,31 @@ local function sendHook(endFrame)
         
         local color = result == "Victory" and 3066993 or 15158332
         
-        local userName = "||" .. plr.Name .. "||"
-        local description = string.format("User: %s\nSeed: %s\nCandy: %s\nRun Time: %s\nMap: %s\nDifficulty: %s\nResult: %s\nGames Played: %d", 
-            userName, seeds, candy, runTime, map, difficulty, result, getgenv().gamesPlayed)
+        local userName = plr.Name
+        
+        local description = string.format(
+            "**Garden Tower Defense**\n\n" ..
+            "**User:** ||%s||\n\n" ..
+            "**Total Replays:** %d\n\n" ..
+            "**Player Stats     Rewards**\n" ..
+            "🌱 %s                🌱 +%s\n" ..
+            "🍬 %s                🍬 +%s\n\n" ..
+            "**Match Results**\n" ..
+            "**%s**\n" ..
+            "**%s - Wave XX**\n" ..
+            "**%s - %s**",
+            userName,
+            getgenv().gamesPlayed,
+            "N/A", seeds,
+            "N/A", candy,
+            result,
+            runTime,
+            map, difficulty
+        )
         
         local data = {
             embeds = {{
-                title = "Seed Tracker",
+                title = nil,
                 color = color,
                 description = description,
                 footer = {text = "Noah Hub | " .. time}
