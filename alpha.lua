@@ -378,8 +378,8 @@ local function sendHook(endFrame)
         local description = string.format(
             "**Garden Tower Defense**\n\n" ..
             "**User:** %s\n\n" ..
-            "**Games Played:** %d\n\n" ..
-            "**Player Stats**\n" ..
+            "**Matches Played:** %d\n\n" ..
+            "**Stats**\n" ..
             "🌱 Seeds: %s\n" ..
             "🍬 Candy: %s\n\n" ..
             "**Match Results**\n" ..
