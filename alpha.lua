@@ -11,6 +11,8 @@ local PlayerGui = plr:WaitForChild("PlayerGui")
 getgenv().isTracking = getgenv().isTracking or false
 getgenv().webhookURL = getgenv().webhookURL or ""
 getgenv().gamesPlayed = getgenv().gamesPlayed or 0
+getgenv().lastSeeds = getgenv().lastSeeds or 0
+getgenv().lastCandy = getgenv().lastCandy or 0
 
 local WEBHOOK_FILE = "webhook_config.txt"
 
@@ -22,15 +24,6 @@ local MAP_NAMES = {
     ["map_jungle"] = "Jungle",
     ["map_farm"] = "Farm",
     ["map_graveyard"] = "Graveyard"
-}
-
-local DIFFICULTY_NAMES = {
-    ["dif_easy"] = "Easy",
-    ["dif_normal"] = "Normal",
-    ["dif_hard"] = "Hard",
-    ["dif_insane"] = "Insane",
-    ["dif_impossible"] = "Impossible",
-    ["dif_apocalypse"] = "Apocalypse"
 }
 
 local function loadWebhook()
@@ -56,120 +49,120 @@ end
 
 loadWebhook()
 
-local function getCurrentMap()
-    local success, result = pcall(function()
-        local workspace = game:GetService("Workspace")
-        
-        for mapId, mapName in pairs(MAP_NAMES) do
-            local mapFolder = workspace:FindFirstChild(mapId)
-            if mapFolder then
-                return mapName
-            end
-        end
-        
+local function getCurrentMapAndDifficulty()
+    local success, results = pcall(function()
         local gui = PlayerGui:FindFirstChild("GameGui")
-        if gui then
-            for _, obj in pairs(gui:GetDescendants()) do
-                if obj:IsA("TextLabel") then
-                    local txt = obj.Text
-                    
-                    if txt:find("Graveyard") then return "Graveyard" end
-                    if txt:find("Dojo") then return "Dojo" end
-                    if txt:find("Back Garden") then return "Back Garden" end
-                    if txt:find("Toxic") then return "Toxic" end
-                    if txt:find("Island") then return "Island" end
-                    if txt:find("Jungle") then return "Jungle" end
-                    if txt:find("Farm") then return "Farm" end
-                end
-            end
-        end
+        if not gui then return "Unknown", "Unknown", "XX" end
         
-        return "Unknown"
-    end)
-    
-    if success then return result else return "Unknown" end
-end
-
-local function getCurrentDifficulty()
-    local success, result = pcall(function()
-        local gui = PlayerGui:FindFirstChild("GameGui")
-        if not gui then return "Unknown" end
+        local map = "Unknown"
+        local difficulty = "Unknown"
+        local wave = "XX"
         
         for _, obj in pairs(gui:GetDescendants()) do
             if obj:IsA("TextLabel") then
                 local txt = obj.Text
                 
-                if txt:find("Apocalypse") then return "Apocalypse" end
-                if txt:find("Impossible") then return "Impossible" end
-                if txt:find("Insane") then return "Insane" end
-                if txt:find("Hard") then return "Hard" end
-                if txt:find("Normal") then return "Normal" end
-                if txt:find("Easy") then return "Easy" end
+                if txt:match("(%a+):%s*Wave%s*(%d+)%s*/%s*(%d+)") then
+                    local dif, currentWave, totalWaves = txt:match("(%a+):%s*Wave%s*(%d+)%s*/%s*(%d+)")
+                    if dif then
+                        difficulty = dif
+                        wave = currentWave or "XX"
+                    end
+                end
             end
         end
         
-        return "Unknown"
+        local workspace = game:GetService("Workspace")
+        for mapId, mapName in pairs(MAP_NAMES) do
+            if workspace:FindFirstChild(mapId) then
+                map = mapName
+                break
+            end
+        end
+        
+        if map == "Unknown" then
+            for _, obj in pairs(gui:GetDescendants()) do
+                if obj:IsA("TextLabel") then
+                    local txt = obj.Text
+                    if txt:find("Graveyard") then map = "Graveyard" break end
+                    if txt:find("Dojo") then map = "Dojo" break end
+                    if txt:find("Back Garden") then map = "Back Garden" break end
+                    if txt:find("Toxic") then map = "Toxic" break end
+                    if txt:find("Island") then map = "Island" break end
+                    if txt:find("Jungle") then map = "Jungle" break end
+                    if txt:find("Farm") then map = "Farm" break end
+                end
+            end
+        end
+        
+        return map, difficulty, wave
     end)
     
-    if success then return result else return "Unknown" end
+    if success then 
+        return results 
+    else 
+        return "Unknown", "Unknown", "XX" 
+    end
 end
 
-local function getSeedsFromScreen()
+local function getTotalSeedsFromLeaderstats()
     local success, result = pcall(function()
-        local gui = PlayerGui:FindFirstChild("GameGui")
-        if not gui then return "N/A" end
-        
-        local seedsDisplay = gui:FindFirstChild("SeedsDisplay", true)
-        
-        if seedsDisplay then
-            local titleLabel = seedsDisplay:FindFirstChild("Title")
-            if titleLabel and titleLabel:IsA("TextLabel") then
-                local num = titleLabel.Text:match("(%d+)")
-                if num then
-                    return num
-                end
+        local leaderstats = plr:FindFirstChild("leaderstats")
+        if leaderstats then
+            local seeds = leaderstats:FindFirstChild("Seeds")
+            if seeds and seeds:IsA("StringValue") then
+                local num = seeds.Value:match("(%d+)")
+                if num then return tonumber(num) end
             end
         end
-        
-        local currencyDisplay = gui:FindFirstChild("CurrencyDisplay", true)
-        if currencyDisplay then
-            local seedsDisplay = currencyDisplay:FindFirstChild("SeedsDisplay")
-            if seedsDisplay then
-                local titleLabel = seedsDisplay:FindFirstChild("Title")
-                if titleLabel and titleLabel:IsA("TextLabel") then
-                    local num = titleLabel.Text:match("(%d+)")
-                    if num then return num end
-                end
-            end
-        end
-        
-        return "N/A"
+        return 0
     end)
     
-    if success then return result else return "N/A" end
+    if success then return result else return 0 end
 end
 
-local function getCandyCornFromScreen()
+local function getTotalCandyFromLeaderstats()
     local success, result = pcall(function()
+        local leaderstats = plr:FindFirstChild("leaderstats")
+        if leaderstats then
+            local cash = leaderstats:FindFirstChild("Cash")
+            if cash and cash:IsA("StringValue") then
+                local num = cash.Value:match("(%d+)")
+                if num then return tonumber(num) end
+            end
+        end
+        return 0
+    end)
+    
+    if success then return result else return 0 end
+end
+
+local function getRewardsFromNotification()
+    local success, results = pcall(function()
         local gui = PlayerGui:FindFirstChild("GameGui")
-        if not gui then return "N/A" end
+        if not gui then return 0, 0 end
         
-        local candyDisplay = gui:FindFirstChild("CandyCornsDisplay", true)
+        local seedsReward = 0
+        local candyReward = 0
         
-        if candyDisplay then
-            local titleLabel = candyDisplay:FindFirstChild("Title")
-            if titleLabel and titleLabel:IsA("TextLabel") then
-                local num = titleLabel.Text:match("(%d+)")
-                if num then
-                    return num
+        for _, obj in pairs(gui:GetDescendants()) do
+            if obj:IsA("TextLabel") then
+                local txt = obj.Text
+                
+                if txt:match("You got (%d+) Seeds") then
+                    seedsReward = tonumber(txt:match("You got (%d+) Seeds"))
+                end
+                
+                if txt:match("You got (%d+) Candy") or txt:match("You got (%d+) candy") then
+                    candyReward = tonumber(txt:match("You got (%d+) [Cc]andy"))
                 end
             end
         end
         
-        return "N/A"
+        return seedsReward, candyReward
     end)
     
-    if success then return result else return "N/A" end
+    if success then return results else return 0, 0 end
 end
 
 local function getGameResult(endFrame)
@@ -362,90 +355,41 @@ local function sendHook(endFrame)
         
         local time = os.date("%Y-%m-%d %H:%M:%S")
         
-        local seeds = getSeedsFromScreen()
-        local candy = getCandyCornFromScreen()
+        local currentTotalSeeds = getTotalSeedsFromLeaderstats()
+        local currentTotalCandy = getTotalCandyFromLeaderstats()
+        
+        local seedsReward, candyReward = getRewardsFromNotification()
+        
+        if seedsReward == 0 and getgenv().lastSeeds > 0 then
+            seedsReward = currentTotalSeeds - getgenv().lastSeeds
+        end
+        
+        if candyReward == 0 and getgenv().lastCandy > 0 then
+            candyReward = currentTotalCandy - getgenv().lastCandy
+        end
+        
+        getgenv().lastSeeds = currentTotalSeeds
+        getgenv().lastCandy = currentTotalCandy
+        
         local result = getGameResult(endFrame)
-        local map = getCurrentMap()
-        local difficulty = getCurrentDifficulty()
+        local map, difficulty, wave = getCurrentMapAndDifficulty()
         
         local runTime = "N/A"
         
-        local items = endFrame:FindFirstChild("Items", true)
-        if items then
-            local txtLabel = items:FindFirstChild("txt")
-            if txtLabel and txtLabel:IsA("TextLabel") then
-                local fullText = txtLabel.Text
+        for _, obj in pairs(endFrame:GetDescendants()) do
+            if obj:IsA("TextLabel") then
+                local txt = obj.Text
                 
-                local timeMatch = fullText:match("Run time[:%s]*(%d+:%d+)")
-                if timeMatch then
-                    runTime = timeMatch
-                elseif fullText:lower():find("run time") then
-                    local secsMatch = fullText:match("Run time[:%s]*(%d+)%s*$")
-                    if secsMatch then
-                        local secs = tonumber(secsMatch)
-                        if secs and secs < 3600 then
-                            local mins = math.floor(secs / 60)
-                            local remainingSecs = secs % 60
-                            runTime = string.format("%d:%02d", mins, remainingSecs)
-                        end
-                    end
-                end
-            end
-        end
-        
-        if runTime == "N/A" then
-            for _, obj in pairs(endFrame:GetDescendants()) do
-                if obj:IsA("TextLabel") then
-                    local txt = obj.Text
-                    local txtLower = txt:lower()
-                    
-                    if txtLower:find("run time") then
-                        local timeMatch = txt:match("(%d+:%d+)")
-                        if timeMatch then
-                            runTime = timeMatch
-                            break
-                        end
-                        
-                        local secsMatch = txt:match("run time[:%s]*(%d+)%s*$")
-                        if secsMatch then
-                            local secs = tonumber(secsMatch)
-                            if secs and secs < 3600 then
-                                local mins = math.floor(secs / 60)
-                                local remainingSecs = secs % 60
-                                runTime = string.format("%d:%02d", mins, remainingSecs)
-                                break
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        
-        if runTime == "N/A" then
-            for _, obj in pairs(endFrame:GetDescendants()) do
-                if obj:IsA("TextLabel") then
-                    local objName = obj.Name:lower()
-                    if objName:find("time") or objName == "txt" then
-                        local txt = obj.Text
-                        
-                        local timeMatch = txt:match("(%d+:%d+)")
-                        if timeMatch then
-                            runTime = timeMatch
-                            break
-                        end
-                        
-                        if txt:lower():find("run") or txt:lower():find("time") then
-                            local num = txt:match("(%d+)%s*$")
-                            if num then
-                                local secs = tonumber(num)
-                                if secs and secs > 0 and secs < 600 then
-                                    local mins = math.floor(secs / 60)
-                                    local remainingSecs = secs % 60
-                                    runTime = string.format("%d:%02d", mins, remainingSecs)
-                                    break
-                                end
-                            end
-                        end
+                if txt:match("Run time:%s*(%d+:%d+)") then
+                    runTime = txt:match("Run time:%s*(%d+:%d+)")
+                    break
+                elseif txt:match("Run time:%s*(%d+)") then
+                    local secs = tonumber(txt:match("Run time:%s*(%d+)"))
+                    if secs then
+                        local mins = math.floor(secs / 60)
+                        local remainingSecs = secs % 60
+                        runTime = string.format("%d:%02d", mins, remainingSecs)
+                        break
                     end
                 end
             end
@@ -459,19 +403,19 @@ local function sendHook(endFrame)
             "**Garden Tower Defense**\n\n" ..
             "**User:** ||%s||\n\n" ..
             "**Total Replays:** %d\n\n" ..
-            "**Player Stats     Rewards**\n" ..
-            "🌱 %s                🌱 +%s\n" ..
-            "🍬 %s                🍬 +%s\n\n" ..
+            "**Player Stats          Rewards**\n" ..
+            "🌱 %s                    🌱 +%s\n" ..
+            "🍬 %s                    🍬 +%s\n\n" ..
             "**Match Results**\n" ..
             "**%s**\n" ..
-            "**%s - Wave XX**\n" ..
+            "**%s - Wave %s**\n" ..
             "**%s - %s**",
             userName,
             getgenv().gamesPlayed,
-            "N/A", seeds,
-            "N/A", candy,
+            tostring(currentTotalSeeds), tostring(seedsReward),
+            tostring(currentTotalCandy), tostring(candyReward),
             result,
-            runTime,
+            runTime, wave,
             map, difficulty
         )
         
@@ -493,7 +437,7 @@ local function sendHook(endFrame)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy .. " | Time: " .. runTime .. " | Map: " .. map .. " | Difficulty: " .. difficulty .. " | Games: " .. getgenv().gamesPlayed)
+        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds Reward: +" .. seedsReward .. " | Candy Reward: +" .. candyReward .. " | Time: " .. runTime .. " | Map: " .. map .. " | Difficulty: " .. difficulty .. " | Wave: " .. wave .. " | Games: " .. getgenv().gamesPlayed)
     end)
     
     if not success then
