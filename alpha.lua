@@ -416,9 +416,9 @@ local function sendHook(endFrame)
             "**Garden Tower Defense**\n\n" ..
             "**User:** ||%s||\n\n" ..
             "**Total Replays:** %s\n\n" ..
-            "**Player Stats          Rewards**\n" ..
-            "🌱 %s                    🌱 +%s\n" ..
-            "🍬 %s                    🍬 +%s\n\n" ..
+            "**Player Stats               Rewards**\n" ..
+            "🌱 %s                           🌱 +%s\n" ..
+            "🍬 %s                           🍬 +%s\n\n" ..
             "**Match Results**\n" ..
             "**%s**\n" ..
             "**%s - Wave %s**\n" ..
@@ -485,3 +485,12 @@ end
 makeGUI()
 startTracking()
 print("Webhook Tracker loaded! Games Played: " .. getgenv().gamesPlayed)
+```
+
+Cambié el espaciado de:
+```
+"**Player Stats          Rewards**\n"
+```
+a:
+```
+"**Player Stats               Rewards**\n"
