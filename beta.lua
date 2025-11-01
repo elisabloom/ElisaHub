@@ -126,17 +126,19 @@ local function createWebhookGui()
     WebhookInput.BorderSizePixel = 0
     WebhookInput.TextXAlignment = Enum.TextXAlignment.Left
     WebhookInput.ClearTextOnFocus = false
+    WebhookInput.TextWrapped = false
+    WebhookInput.ClipsDescendants = true
     WebhookInput.Parent = WebhookFrame
     
     local InputCorner = Instance.new("UICorner", WebhookInput)
     InputCorner.CornerRadius = UDim.new(0, 6)
     
     local SaveButton = Instance.new("TextButton")
-    SaveButton.Size = UDim2.new(0.48, 0, 0, 25)
+    SaveButton.Size = UDim2.new(0, 60, 0, 25)
     SaveButton.Position = UDim2.new(0, 10, 0, 65)
     SaveButton.Text = "💾 Save"
     SaveButton.Font = Enum.Font.GothamBold
-    SaveButton.TextSize = 11
+    SaveButton.TextSize = 10
     SaveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     SaveButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
     SaveButton.BorderSizePixel = 0
@@ -146,11 +148,11 @@ local function createWebhookGui()
     SaveCorner.CornerRadius = UDim.new(0, 6)
     
     local ClearButton = Instance.new("TextButton")
-    ClearButton.Size = UDim2.new(0.48, 0, 0, 25)
-    ClearButton.Position = UDim2.new(0.52, 0, 0, 65)
+    ClearButton.Size = UDim2.new(0, 60, 0, 25)
+    ClearButton.Position = UDim2.new(0, 75, 0, 65)
     ClearButton.Text = "🗑️ Clear"
     ClearButton.Font = Enum.Font.GothamBold
-    ClearButton.TextSize = 11
+    ClearButton.TextSize = 10
     ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     ClearButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
     ClearButton.BorderSizePixel = 0
@@ -216,7 +218,7 @@ local function createWebhookGui()
     return StatusLabel
 end
 
-local function sendWebhook(runTime, result, statusLabel)
+local function sendWebhook(gameEndFrame, statusLabel)
     if _G.webhookURL == "" or not _G.webhookURL then
         warn("[WEBHOOK] No webhook URL configured!")
         if statusLabel then
@@ -227,6 +229,8 @@ local function sendWebhook(runTime, result, statusLabel)
     
     local success, err = pcall(function()
         local currentTime = os.date("%Y-%m-%d %H:%M:%S")
+        
+        -- Obtener Seeds y Candy de leaderstats
         local leaderstats = plr:WaitForChild("leaderstats", 5)
         local totalSeeds = "N/A"
         local totalCandy = "N/A"
@@ -236,19 +240,62 @@ local function sendWebhook(runTime, result, statusLabel)
             local candyValue = leaderstats:FindFirstChild("Candy")
             
             if seedsValue then
-                totalSeeds = formatNumber(seedsValue.Value)
+                totalSeeds = tostring(math.floor(seedsValue.Value))
             end
             
             if candyValue then
-                totalCandy = formatNumber(candyValue.Value)
+                totalCandy = tostring(math.floor(candyValue.Value))
             end
         end
         
-        local embedColor = result == "Victory" and 3066993 or 15158332
+        -- Obtener el resultado del juego
+        local resultText = "Unknown"
+        local resultLabel = gameEndFrame:FindFirstChild("Result")
+        if resultLabel and resultLabel:IsA("TextLabel") then
+            local text = resultLabel.Text:lower()
+            if text:find("defeat") then
+                resultText = "Defeat"
+            elseif text:find("victory") then
+                resultText = "Victory"
+            else
+                resultText = resultLabel.Text
+            end
+        end
+        
+        -- Buscar el Run Time en el GameEnd frame
+        local runTime = "00:00"
+        
+        -- Buscar en todos los descendientes del GameEnd frame
+        for _, child in pairs(gameEndFrame:GetDescendants()) do
+            if child:IsA("TextLabel") then
+                local text = child.Text
+                -- Buscar formato de tiempo XX:XX
+                if text:match("%d+:%d+") and child.Name:lower():find("time") then
+                    runTime = text:match("%d+:%d+")
+                    break
+                elseif text:match("Run time: (%d+:%d+)") then
+                    runTime = text:match("Run time: (%d+:%d+)")
+                    break
+                end
+            end
+        end
+        
+        -- Si no se encontró, buscar específicamente "Run time" label
+        if runTime == "00:00" then
+            local runTimeLabel = gameEndFrame:FindFirstChild("Run time", true)
+            if runTimeLabel and runTimeLabel:IsA("TextLabel") then
+                local timeMatch = runTimeLabel.Text:match("%d+:%d+")
+                if timeMatch then
+                    runTime = timeMatch
+                end
+            end
+        end
+        
+        local embedColor = resultText == "Victory" and 3066993 or 15158332
         
         local data = {
             ["embeds"] = {{
-                ["title"] = "🎮 Seed Tracker",
+                ["title"] = "Tracker",
                 ["color"] = embedColor,
                 ["fields"] = {
                     {
@@ -257,23 +304,23 @@ local function sendWebhook(runTime, result, statusLabel)
                         ["inline"] = false
                     },
                     {
-                        ["name"] = "💎 Seeds:",
+                        ["name"] = "Seeds:",
                         ["value"] = totalSeeds,
                         ["inline"] = true
                     },
                     {
-                        ["name"] = "🍬 Candy:",
+                        ["name"] = "Candy:",
                         ["value"] = totalCandy,
                         ["inline"] = true
                     },
                     {
-                        ["name"] = "⏱️ Run Time:",
+                        ["name"] = "Run Time:",
                         ["value"] = runTime,
                         ["inline"] = true
                     },
                     {
-                        ["name"] = "📊 Result:",
-                        ["value"] = result,
+                        ["name"] = "Result:",
+                        ["value"] = resultText,
                         ["inline"] = true
                     }
                 },
@@ -293,9 +340,9 @@ local function sendWebhook(runTime, result, statusLabel)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Message sent! (" .. result .. ")")
+        warn("[WEBHOOK] Message sent! (" .. resultText .. ")")
         if statusLabel then
-            statusLabel.Text = "✅ Webhook sent!\n" .. result .. " | " .. runTime
+            statusLabel.Text = "✅ Webhook sent!\n" .. resultText .. " | " .. runTime
             statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         end
     end)
@@ -325,7 +372,7 @@ local function detectGameStart(statusLabel)
                         _G.gameStartTime = tick()
                         warn("[TRACKER] Game started!")
                         if statusLabel then
-                            statusLabel.Text = "🎮 Game in progress..."
+                            statusLabel.Text = "Game in progress..."
                             statusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
                         end
                         
@@ -334,41 +381,25 @@ local function detectGameStart(statusLabel)
                             task.wait(0.5)
                         until gameEndFrame.Visible == true
                         
-                        task.wait(0.5)
+                        -- Esperar un momento para que todos los datos se carguen
+                        task.wait(1)
                         
-                        -- Obtener el resultado del juego
-                        local resultText = "Unknown"
-                        pcall(function()
-                            local resultLabel = gameEndFrame:FindFirstChild("Result")
-                            if resultLabel and resultLabel:IsA("TextLabel") then
-                                local text = resultLabel.Text
-                                if string.find(text:lower(), "defeat") then
-                                    resultText = "Defeat"
-                                elseif string.find(text:lower(), "victory") then
-                                    resultText = "Victory"
-                                else
-                                    resultText = text
-                                end
+                        warn("[TRACKER] Game ended! Searching for data...")
+                        
+                        -- Debug: Imprimir todos los elementos del GameEnd
+                        warn("[DEBUG] GameEnd children:")
+                        for _, child in pairs(gameEndFrame:GetDescendants()) do
+                            if child:IsA("TextLabel") then
+                                warn("[DEBUG] " .. child.Name .. ": " .. child.Text)
                             end
-                        end)
-                        
-                        -- Obtener el run time del cuadro de juego
-                        local runTime = "00:00"
-                        pcall(function()
-                            local runTimeLabel = gameEndFrame:FindFirstChild("Run time")
-                            if runTimeLabel and runTimeLabel:IsA("TextLabel") then
-                                runTime = runTimeLabel.Text
-                            end
-                        end)
-                        
-                        warn("[TRACKER] Game ended! Result: " .. resultText .. " | Time: " .. runTime)
+                        end
                         
                         if statusLabel then
                             statusLabel.Text = "📤 Sending webhook..."
                             statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
                         end
                         
-                        sendWebhook(runTime, resultText, statusLabel)
+                        sendWebhook(gameEndFrame, statusLabel)
                         
                         task.wait(3)
                         _G.isTracking = false
