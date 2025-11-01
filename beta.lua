@@ -95,7 +95,6 @@ local function getCandyCornFromScreen()
 end
 
 local function getGameResult(endFrame)
-    -- Método 1: Buscar textos descriptivos específicos (MÁS CONFIABLE)
     for _, obj in pairs(endFrame:GetDescendants()) do
         if obj:IsA("TextLabel") then
             local txt = obj.Text
@@ -113,7 +112,6 @@ local function getGameResult(endFrame)
         end
     end
     
-    -- Método 2: Buscar Title con mayor visibilidad
     local titles = {}
     for _, obj in pairs(endFrame:GetDescendants()) do
         if obj:IsA("TextLabel") and obj.Name == "Title" then
@@ -295,11 +293,45 @@ local function sendHook(endFrame)
                 local txt = obj.Text
                 local txtLower = txt:lower()
                 
-                if txtLower:find("run time") or obj.Name:lower():find("runtime") then
-                    local t = txt:match("(%d+:%d+)")
-                    if t then 
-                        runTime = t 
+                if txtLower:find("run time") then
+                    local timeMatch = txt:match("(%d+:%d+)")
+                    if timeMatch then
+                        runTime = timeMatch
                         break
+                    end
+                    
+                    local secsMatch = txt:match("run time[:%s]+(%d+)%s*$")
+                    if secsMatch then
+                        local secs = tonumber(secsMatch)
+                        if secs then
+                            local mins = math.floor(secs / 60)
+                            local remainingSecs = secs % 60
+                            runTime = string.format("%d:%02d", mins, remainingSecs)
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        
+        if runTime == "N/A" then
+            local items = endFrame:FindFirstChild("Items", true)
+            if items then
+                local txtLabel = items:FindFirstChild("txt")
+                if txtLabel and txtLabel:IsA("TextLabel") then
+                    local timeMatch = txtLabel.Text:match("(%d+:%d+)")
+                    if timeMatch then
+                        runTime = timeMatch
+                    else
+                        local secsMatch = txtLabel.Text:match("(%d+)%s*$")
+                        if secsMatch then
+                            local secs = tonumber(secsMatch)
+                            if secs and secs < 3600 then
+                                local mins = math.floor(secs / 60)
+                                local remainingSecs = secs % 60
+                                runTime = string.format("%d:%02d", mins, remainingSecs)
+                            end
+                        end
                     end
                 end
             end
@@ -311,7 +343,7 @@ local function sendHook(endFrame)
             embeds = {{
                 title = "Seed Tracker",
                 color = color,
-                description = "User: " .. plr.Name .. "\nSeed: " .. seeds .. "\nCandy: " .. candy .. "\nRun Time: " .. runTime .. "\nResult: " .. result,
+                description = "User: ||" .. plr.Name .. "||\nSeed: " .. seeds .. "\nCandy: " .. candy .. "\nRun Time: " .. runTime .. "\nResult: " .. result,
                 footer = {text = "Noah Hub | " .. time}
             }}
         }
@@ -325,7 +357,7 @@ local function sendHook(endFrame)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy)
+        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy .. " | Time: " .. runTime)
     end)
     
     if not success then
