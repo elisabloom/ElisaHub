@@ -376,7 +376,7 @@ local function sendHook(endFrame)
         
         local data = {
             embeds = {{
-                title = "Seed Tracker",
+                title = "Tracker",
                 color = color,
                 description = description,
                 footer = {text = "Noah Hub | " .. time}
