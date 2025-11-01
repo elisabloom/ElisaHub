@@ -1,8 +1,7 @@
-task.wait(1)
+-- Webhook Tracker
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local plr = Players.LocalPlayer
-task.wait(1)
 
 getgenv().isTracking = getgenv().isTracking or false
 getgenv().webhookURL = getgenv().webhookURL or ""
@@ -203,7 +202,7 @@ local function makeGUI()
         getgenv().webhookURL = input.Text
         saveWebhook(input.Text)
         saveBtn.Text = "Saved!"
-        task.wait(1)
+        wait(1)
         saveBtn.Text = "Save"
     end)
     
@@ -212,7 +211,7 @@ local function makeGUI()
         saveWebhook("")
         input.Text = ""
         clearBtn.Text = "Cleared!"
-        task.wait(1)
+        wait(1)
         clearBtn.Text = "Clear"
     end)
     
@@ -308,7 +307,7 @@ end
 
 local function startTracking(statusLbl)
     spawn(function()
-        while task.wait(2) do
+        while wait(2) do
             pcall(function()
                 local gui = plr.PlayerGui:FindFirstChild("GameGui")
                 if gui and not getgenv().isTracking then
@@ -322,13 +321,13 @@ local function startTracking(statusLbl)
                             statusLbl.TextColor3 = Color3.fromRGB(100, 200, 255)
                         end
                         
-                        repeat task.wait(0.5) until endFrame.Visible
-                        task.wait(2.5)
+                        repeat wait(0.5) until endFrame.Visible
+                        wait(2.5)
                         
                         if statusLbl then statusLbl.Text = "Sending..." end
                         sendHook(endFrame, statusLbl)
                         
-                        task.wait(3)
+                        wait(3)
                         getgenv().isTracking = false
                         if statusLbl then
                             statusLbl.Text = "Waiting..."
