@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local plr = Players.LocalPlayer
 repeat wait() until plr
@@ -291,20 +290,82 @@ local function sendHook(endFrame)
         
         local runTime = "N/A"
         
-        for _, obj in pairs(endFrame:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
+        local items = endFrame:FindFirstChild("Items", true)
+        if items then
+            local txtLabel = items:FindFirstChild("txt")
+            if txtLabel and txtLabel:IsA("TextLabel") then
+                local fullText = txtLabel.Text
                 
-                if txt:match("Run time:%s*(%d+:%d+)") then
-                    runTime = txt:match("Run time:%s*(%d+:%d+)")
-                    break
-                elseif txt:match("Run time:%s*(%d+)") then
-                    local secs = tonumber(txt:match("Run time:%s*(%d+)"))
-                    if secs then
-                        local mins = math.floor(secs / 60)
-                        local remainingSecs = secs % 60
-                        runTime = string.format("%d:%02d", mins, remainingSecs)
-                        break
+                local timeMatch = fullText:match("Run time[:%s]*(%d+:%d+)")
+                if timeMatch then
+                    runTime = timeMatch
+                elseif fullText:lower():find("run time") then
+                    local secsMatch = fullText:match("Run time[:%s]*(%d+)%s*$")
+                    if secsMatch then
+                        local secs = tonumber(secsMatch)
+                        if secs and secs < 3600 then
+                            local mins = math.floor(secs / 60)
+                            local remainingSecs = secs % 60
+                            runTime = string.format("%d:%02d", mins, remainingSecs)
+                        end
+                    end
+                end
+            end
+        end
+        
+        if runTime == "N/A" then
+            for _, obj in pairs(endFrame:GetDescendants()) do
+                if obj:IsA("TextLabel") then
+                    local txt = obj.Text
+                    local txtLower = txt:lower()
+                    
+                    if txtLower:find("run time") then
+                        local timeMatch = txt:match("(%d+:%d+)")
+                        if timeMatch then
+                            runTime = timeMatch
+                            break
+                        end
+                        
+                        local secsMatch = txt:match("run time[:%s]*(%d+)%s*$")
+                        if secsMatch then
+                            local secs = tonumber(secsMatch)
+                            if secs and secs < 3600 then
+                                local mins = math.floor(secs / 60)
+                                local remainingSecs = secs % 60
+                                runTime = string.format("%d:%02d", mins, remainingSecs)
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+        if runTime == "N/A" then
+            for _, obj in pairs(endFrame:GetDescendants()) do
+                if obj:IsA("TextLabel") then
+                    local objName = obj.Name:lower()
+                    if objName:find("time") or objName == "txt" then
+                        local txt = obj.Text
+                        
+                        local timeMatch = txt:match("(%d+:%d+)")
+                        if timeMatch then
+                            runTime = timeMatch
+                            break
+                        end
+                        
+                        if txt:lower():find("run") or txt:lower():find("time") then
+                            local num = txt:match("(%d+)%s*$")
+                            if num then
+                                local secs = tonumber(num)
+                                if secs and secs > 0 and secs < 600 then
+                                    local mins = math.floor(secs / 60)
+                                    local remainingSecs = secs % 60
+                                    runTime = string.format("%d:%02d", mins, remainingSecs)
+                                    break
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -312,11 +373,11 @@ local function sendHook(endFrame)
         
         local color = result == "Victory" and 3066993 or 15158332
         
-        local userName = tostring(plr.Name)
+        local userName = "||" .. plr.Name .. "||"
         
         local description = string.format(
             "**Garden Tower Defense**\n\n" ..
-            "**User:** ||%s||\n\n" ..
+            "**User:** %s\n\n" ..
             "**Games Played:** %d\n\n" ..
             "**Player Stats**\n" ..
             "🌱 Seeds: %s\n" ..
@@ -385,27 +446,3 @@ end
 makeGUI()
 startTracking()
 print("Webhook Tracker loaded! Games Played: " .. getgenv().gamesPlayed)
-```
-
-## Cambios realizados:
-
-✅ **Eliminados Rewards** - Solo Player Stats
-✅ **"Total Replays"** → **"Games Played"**
-✅ **Match Results simplificado** - Solo resultado y tiempo
-✅ **Sin mapa, wave ni dificultad** por ahora
-
-El webhook ahora mostrará:
-```
-Garden Tower Defense
-
-User: ||nombre||
-
-Games Played: 1
-
-Player Stats
-🌱 Seeds: 44
-🍬 Candy: 1
-
-Match Results
-Victory
-Run Time: 0:26
