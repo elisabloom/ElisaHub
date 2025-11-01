@@ -1,312 +1,426 @@
-wait(1)
+--// Discord Webhook Test - Real Game Data Tracker (FIXED)
+
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
 local plr = Players.LocalPlayer
-wait(1)
+local HttpService = game:GetService("HttpService")
 
-getgenv().isTracking = getgenv().isTracking or false
-getgenv().webhookURL = getgenv().webhookURL or ""
-getgenv().isMinimized = getgenv().isMinimized or false
+-- Variables globales
+_G.isTracking = false
+_G.gameStartTime = nil
+_G.isMinimized = false
+_G.webhookURL = ""
 
-local WEBHOOK_FILE = "webhook_config.txt"
+-- Nombre del archivo donde se guardará el webhook
+local WEBHOOK_FILE = "webhook_tracker_config.txt"
 
+-- Cargar el webhook guardado del archivo
 local function loadWebhook()
-    if isfile and readfile then
-        pcall(function()
+    if readfile and isfile then
+        local success, result = pcall(function()
             if isfile(WEBHOOK_FILE) then
-                local url = readfile(WEBHOOK_FILE)
-                if url and url ~= "" then
-                    getgenv().webhookURL = url
+                local savedURL = readfile(WEBHOOK_FILE)
+                if savedURL and savedURL ~= "" then
+                    _G.webhookURL = savedURL
+                    warn("[WEBHOOK] ✓ Webhook cargado desde archivo")
+                    return true
                 end
             end
+            return false
         end)
+        
+        if not success then
+            warn("[WEBHOOK] ⚠️ Error al cargar webhook")
+        end
+    else
+        warn("[WEBHOOK] ⚠️ writefile/readfile no disponible en este ejecutor")
     end
 end
 
+-- Guardar el webhook en archivo permanente
 local function saveWebhook(url)
     if writefile then
-        pcall(function()
+        local success = pcall(function()
             writefile(WEBHOOK_FILE, url)
         end)
+        
+        if success then
+            warn("[WEBHOOK] ✓ Webhook guardado permanentemente")
+            return true
+        else
+            warn("[WEBHOOK] ❌ Error al guardar webhook")
+            return false
+        end
+    else
+        warn("[WEBHOOK] ⚠️ writefile no disponible")
+        return false
     end
 end
 
+-- Cargar el webhook al iniciar
 loadWebhook()
 
-local function getValueSafe(obj)
-    if not obj then return "N/A" end
-    local v = obj.Value
-    if type(v) == "number" then return tostring(v) end
-    if type(v) == "string" then return v end
-    return tostring(v)
+-- Función mejorada para obtener valores (maneja strings y números)
+local function getValueSafe(valueObject)
+    if not valueObject then
+        return "N/A"
+    end
+    
+    local val = valueObject.Value
+    
+    -- Si ya es un número, convertirlo a string directamente
+    if type(val) == "number" then
+        return tostring(val)
+    end
+    
+    -- Si es un string, devolverlo tal cual (puede ser "3.43M", "1.2K", etc.)
+    if type(val) == "string" then
+        return val
+    end
+    
+    -- Fallback
+    return tostring(val)
 end
 
-local function getCandyFromGUI()
-    local success, result = pcall(function()
-        local gui = plr.PlayerGui:FindFirstChild("GameGui")
-        if not gui then return "N/A" end
+local function createWebhookGui()
+    local existingGui = plr.PlayerGui:FindFirstChild("WebhookTest")
+    if existingGui then existingGui:Destroy() end
+    
+    local WebhookGui = Instance.new("ScreenGui")
+    WebhookGui.Name = "WebhookTest"
+    WebhookGui.ResetOnSpawn = false
+    WebhookGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    WebhookGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local WebhookFrame = Instance.new("Frame")
+    WebhookFrame.Name = "MainFrame"
+    WebhookFrame.Size = UDim2.new(0, 210, 0, 132)
+    WebhookFrame.Position = UDim2.new(1, -220, 1, -142)
+    WebhookFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    WebhookFrame.BackgroundTransparency = 0.1
+    WebhookFrame.BorderSizePixel = 0
+    WebhookFrame.Active = true
+    WebhookFrame.Draggable = true
+    WebhookFrame.Parent = WebhookGui
+    
+    local UICorner = Instance.new("UICorner", WebhookFrame)
+    UICorner.CornerRadius = UDim.new(0, 10)
+    
+    local WebhookTitle = Instance.new("TextLabel")
+    WebhookTitle.Size = UDim2.new(1, -30, 0, 25)
+    WebhookTitle.BackgroundTransparency = 1
+    WebhookTitle.Text = "Webhook Tracker"
+    WebhookTitle.Font = Enum.Font.GothamBold
+    WebhookTitle.TextSize = 12
+    WebhookTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    WebhookTitle.Parent = WebhookFrame
+    
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
+    MinimizeButton.Position = UDim2.new(1, -25, 0, 0)
+    MinimizeButton.Text = "−"
+    MinimizeButton.Font = Enum.Font.GothamBold
+    MinimizeButton.TextSize = 18
+    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MinimizeButton.BorderSizePixel = 0
+    MinimizeButton.Parent = WebhookFrame
+    
+    local MinimizeCorner = Instance.new("UICorner", MinimizeButton)
+    MinimizeCorner.CornerRadius = UDim.new(0, 6)
+    
+    local WebhookInput = Instance.new("TextBox")
+    WebhookInput.Name = "WebhookInput"
+    WebhookInput.Size = UDim2.new(1, -20, 0, 28)
+    WebhookInput.Position = UDim2.new(0, 10, 0, 30)
+    WebhookInput.PlaceholderText = "Paste Discord Webhook URL..."
+    WebhookInput.Text = _G.webhookURL
+    WebhookInput.Font = Enum.Font.Gotham
+    WebhookInput.TextSize = 9
+    WebhookInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    WebhookInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    WebhookInput.BorderSizePixel = 0
+    WebhookInput.TextXAlignment = Enum.TextXAlignment.Left
+    WebhookInput.ClearTextOnFocus = false
+    WebhookInput.TextWrapped = false
+    WebhookInput.ClipsDescendants = true
+    WebhookInput.Parent = WebhookFrame
+    
+    local InputCorner = Instance.new("UICorner", WebhookInput)
+    InputCorner.CornerRadius = UDim.new(0, 6)
+    
+    local SaveButton = Instance.new("TextButton")
+    SaveButton.Size = UDim2.new(0, 60, 0, 25)
+    SaveButton.Position = UDim2.new(0, 10, 0, 65)
+    SaveButton.Text = "💾 Save"
+    SaveButton.Font = Enum.Font.GothamBold
+    SaveButton.TextSize = 10
+    SaveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SaveButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    SaveButton.BorderSizePixel = 0
+    SaveButton.Parent = WebhookFrame
+    
+    local SaveCorner = Instance.new("UICorner", SaveButton)
+    SaveCorner.CornerRadius = UDim.new(0, 6)
+    
+    local ClearButton = Instance.new("TextButton")
+    ClearButton.Size = UDim2.new(0, 60, 0, 25)
+    ClearButton.Position = UDim2.new(0, 75, 0, 65)
+    ClearButton.Text = "🗑️ Clear"
+    ClearButton.Font = Enum.Font.GothamBold
+    ClearButton.TextSize = 10
+    ClearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ClearButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+    ClearButton.BorderSizePixel = 0
+    ClearButton.Parent = WebhookFrame
+    
+    local ClearCorner = Instance.new("UICorner", ClearButton)
+    ClearCorner.CornerRadius = UDim.new(0, 6)
+    
+    local StatusLabel = Instance.new("TextLabel")
+    StatusLabel.Name = "StatusLabel"
+    StatusLabel.Size = UDim2.new(1, -20, 0, 35)
+    StatusLabel.Position = UDim2.new(0, 10, 0, 95)
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Text = "⏸️ Waiting for game..."
+    StatusLabel.Font = Enum.Font.Gotham
+    StatusLabel.TextSize = 10
+    StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    StatusLabel.TextYAlignment = Enum.TextYAlignment.Top
+    StatusLabel.TextWrapped = true
+    StatusLabel.Parent = WebhookFrame
+    
+    -- Funcionalidad de minimizar
+    MinimizeButton.MouseButton1Click:Connect(function()
+        _G.isMinimized = not _G.isMinimized
         
-        for _, obj in pairs(gui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
-                if txt:find("candy") or txt:find("Candy") or txt:find("CANDY") then
-                    local num = txt:match("%d+")
-                    if num then return num end
-                end
-                
-                if obj.Name:lower():find("candy") then
-                    local num = txt:match("%d+")
-                    if num then return num end
-                end
+        if _G.isMinimized then
+            WebhookFrame:TweenSize(UDim2.new(0, 210, 0, 25), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+            MinimizeButton.Text = "+"
+            WebhookInput.Visible = false
+            SaveButton.Visible = false
+            ClearButton.Visible = false
+            StatusLabel.Visible = false
+        else
+            WebhookFrame:TweenSize(UDim2.new(0, 210, 0, 132), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+            MinimizeButton.Text = "−"
+            WebhookInput.Visible = true
+            SaveButton.Visible = true
+            ClearButton.Visible = true
+            StatusLabel.Visible = true
+        end
+    end)
+    
+    SaveButton.MouseButton1Click:Connect(function()
+        _G.webhookURL = WebhookInput.Text
+        saveWebhook(_G.webhookURL)
+        SaveButton.Text = "✓ Saved!"
+        SaveButton.BackgroundColor3 = Color3.fromRGB(30, 100, 30)
+        task.wait(1.5)
+        SaveButton.Text = "💾 Save"
+        SaveButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    end)
+    
+    ClearButton.MouseButton1Click:Connect(function()
+        _G.webhookURL = ""
+        saveWebhook("")
+        WebhookInput.Text = ""
+        ClearButton.Text = "✓ Cleared!"
+        task.wait(1)
+        ClearButton.Text = "🗑️ Clear"
+    end)
+    
+    return StatusLabel
+end
+
+local function sendWebhook(gameEndFrame, statusLabel)
+    if _G.webhookURL == "" or not _G.webhookURL then
+        warn("[WEBHOOK] No webhook URL configured!")
+        if statusLabel then
+            statusLabel.Text = "⚠️ No webhook URL set!"
+        end
+        return
+    end
+    
+    local success, err = pcall(function()
+        local currentTime = os.date("%Y-%m-%d %H:%M:%S")
+        
+        -- Obtener Seeds y Candy de leaderstats (SIN math.floor)
+        local leaderstats = plr:WaitForChild("leaderstats", 5)
+        local totalSeeds = "N/A"
+        local totalCandy = "N/A"
+        
+        if leaderstats then
+            local seedsValue = leaderstats:FindFirstChild("Seeds")
+            local candyValue = leaderstats:FindFirstChild("Candy")
+            
+            if seedsValue then
+                totalSeeds = getValueSafe(seedsValue)
+                warn("[DEBUG] Seeds Value: " .. totalSeeds)
+            end
+            
+            if candyValue then
+                totalCandy = getValueSafe(candyValue)
+                warn("[DEBUG] Candy Value: " .. totalCandy)
             end
         end
-        return "N/A"
-    end)
-    
-    if success then return result else return "N/A" end
-end
-
-local function makeGUI()
-    local old = plr.PlayerGui:FindFirstChild("WebhookGUI")
-    if old then old:Destroy() end
-    
-    local sg = Instance.new("ScreenGui")
-    sg.Name = "WebhookGUI"
-    sg.ResetOnSpawn = false
-    sg.Parent = plr.PlayerGui
-    
-    local fr = Instance.new("Frame")
-    fr.Size = UDim2.new(0, 210, 0, 132)
-    fr.Position = UDim2.new(1, -220, 1, -142)
-    fr.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    fr.BackgroundTransparency = 0.1
-    fr.BorderSizePixel = 0
-    fr.Active = true
-    fr.Draggable = true
-    fr.Parent = sg
-    
-    local corner = Instance.new("UICorner", fr)
-    corner.CornerRadius = UDim.new(0, 10)
-    
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -30, 0, 25)
-    title.BackgroundTransparency = 1
-    title.Text = "Webhook Tracker"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 12
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.Parent = fr
-    
-    local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.new(0, 25, 0, 25)
-    minBtn.Position = UDim2.new(1, -25, 0, 0)
-    minBtn.Text = "-"
-    minBtn.Font = Enum.Font.GothamBold
-    minBtn.TextSize = 18
-    minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    minBtn.BorderSizePixel = 0
-    minBtn.Parent = fr
-    
-    Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
-    
-    local input = Instance.new("TextBox")
-    input.Name = "Input"
-    input.Size = UDim2.new(1, -20, 0, 28)
-    input.Position = UDim2.new(0, 10, 0, 30)
-    input.PlaceholderText = "Webhook URL..."
-    input.Text = getgenv().webhookURL
-    input.Font = Enum.Font.Gotham
-    input.TextSize = 9
-    input.TextColor3 = Color3.fromRGB(255, 255, 255)
-    input.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    input.BorderSizePixel = 0
-    input.TextXAlignment = Enum.TextXAlignment.Left
-    input.ClearTextOnFocus = false
-    input.Parent = fr
-    
-    Instance.new("UICorner", input).CornerRadius = UDim.new(0, 6)
-    
-    local saveBtn = Instance.new("TextButton")
-    saveBtn.Size = UDim2.new(0, 60, 0, 25)
-    saveBtn.Position = UDim2.new(0, 10, 0, 65)
-    saveBtn.Text = "Save"
-    saveBtn.Font = Enum.Font.GothamBold
-    saveBtn.TextSize = 10
-    saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    saveBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-    saveBtn.BorderSizePixel = 0
-    saveBtn.Parent = fr
-    
-    Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 6)
-    
-    local clearBtn = Instance.new("TextButton")
-    clearBtn.Size = UDim2.new(0, 60, 0, 25)
-    clearBtn.Position = UDim2.new(0, 75, 0, 65)
-    clearBtn.Text = "Clear"
-    clearBtn.Font = Enum.Font.GothamBold
-    clearBtn.TextSize = 10
-    clearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    clearBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-    clearBtn.BorderSizePixel = 0
-    clearBtn.Parent = fr
-    
-    Instance.new("UICorner", clearBtn).CornerRadius = UDim.new(0, 6)
-    
-    local status = Instance.new("TextLabel")
-    status.Name = "Status"
-    status.Size = UDim2.new(1, -20, 0, 35)
-    status.Position = UDim2.new(0, 10, 0, 95)
-    status.BackgroundTransparency = 1
-    status.Text = "Waiting..."
-    status.Font = Enum.Font.Gotham
-    status.TextSize = 10
-    status.TextColor3 = Color3.fromRGB(255, 200, 100)
-    status.TextXAlignment = Enum.TextXAlignment.Left
-    status.TextYAlignment = Enum.TextYAlignment.Top
-    status.TextWrapped = true
-    status.Parent = fr
-    
-    minBtn.MouseButton1Click:Connect(function()
-        getgenv().isMinimized = not getgenv().isMinimized
-        if getgenv().isMinimized then
-            fr:TweenSize(UDim2.new(0, 210, 0, 25), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
-            minBtn.Text = "+"
-            input.Visible = false
-            saveBtn.Visible = false
-            clearBtn.Visible = false
-            status.Visible = false
-        else
-            fr:TweenSize(UDim2.new(0, 210, 0, 132), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
-            minBtn.Text = "-"
-            input.Visible = true
-            saveBtn.Visible = true
-            clearBtn.Visible = true
-            status.Visible = true
-        end
-    end)
-    
-    saveBtn.MouseButton1Click:Connect(function()
-        getgenv().webhookURL = input.Text
-        saveWebhook(input.Text)
-        saveBtn.Text = "Saved!"
-        wait(1)
-        saveBtn.Text = "Save"
-    end)
-    
-    clearBtn.MouseButton1Click:Connect(function()
-        getgenv().webhookURL = ""
-        saveWebhook("")
-        input.Text = ""
-        clearBtn.Text = "Cleared!"
-        wait(1)
-        clearBtn.Text = "Clear"
-    end)
-    
-    return status
-end
-
-local function sendHook(endFrame, statusLbl)
-    pcall(function()
-        if getgenv().webhookURL == "" then
-            if statusLbl then statusLbl.Text = "No URL!" end
-            return
+        
+        -- Obtener el resultado del juego
+        local resultText = "Unknown"
+        local resultLabel = gameEndFrame:FindFirstChild("Result")
+        if resultLabel and resultLabel:IsA("TextLabel") then
+            local text = resultLabel.Text:lower()
+            if text:find("defeat") then
+                resultText = "Defeat"
+            elseif text:find("victory") then
+                resultText = "Victory"
+            else
+                resultText = resultLabel.Text
+            end
         end
         
-        local time = os.date("%Y-%m-%d %H:%M:%S")
-        local seeds = "N/A"
-        local candy = "N/A"
-        local result = "Unknown"
+        -- Buscar el Run Time
         local runTime = "00:00"
         
-        local stats = plr:FindFirstChild("leaderstats")
-        if stats then
-            local s = stats:FindFirstChild("Seeds")
-            if s then seeds = getValueSafe(s) end
-        end
-        
-        candy = getCandyFromGUI()
-        
-        for _, obj in pairs(endFrame:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text:lower()
-                if txt:find("victory") or txt:find("win") then
-                    result = "Victory"
-                elseif txt:find("defeat") or txt:find("lost") then
-                    result = "Defeat"
+        for _, child in pairs(gameEndFrame:GetDescendants()) do
+            if child:IsA("TextLabel") then
+                local text = child.Text
+                if text:match("%d+:%d+") then
+                    local potentialTime = text:match("%d+:%d+")
+                    if child.Name:lower():find("time") or text:lower():find("run") then
+                        runTime = potentialTime
+                        break
+                    end
                 end
-                
-                local t = obj.Text:match("(%d+:%d+)")
-                if t then runTime = t end
             end
         end
         
-        local color = result == "Victory" and 3066993 or 15158332
+        local embedColor = resultText == "Victory" and 3066993 or 15158332
         
         local data = {
-            embeds = {{
-                title = "Seed Tracker",
-                color = color,
-                fields = {
-                    {name = "User", value = plr.Name, inline = false},
-                    {name = "Seeds", value = seeds, inline = true},
-                    {name = "Candy", value = candy, inline = true},
-                    {name = "Time", value = runTime, inline = true},
-                    {name = "Result", value = result, inline = true}
+            ["embeds"] = {{
+                ["title"] = "🎮 Seed Tracker",
+                ["color"] = embedColor,
+                ["fields"] = {
+                    {
+                        ["name"] = "User:",
+                        ["value"] = "||" .. plr.Name .. "||",
+                        ["inline"] = false
+                    },
+                    {
+                        ["name"] = "💎 Seeds:",
+                        ["value"] = totalSeeds,
+                        ["inline"] = true
+                    },
+                    {
+                        ["name"] = "🍬 Candy:",
+                        ["value"] = totalCandy,
+                        ["inline"] = true
+                    },
+                    {
+                        ["name"] = "⏱️ Run Time:",
+                        ["value"] = runTime,
+                        ["inline"] = true
+                    },
+                    {
+                        ["name"] = "📊 Result:",
+                        ["value"] = resultText,
+                        ["inline"] = true
+                    }
                 },
-                footer = {text = "Noah Hub | " .. time}
+                ["footer"] = {
+                    ["text"] = "Noah Hub | " .. currentTime
+                }
             }}
         }
         
-        local json = HttpService:JSONEncode(data)
+        local jsonData = HttpService:JSONEncode(data)
+        local headers = {["Content-Type"] = "application/json"}
         
         request({
-            Url = getgenv().webhookURL,
+            Url = _G.webhookURL,
             Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = json
+            Headers = headers,
+            Body = jsonData
         })
         
-        if statusLbl then
-            statusLbl.Text = "Sent! " .. result
-            statusLbl.TextColor3 = Color3.fromRGB(100, 255, 100)
+        warn("[WEBHOOK] ✅ Message sent! (" .. resultText .. ")")
+        if statusLabel then
+            statusLabel.Text = "✅ Webhook sent!\n" .. resultText .. " | " .. runTime
+            statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         end
     end)
+    
+    if not success then
+        warn("[WEBHOOK ERROR] " .. tostring(err))
+        if statusLabel then
+            statusLabel.Text = "❌ Webhook failed!\n" .. tostring(err):sub(1, 30)
+            statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
+    end
 end
 
-local function startTracking(statusLbl)
-    spawn(function()
-        while wait(2) do
-            pcall(function()
-                local gui = plr.PlayerGui:FindFirstChild("GameGui")
-                if gui and not getgenv().isTracking then
-                    local endFrame = gui.Screen.Middle:FindFirstChild("GameEnd")
-                    if endFrame and not endFrame.Visible then
-                        getgenv().isTracking = true
-                        if statusLbl then
-                            statusLbl.Text = "Game started..."
-                            statusLbl.TextColor3 = Color3.fromRGB(100, 200, 255)
+local function detectGameStart(statusLabel)
+    task.spawn(function()
+        while true do
+            task.wait(2)
+            
+            local success = pcall(function()
+                local gameGui = plr.PlayerGui:FindFirstChild("GameGui")
+                
+                if gameGui and not _G.isTracking then
+                    local gameEndFrame = gameGui.Screen.Middle:FindFirstChild("GameEnd")
+                    
+                    if gameEndFrame and not gameEndFrame.Visible then
+                        _G.isTracking = true
+                        _G.gameStartTime = tick()
+                        warn("[TRACKER] Game started!")
+                        if statusLabel then
+                            statusLabel.Text = "🎮 Game in progress..."
+                            statusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
                         end
                         
-                        repeat wait(0.5) until endFrame.Visible
-                        wait(2)
+                        -- Esperar hasta que el juego termine
+                        repeat
+                            task.wait(0.5)
+                        until gameEndFrame.Visible == true
                         
-                        if statusLbl then statusLbl.Text = "Sending..." end
-                        sendHook(endFrame, statusLbl)
+                        -- Esperar para que se carguen todos los datos
+                        task.wait(2)
                         
-                        wait(3)
-                        getgenv().isTracking = false
-                        if statusLbl then
-                            statusLbl.Text = "Waiting..."
-                            statusLbl.TextColor3 = Color3.fromRGB(255, 200, 100)
+                        warn("[TRACKER] Game ended! Sending webhook...")
+                        
+                        if statusLabel then
+                            statusLabel.Text = "📤 Sending webhook..."
+                            statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+                        end
+                        
+                        sendWebhook(gameEndFrame, statusLabel)
+                        
+                        task.wait(3)
+                        _G.isTracking = false
+                        
+                        if statusLabel then
+                            statusLabel.Text = "⏸️ Waiting for next game..."
+                            statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
                         end
                     end
                 end
             end)
+            
+            if not success then
+                task.wait(1)
+            end
         end
     end)
 end
 
-local statusLabel = makeGUI()
-startTracking(statusLabel)
-print("Webhook Tracker loaded successfully!")
+local statusLabel = createWebhookGui()
+detectGameStart(statusLabel)
+
+warn("========================================")
+warn("[WEBHOOK TRACKER] Initialized (FIXED)")
+warn("[INFO] Ejecutor: " .. (writefile and "✓ Compatible (Delta)" or "✗ No compatible"))
+warn("[INFO] Webhook: " .. (_G.webhookURL ~= "" and "✓ Cargado" or "⚠️ No configurado"))
+warn("[INFO] Start a game - tracker will auto-detect!")
+warn("========================================")
