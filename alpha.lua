@@ -383,8 +383,8 @@ local function sendHook(endFrame)
             "🌱 Seeds: %s\n" ..
             "🍬 Candy: %s\n\n" ..
             "**Match Results**\n" ..
-            "**%s**\n" ..
-            "**Run Time: %s**",
+            "%s\n" ..
+            "Run Time: %s",
             userName,
             getgenv().gamesPlayed,
             seeds,
