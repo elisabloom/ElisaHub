@@ -66,6 +66,45 @@ local function formatNumber(num)
     return tostring(math.floor(num))
 end
 
+local function parseFormattedNumber(str)
+    -- Si ya es un número, devolverlo
+    if type(str) == "number" then
+        return tostring(math.floor(str))
+    end
+    
+    -- Convertir a string
+    str = tostring(str)
+    
+    -- Si no tiene sufijos, devolver tal cual
+    if not str:match("[KMBkmb]") then
+        local num = tonumber(str)
+        if num then
+            return tostring(math.floor(num))
+        end
+        return str
+    end
+    
+    -- Parsear números con sufijos (3.5M, 1.2K, etc)
+    local number = str:match("([%d%.]+)")
+    local suffix = str:match("[KMBkmb]")
+    
+    if not number or not suffix then
+        return str
+    end
+    
+    number = tonumber(number)
+    suffix = suffix:upper()
+    
+    local multipliers = {
+        K = 1000,
+        M = 1000000,
+        B = 1000000000
+    }
+    
+    local result = number * (multipliers[suffix] or 1)
+    return tostring(math.floor(result))
+end
+
 local function createWebhookGui()
     local existingGui = plr.PlayerGui:FindFirstChild("WebhookTest")
     if existingGui then existingGui:Destroy() end
