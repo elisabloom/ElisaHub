@@ -1,4 +1,4 @@
---// Discord Webhook Test - Real Game Data Tracker
+--// Discord Webhook Test - Real Game Data Tracker (FIXED)
 
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
@@ -59,47 +59,25 @@ end
 -- Cargar el webhook al iniciar
 loadWebhook()
 
-local function formatNumber(num)
-    if type(num) ~= "number" then
-        return tostring(num)
-    end
-    return tostring(math.floor(num))
-end
-
-local function getExactValue(valueObject)
+-- Función mejorada para obtener valores (maneja strings y números)
+local function getValueSafe(valueObject)
     if not valueObject then
-        warn("[DEBUG] Value object is nil")
         return "N/A"
     end
     
     local val = valueObject.Value
-    warn("[DEBUG] Raw value: " .. tostring(val) .. " | Type: " .. type(val))
     
-    -- Si es un número, devolverlo directamente SIN math.floor
+    -- Si ya es un número, convertirlo a string directamente
     if type(val) == "number" then
-        -- Convertir a string sin decimales
-        return string.format("%.0f", val)
+        return tostring(val)
     end
     
-    -- Si es un string, intentar extraer el número
+    -- Si es un string, devolverlo tal cual (puede ser "3.43M", "1.2K", etc.)
     if type(val) == "string" then
-        -- Intentar convertir directamente
-        local num = tonumber(val)
-        if num then
-            return string.format("%.0f", num)
-        end
-        
-        -- Si tiene formato como "3.43M", extraer el número sin formato
-        local numPart = val:match("([%d%.]+)")
-        if numPart then
-            num = tonumber(numPart)
-            if num then
-                return string.format("%.0f", num)
-            end
-        end
+        return val
     end
     
-    warn("[DEBUG] Could not parse value, returning as string")
+    -- Fallback
     return tostring(val)
 end
 
@@ -267,7 +245,7 @@ local function sendWebhook(gameEndFrame, statusLabel)
     local success, err = pcall(function()
         local currentTime = os.date("%Y-%m-%d %H:%M:%S")
         
-        -- Obtener Seeds y Candy de leaderstats
+        -- Obtener Seeds y Candy de leaderstats (SIN math.floor)
         local leaderstats = plr:WaitForChild("leaderstats", 5)
         local totalSeeds = "N/A"
         local totalCandy = "N/A"
@@ -277,11 +255,13 @@ local function sendWebhook(gameEndFrame, statusLabel)
             local candyValue = leaderstats:FindFirstChild("Candy")
             
             if seedsValue then
-                totalSeeds = tostring(math.floor(seedsValue.Value))
+                totalSeeds = getValueSafe(seedsValue)
+                warn("[DEBUG] Seeds Value: " .. totalSeeds)
             end
             
             if candyValue then
-                totalCandy = tostring(math.floor(candyValue.Value))
+                totalCandy = getValueSafe(candyValue)
+                warn("[DEBUG] Candy Value: " .. totalCandy)
             end
         end
         
@@ -299,31 +279,18 @@ local function sendWebhook(gameEndFrame, statusLabel)
             end
         end
         
-        -- Buscar el Run Time en el GameEnd frame
+        -- Buscar el Run Time
         local runTime = "00:00"
         
-        -- Buscar en todos los descendientes del GameEnd frame
         for _, child in pairs(gameEndFrame:GetDescendants()) do
             if child:IsA("TextLabel") then
                 local text = child.Text
-                -- Buscar formato de tiempo XX:XX
-                if text:match("%d+:%d+") and child.Name:lower():find("time") then
-                    runTime = text:match("%d+:%d+")
-                    break
-                elseif text:match("Run time: (%d+:%d+)") then
-                    runTime = text:match("Run time: (%d+:%d+)")
-                    break
-                end
-            end
-        end
-        
-        -- Si no se encontró, buscar específicamente "Run time" label
-        if runTime == "00:00" then
-            local runTimeLabel = gameEndFrame:FindFirstChild("Run time", true)
-            if runTimeLabel and runTimeLabel:IsA("TextLabel") then
-                local timeMatch = runTimeLabel.Text:match("%d+:%d+")
-                if timeMatch then
-                    runTime = timeMatch
+                if text:match("%d+:%d+") then
+                    local potentialTime = text:match("%d+:%d+")
+                    if child.Name:lower():find("time") or text:lower():find("run") then
+                        runTime = potentialTime
+                        break
+                    end
                 end
             end
         end
@@ -377,7 +344,7 @@ local function sendWebhook(gameEndFrame, statusLabel)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Message sent! (" .. resultText .. ")")
+        warn("[WEBHOOK] ✅ Message sent! (" .. resultText .. ")")
         if statusLabel then
             statusLabel.Text = "✅ Webhook sent!\n" .. resultText .. " | " .. runTime
             statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
@@ -387,7 +354,7 @@ local function sendWebhook(gameEndFrame, statusLabel)
     if not success then
         warn("[WEBHOOK ERROR] " .. tostring(err))
         if statusLabel then
-            statusLabel.Text = "❌ Webhook failed!"
+            statusLabel.Text = "❌ Webhook failed!\n" .. tostring(err):sub(1, 30)
             statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
         end
     end
@@ -418,11 +385,10 @@ local function detectGameStart(statusLabel)
                             task.wait(0.5)
                         until gameEndFrame.Visible == true
                         
-                        -- Esperar un momento para que todos los datos se carguen
-                        task.wait(1)
+                        -- Esperar para que se carguen todos los datos
+                        task.wait(2)
                         
-                        warn("[TRACKER] Game ended! Searching for data...")
-                        warn("[DEBUG] ========== GameEnd Structure ==========")
+                        warn("[TRACKER] Game ended! Sending webhook...")
                         
                         if statusLabel then
                             statusLabel.Text = "📤 Sending webhook..."
@@ -453,7 +419,7 @@ local statusLabel = createWebhookGui()
 detectGameStart(statusLabel)
 
 warn("========================================")
-warn("[WEBHOOK TRACKER] Initialized")
+warn("[WEBHOOK TRACKER] Initialized (FIXED)")
 warn("[INFO] Ejecutor: " .. (writefile and "✓ Compatible (Delta)" or "✗ No compatible"))
 warn("[INFO] Webhook: " .. (_G.webhookURL ~= "" and "✓ Cargado" or "⚠️ No configurado"))
 warn("[INFO] Start a game - tracker will auto-detect!")
