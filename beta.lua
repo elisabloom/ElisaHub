@@ -288,26 +288,23 @@ local function sendHook(endFrame)
         
         local runTime = "N/A"
         
-        for _, obj in pairs(endFrame:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
-                local txtLower = txt:lower()
+        local items = endFrame:FindFirstChild("Items", true)
+        if items then
+            local txtLabel = items:FindFirstChild("txt")
+            if txtLabel and txtLabel:IsA("TextLabel") then
+                local fullText = txtLabel.Text
                 
-                if txtLower:find("run time") then
-                    local timeMatch = txt:match("(%d+:%d+)")
-                    if timeMatch then
-                        runTime = timeMatch
-                        break
-                    end
-                    
-                    local secsMatch = txt:match("run time[:%s]+(%d+)%s*$")
+                local timeMatch = fullText:match("Run time[:%s]*(%d+:%d+)")
+                if timeMatch then
+                    runTime = timeMatch
+                elseif fullText:lower():find("run time") then
+                    local secsMatch = fullText:match("Run time[:%s]*(%d+)%s*$")
                     if secsMatch then
                         local secs = tonumber(secsMatch)
-                        if secs then
+                        if secs and secs < 3600 then
                             local mins = math.floor(secs / 60)
                             local remainingSecs = secs % 60
                             runTime = string.format("%d:%02d", mins, remainingSecs)
-                            break
                         end
                     end
                 end
@@ -315,21 +312,56 @@ local function sendHook(endFrame)
         end
         
         if runTime == "N/A" then
-            local items = endFrame:FindFirstChild("Items", true)
-            if items then
-                local txtLabel = items:FindFirstChild("txt")
-                if txtLabel and txtLabel:IsA("TextLabel") then
-                    local timeMatch = txtLabel.Text:match("(%d+:%d+)")
-                    if timeMatch then
-                        runTime = timeMatch
-                    else
-                        local secsMatch = txtLabel.Text:match("(%d+)%s*$")
+            for _, obj in pairs(endFrame:GetDescendants()) do
+                if obj:IsA("TextLabel") then
+                    local txt = obj.Text
+                    local txtLower = txt:lower()
+                    
+                    if txtLower:find("run time") then
+                        local timeMatch = txt:match("(%d+:%d+)")
+                        if timeMatch then
+                            runTime = timeMatch
+                            break
+                        end
+                        
+                        local secsMatch = txt:match("run time[:%s]*(%d+)%s*$")
                         if secsMatch then
                             local secs = tonumber(secsMatch)
                             if secs and secs < 3600 then
                                 local mins = math.floor(secs / 60)
                                 local remainingSecs = secs % 60
                                 runTime = string.format("%d:%02d", mins, remainingSecs)
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+        if runTime == "N/A" then
+            for _, obj in pairs(endFrame:GetDescendants()) do
+                if obj:IsA("TextLabel") then
+                    local objName = obj.Name:lower()
+                    if objName:find("time") or objName == "txt" then
+                        local txt = obj.Text
+                        
+                        local timeMatch = txt:match("(%d+:%d+)")
+                        if timeMatch then
+                            runTime = timeMatch
+                            break
+                        end
+                        
+                        if txt:lower():find("run") or txt:lower():find("time") then
+                            local num = txt:match("(%d+)%s*$")
+                            if num then
+                                local secs = tonumber(num)
+                                if secs and secs > 0 and secs < 600 then
+                                    local mins = math.floor(secs / 60)
+                                    local remainingSecs = secs % 60
+                                    runTime = string.format("%d:%02d", mins, remainingSecs)
+                                    break
+                                end
                             end
                         end
                     end
