@@ -215,17 +215,7 @@ local function makeStatsGUI()
     matchesLabel.TextXAlignment = Enum.TextXAlignment.Left
     matchesLabel.Parent = fr
     
-    spawn(function()
-        while wait(2) do
-            pcall(function()
-                if sg and sg.Parent then
-                    seedsLabel.Text = "🌱 Seeds: " .. getSeedsFromScreen()
-                    candyLabel.Text = "🍬 Candy: " .. getCandyCornFromScreen()
-                    matchesLabel.Text = "🎮 Matches: " .. getgenv().gamesPlayed
-                end
-            end)
-        end
-    end)
+    return {seedsLabel = seedsLabel, candyLabel = candyLabel, matchesLabel = matchesLabel}
 end
 
 local function makeGUI()
@@ -358,6 +348,18 @@ local function makeGUI()
         wait(1)
         clearBtn.Text = "Clear"
     end)
+end
+
+local statsGUIElements = nil
+
+local function updateStatsGUI()
+    if statsGUIElements then
+        pcall(function()
+            statsGUIElements.seedsLabel.Text = "🌱 Seeds: " .. getSeedsFromScreen()
+            statsGUIElements.candyLabel.Text = "🍬 Candy: " .. getCandyCornFromScreen()
+            statsGUIElements.matchesLabel.Text = "🎮 Matches: " .. getgenv().gamesPlayed
+        end)
+    end
 end
 
 local function sendHook(endFrame)
@@ -499,6 +501,8 @@ local function sendHook(endFrame)
         })
         
         warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy .. " | Time: " .. runTime .. " | Games: " .. getgenv().gamesPlayed)
+        
+        updateStatsGUI()
     end)
     
     if not success then
@@ -531,6 +535,6 @@ local function startTracking()
 end
 
 makeGUI()
-makeStatsGUI()
+statsGUIElements = makeStatsGUI()
 startTracking()
 print("Webhook Tracker loaded! Games Played: " .. getgenv().gamesPlayed)
