@@ -1,7 +1,12 @@
 -- Webhook Tracker
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
+
 local plr = Players.LocalPlayer
+repeat wait() until plr
+repeat wait() until plr:FindFirstChild("PlayerGui")
+
+local PlayerGui = plr:WaitForChild("PlayerGui")
 
 getgenv().isTracking = getgenv().isTracking or false
 getgenv().webhookURL = getgenv().webhookURL or ""
@@ -33,18 +38,29 @@ loadWebhook()
 
 local function getSeedsFromScreen()
     local success, result = pcall(function()
-        local gui = plr.PlayerGui:FindFirstChild("GameGui")
+        local gui = PlayerGui:FindFirstChild("GameGui")
         if not gui then return "N/A" end
         
-        for _, obj in pairs(gui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
-                local bigNumber = txt:match("(%d%d%d%d%d%d+)")
-                if bigNumber then
-                    local numVal = tonumber(bigNumber)
-                    if numVal and numVal > 100000 then
-                        return bigNumber
-                    end
+        local seedsDisplay = gui:FindFirstChild("SeedsDisplay", true)
+        
+        if seedsDisplay then
+            local titleLabel = seedsDisplay:FindFirstChild("Title")
+            if titleLabel and titleLabel:IsA("TextLabel") then
+                local num = titleLabel.Text:match("(%d+)")
+                if num then
+                    return num
+                end
+            end
+        end
+        
+        local currencyDisplay = gui:FindFirstChild("CurrencyDisplay", true)
+        if currencyDisplay then
+            local seedsDisplay = currencyDisplay:FindFirstChild("SeedsDisplay")
+            if seedsDisplay then
+                local titleLabel = seedsDisplay:FindFirstChild("Title")
+                if titleLabel and titleLabel:IsA("TextLabel") then
+                    local num = titleLabel.Text:match("(%d+)")
+                    if num then return num end
                 end
             end
         end
@@ -55,47 +71,19 @@ local function getSeedsFromScreen()
     if success then return result else return "N/A" end
 end
 
-local function getCandyFromScreen()
+local function getCandyCornFromScreen()
     local success, result = pcall(function()
-        local gui = plr.PlayerGui:FindFirstChild("GameGui")
+        local gui = PlayerGui:FindFirstChild("GameGui")
         if not gui then return "N/A" end
         
-        for _, obj in pairs(gui:GetDescendants()) do
-            if obj:IsA("ImageLabel") then
-                local imgName = obj.Name:lower()
-                local imgSrc = tostring(obj.Image):lower()
-                
-                if imgName:find("candy") or imgSrc:find("candy") then
-                    local parent = obj.Parent
-                    if parent then
-                        for _, sibling in pairs(parent:GetChildren()) do
-                            if sibling:IsA("TextLabel") then
-                                local num = sibling.Text:match("(%d+)")
-                                if num then
-                                    return num
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
+        local candyDisplay = gui:FindFirstChild("CandyCornsDisplay", true)
         
-        for _, obj in pairs(gui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local txt = obj.Text
-                if txt:match("🍬") then
-                    local parent = obj.Parent
-                    if parent then
-                        for _, sibling in pairs(parent:GetChildren()) do
-                            if sibling:IsA("TextLabel") and sibling ~= obj then
-                                local num = sibling.Text:match("(%d+)")
-                                if num then
-                                    return num
-                                end
-                            end
-                        end
-                    end
+        if candyDisplay then
+            local titleLabel = candyDisplay:FindFirstChild("Title")
+            if titleLabel and titleLabel:IsA("TextLabel") then
+                local num = titleLabel.Text:match("(%d+)")
+                if num then
+                    return num
                 end
             end
         end
@@ -104,16 +92,65 @@ local function getCandyFromScreen()
     end)
     
     if success then return result else return "N/A" end
+end
+
+local function getGameResult(endFrame)
+    -- Método 1: Buscar textos descriptivos específicos (MÁS CONFIABLE)
+    for _, obj in pairs(endFrame:GetDescendants()) do
+        if obj:IsA("TextLabel") then
+            local txt = obj.Text
+            local txtLower = txt:lower()
+            
+            if txtLower:find("overwhelmed") then
+                return "Defeat"
+            elseif txtLower:find("defeated") or txtLower:find("game over") then
+                return "Defeat"
+            elseif txtLower:find("cleared all waves") or (txtLower:find("cleared") and txtLower:find("%d+")) then
+                return "Victory"
+            elseif txtLower:find("you win") or txtLower:find("congratulations") then
+                return "Victory"
+            end
+        end
+    end
+    
+    -- Método 2: Buscar Title con mayor visibilidad
+    local titles = {}
+    for _, obj in pairs(endFrame:GetDescendants()) do
+        if obj:IsA("TextLabel") and obj.Name == "Title" then
+            if obj.Text == "Victory" or obj.Text == "Defeat" then
+                table.insert(titles, {
+                    text = obj.Text,
+                    obj = obj,
+                    size = obj.TextSize,
+                    transparency = obj.TextTransparency,
+                    visible = obj.Visible
+                })
+            end
+        end
+    end
+    
+    table.sort(titles, function(a, b)
+        if a.transparency ~= b.transparency then
+            return a.transparency < b.transparency
+        end
+        return a.size > b.size
+    end)
+    
+    if #titles > 0 and titles[1].visible then
+        return titles[1].text
+    end
+    
+    return "Unknown"
 end
 
 local function makeGUI()
-    local old = plr.PlayerGui:FindFirstChild("WebhookGUI")
+    local old = PlayerGui:FindFirstChild("WebhookGUI")
     if old then old:Destroy() end
     
     local sg = Instance.new("ScreenGui")
     sg.Name = "WebhookGUI"
     sg.ResetOnSpawn = false
-    sg.Parent = plr.PlayerGui
+    sg.Parent = PlayerGui
     
     local fr = Instance.new("Frame")
     fr.Size = UDim2.new(0, 180, 0, 25)
@@ -155,16 +192,17 @@ local function makeGUI()
     input.Size = UDim2.new(1, -20, 0, 25)
     input.Position = UDim2.new(0, 10, 0, 30)
     input.PlaceholderText = "Webhook URL"
-    input.Text = ""
+    input.Text = getgenv().webhookURL
     input.Font = Enum.Font.Gotham
     input.TextSize = 7
     input.TextColor3 = Color3.fromRGB(200, 200, 200)
     input.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     input.BorderSizePixel = 0
-    input.TextXAlignment = Enum.TextXAlignment.Center
+    input.TextXAlignment = Enum.TextXAlignment.Left
     input.ClearTextOnFocus = false
     input.TextWrapped = false
     input.ClipsDescendants = true
+    input.TextTruncate = Enum.TextTruncate.AtEnd
     input.Visible = false
     input.Parent = fr
     
@@ -198,10 +236,6 @@ local function makeGUI()
     
     Instance.new("UICorner", clearBtn).CornerRadius = UDim.new(0, 6)
     
-    if getgenv().webhookURL ~= "" then
-        input.PlaceholderText = "Webhook saved"
-    end
-    
     expandBtn.MouseButton1Click:Connect(function()
         local isExpanded = expandBtn.Text == "-"
         
@@ -221,22 +255,10 @@ local function makeGUI()
         end
     end)
     
-    input.Focused:Connect(function()
-        input.Text = getgenv().webhookURL
-    end)
-    
-    input.FocusLost:Connect(function()
-        if input.Text == "" or input.Text == getgenv().webhookURL then
-            input.Text = ""
-        end
-    end)
-    
     saveBtn.MouseButton1Click:Connect(function()
         if input.Text ~= "" then
             getgenv().webhookURL = input.Text
             saveWebhook(input.Text)
-            input.Text = ""
-            input.PlaceholderText = "Webhook saved"
             saveBtn.Text = "Saved!"
             wait(1)
             saveBtn.Text = "Save"
@@ -247,7 +269,6 @@ local function makeGUI()
         getgenv().webhookURL = ""
         saveWebhook("")
         input.Text = ""
-        input.PlaceholderText = "Webhook URL"
         clearBtn.Text = "Cleared!"
         wait(1)
         clearBtn.Text = "Clear"
@@ -264,9 +285,9 @@ local function sendHook(endFrame)
         local time = os.date("%Y-%m-%d %H:%M:%S")
         
         local seeds = getSeedsFromScreen()
-        local candy = getCandyFromScreen()
+        local candy = getCandyCornFromScreen()
+        local result = getGameResult(endFrame)
         
-        local result = "Unknown"
         local runTime = "N/A"
         
         for _, obj in pairs(endFrame:GetDescendants()) do
@@ -274,17 +295,12 @@ local function sendHook(endFrame)
                 local txt = obj.Text
                 local txtLower = txt:lower()
                 
-                if txt == "Victory" or txt == "Defeat" then
-                    result = txt
-                elseif txtLower:find("victory") or txtLower:find("win") then
-                    result = "Victory"
-                elseif txtLower:find("defeat") or txtLower:find("overwhelmed") then
-                    result = "Defeat"
-                end
-                
-                if txtLower:find("run time") or obj.Name:lower():find("time") then
+                if txtLower:find("run time") or obj.Name:lower():find("runtime") then
                     local t = txt:match("(%d+:%d+)")
-                    if t then runTime = t end
+                    if t then 
+                        runTime = t 
+                        break
+                    end
                 end
             end
         end
@@ -309,7 +325,7 @@ local function sendHook(endFrame)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Sent successfully! Result: " .. result)
+        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy)
     end)
     
     if not success then
@@ -319,16 +335,16 @@ end
 
 local function startTracking()
     spawn(function()
-        while wait(2) do
+        while wait(1) do
             pcall(function()
-                local gui = plr.PlayerGui:FindFirstChild("GameGui")
+                local gui = PlayerGui:FindFirstChild("GameGui")
                 if gui and not getgenv().isTracking then
                     local endFrame = gui.Screen.Middle:FindFirstChild("GameEnd")
                     if endFrame and not endFrame.Visible then
                         getgenv().isTracking = true
                         
-                        repeat wait(0.5) until endFrame.Visible
-                        wait(3)
+                        repeat wait(0.3) until endFrame.Visible
+                        wait(1)
                         
                         sendHook(endFrame)
                         
