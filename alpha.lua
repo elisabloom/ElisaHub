@@ -1,29 +1,54 @@
 local plr = game.Players.LocalPlayer
 
-print("=== BUSCANDO WINS EN DATOS DEL JUGADOR ===")
+print("=== ANALIZANDO LEADERSTATS ===")
 
--- Método 1: Buscar en el jugador directamente
-for _, child in pairs(plr:GetChildren()) do
-    print("Player child:", child.Name, child.ClassName)
-    if child:IsA("Folder") or child:IsA("Configuration") or child:IsA("IntValue") or child:IsA("NumberValue") then
-        for _, subChild in pairs(child:GetChildren()) do
-            local name = subChild.Name:lower()
-            if name:find("win") or name:find("victor") then
-                print("  ENCONTRADO:", subChild.Name, "=", subChild.Value)
-            end
+local leaderstats = plr:FindFirstChild("leaderstats")
+if leaderstats then
+    print("Leaderstats encontrado! Tipo:", leaderstats.ClassName)
+    print("Valor:", leaderstats.Value)
+    
+    print("\nHijos de leaderstats:")
+    for _, child in pairs(leaderstats:GetChildren()) do
+        print("  ", child.Name, child.ClassName)
+        if child:IsA("IntValue") or child:IsA("NumberValue") then
+            print("    Valor:", child.Value)
         end
+    end
+else
+    print("Leaderstats NO encontrado")
+end
+
+print("\n=== BUSCANDO OTROS DATOS ===")
+for _, child in pairs(plr:GetChildren()) do
+    if child:IsA("IntValue") or child:IsA("NumberValue") or child:IsA("StringValue") then
+        print(child.Name, "=", child.Value)
     end
 end
 
--- Método 2: Buscar en ReplicatedStorage
-local repStorage = game:GetService("ReplicatedStorage")
-print("\n=== REPLICATEDSTORAGE ===")
-for _, obj in pairs(repStorage:GetDescendants()) do
-    local name = obj.Name:lower()
-    if name:find("win") or name:find("victor") or name:find("stat") then
-        if obj:IsA("IntValue") or obj:IsA("NumberValue") then
-            print("Found:", obj:GetFullName(), "=", obj.Value)
+print("=== FIN ===")local plr = game.Players.LocalPlayer
+
+print("=== ANALIZANDO LEADERSTATS ===")
+
+local leaderstats = plr:FindFirstChild("leaderstats")
+if leaderstats then
+    print("Leaderstats encontrado! Tipo:", leaderstats.ClassName)
+    print("Valor:", leaderstats.Value)
+    
+    print("\nHijos de leaderstats:")
+    for _, child in pairs(leaderstats:GetChildren()) do
+        print("  ", child.Name, child.ClassName)
+        if child:IsA("IntValue") or child:IsA("NumberValue") then
+            print("    Valor:", child.Value)
         end
+    end
+else
+    print("Leaderstats NO encontrado")
+end
+
+print("\n=== BUSCANDO OTROS DATOS ===")
+for _, child in pairs(plr:GetChildren()) do
+    if child:IsA("IntValue") or child:IsA("NumberValue") or child:IsA("StringValue") then
+        print(child.Name, "=", child.Value)
     end
 end
 
