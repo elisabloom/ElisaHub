@@ -50,13 +50,13 @@ end
 loadWebhook()
 
 local function getCurrentMapAndDifficulty()
-    local success, results = pcall(function()
+    local success, map, difficulty, wave = pcall(function()
         local gui = PlayerGui:FindFirstChild("GameGui")
         if not gui then return "Unknown", "Unknown", "XX" end
         
-        local map = "Unknown"
-        local difficulty = "Unknown"
-        local wave = "XX"
+        local foundMap = "Unknown"
+        local foundDifficulty = "Unknown"
+        local foundWave = "XX"
         
         for _, obj in pairs(gui:GetDescendants()) do
             if obj:IsA("TextLabel") then
@@ -65,8 +65,8 @@ local function getCurrentMapAndDifficulty()
                 if txt:match("(%a+):%s*Wave%s*(%d+)%s*/%s*(%d+)") then
                     local dif, currentWave, totalWaves = txt:match("(%a+):%s*Wave%s*(%d+)%s*/%s*(%d+)")
                     if dif then
-                        difficulty = dif
-                        wave = currentWave or "XX"
+                        foundDifficulty = dif
+                        foundWave = currentWave or "XX"
                     end
                 end
             end
@@ -75,31 +75,31 @@ local function getCurrentMapAndDifficulty()
         local workspace = game:GetService("Workspace")
         for mapId, mapName in pairs(MAP_NAMES) do
             if workspace:FindFirstChild(mapId) then
-                map = mapName
+                foundMap = mapName
                 break
             end
         end
         
-        if map == "Unknown" then
+        if foundMap == "Unknown" then
             for _, obj in pairs(gui:GetDescendants()) do
                 if obj:IsA("TextLabel") then
                     local txt = obj.Text
-                    if txt:find("Graveyard") then map = "Graveyard" break end
-                    if txt:find("Dojo") then map = "Dojo" break end
-                    if txt:find("Back Garden") then map = "Back Garden" break end
-                    if txt:find("Toxic") then map = "Toxic" break end
-                    if txt:find("Island") then map = "Island" break end
-                    if txt:find("Jungle") then map = "Jungle" break end
-                    if txt:find("Farm") then map = "Farm" break end
+                    if txt:find("Graveyard") then foundMap = "Graveyard" break end
+                    if txt:find("Dojo") then foundMap = "Dojo" break end
+                    if txt:find("Back Garden") then foundMap = "Back Garden" break end
+                    if txt:find("Toxic") then foundMap = "Toxic" break end
+                    if txt:find("Island") then foundMap = "Island" break end
+                    if txt:find("Jungle") then foundMap = "Jungle" break end
+                    if txt:find("Farm") then foundMap = "Farm" break end
                 end
             end
         end
         
-        return map, difficulty, wave
+        return foundMap, foundDifficulty, foundWave
     end)
     
     if success then 
-        return results 
+        return map or "Unknown", difficulty or "Unknown", wave or "XX"
     else 
         return "Unknown", "Unknown", "XX" 
     end
@@ -118,7 +118,7 @@ local function getTotalSeedsFromLeaderstats()
         return 0
     end)
     
-    if success then return result else return 0 end
+    return (success and result) or 0
 end
 
 local function getTotalCandyFromLeaderstats()
@@ -134,35 +134,39 @@ local function getTotalCandyFromLeaderstats()
         return 0
     end)
     
-    if success then return result else return 0 end
+    return (success and result) or 0
 end
 
 local function getRewardsFromNotification()
-    local success, results = pcall(function()
+    local success, seedsReward, candyReward = pcall(function()
         local gui = PlayerGui:FindFirstChild("GameGui")
         if not gui then return 0, 0 end
         
-        local seedsReward = 0
-        local candyReward = 0
+        local seeds = 0
+        local candy = 0
         
         for _, obj in pairs(gui:GetDescendants()) do
             if obj:IsA("TextLabel") then
                 local txt = obj.Text
                 
                 if txt:match("You got (%d+) Seeds") then
-                    seedsReward = tonumber(txt:match("You got (%d+) Seeds"))
+                    seeds = tonumber(txt:match("You got (%d+) Seeds")) or 0
                 end
                 
                 if txt:match("You got (%d+) Candy") or txt:match("You got (%d+) candy") then
-                    candyReward = tonumber(txt:match("You got (%d+) [Cc]andy"))
+                    candy = tonumber(txt:match("You got (%d+) [Cc]andy")) or 0
                 end
             end
         end
         
-        return seedsReward, candyReward
+        return seeds, candy
     end)
     
-    if success then return results else return 0, 0 end
+    if success then 
+        return seedsReward or 0, candyReward or 0
+    else 
+        return 0, 0
+    end
 end
 
 local function getGameResult(endFrame)
@@ -361,18 +365,22 @@ local function sendHook(endFrame)
         local seedsReward, candyReward = getRewardsFromNotification()
         
         if seedsReward == 0 and getgenv().lastSeeds > 0 then
-            seedsReward = currentTotalSeeds - getgenv().lastSeeds
+            seedsReward = math.max(0, currentTotalSeeds - getgenv().lastSeeds)
         end
         
         if candyReward == 0 and getgenv().lastCandy > 0 then
-            candyReward = currentTotalCandy - getgenv().lastCandy
+            candyReward = math.max(0, currentTotalCandy - getgenv().lastCandy)
         end
         
         getgenv().lastSeeds = currentTotalSeeds
         getgenv().lastCandy = currentTotalCandy
         
-        local result = getGameResult(endFrame)
+        local result = getGameResult(endFrame) or "Unknown"
         local map, difficulty, wave = getCurrentMapAndDifficulty()
+        
+        map = map or "Unknown"
+        difficulty = difficulty or "Unknown"
+        wave = wave or "XX"
         
         local runTime = "N/A"
         
@@ -397,12 +405,17 @@ local function sendHook(endFrame)
         
         local color = result == "Victory" and 3066993 or 15158332
         
-        local userName = plr.Name
+        local userName = tostring(plr.Name)
+        local totalSeeds = tostring(currentTotalSeeds)
+        local totalCandy = tostring(currentTotalCandy)
+        local rewardSeeds = tostring(seedsReward)
+        local rewardCandy = tostring(candyReward)
+        local gamesPlayedStr = tostring(getgenv().gamesPlayed)
         
         local description = string.format(
             "**Garden Tower Defense**\n\n" ..
             "**User:** ||%s||\n\n" ..
-            "**Total Replays:** %d\n\n" ..
+            "**Total Replays:** %s\n\n" ..
             "**Player Stats          Rewards**\n" ..
             "🌱 %s                    🌱 +%s\n" ..
             "🍬 %s                    🍬 +%s\n\n" ..
@@ -411,9 +424,9 @@ local function sendHook(endFrame)
             "**%s - Wave %s**\n" ..
             "**%s - %s**",
             userName,
-            getgenv().gamesPlayed,
-            tostring(currentTotalSeeds), tostring(seedsReward),
-            tostring(currentTotalCandy), tostring(candyReward),
+            gamesPlayedStr,
+            totalSeeds, rewardSeeds,
+            totalCandy, rewardCandy,
             result,
             runTime, wave,
             map, difficulty
@@ -437,7 +450,7 @@ local function sendHook(endFrame)
             Body = jsonData
         })
         
-        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds Reward: +" .. seedsReward .. " | Candy Reward: +" .. candyReward .. " | Time: " .. runTime .. " | Map: " .. map .. " | Difficulty: " .. difficulty .. " | Wave: " .. wave .. " | Games: " .. getgenv().gamesPlayed)
+        warn("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: +" .. rewardSeeds .. " | Candy: +" .. rewardCandy .. " | Time: " .. runTime .. " | Map: " .. map .. " | Difficulty: " .. difficulty .. " | Wave: " .. wave .. " | Games: " .. gamesPlayedStr)
     end)
     
     if not success then
