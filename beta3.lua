@@ -82,7 +82,6 @@ local entities = Workspace:WaitForChild("Map"):WaitForChild("Entities")
 _G.myUnitIDs = _G.myUnitIDs or {}
 _G.trackingEnabled = false
 _G.currentWave = 0
-_G.allActionsCompleted = false
 
 local function detectWave()
     local success, result = pcall(function()
@@ -244,11 +243,6 @@ local function generateRBTomatoEDPlacements()
         {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-331.4523620605469, 61.680301666259766, -735.6544799804688), unitIndex = 5},
         {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-319.48638916015625, 61.68030548095703, -734.1026000976562), unitIndex = 6}
     }
-    for i, action in ipairs(randomPlacements) do
-        if action.type == "place" and action.basePosition then
-            action.needsPlacement = true
-        end
-    end
     return randomPlacements
 end
 
@@ -256,10 +250,10 @@ local function generatePesticiderPlacements()
     return {
         {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
          basePosition = Vector3.new(-341.5465393066406, 61.68030548095703, -703.4617919921875), 
-         unitIndex = 1, needsPlacement = true},
+         unitIndex = 1},
         {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
          basePosition = Vector3.new(-347.159912109375, 61.68030548095703, -709.947265625), 
-         unitIndex = 2, needsPlacement = true, waitForUnit = 1, waitForLevel = 1},
+         unitIndex = 2, waitForUnit = 1, waitForLevel = 1},
         {type = "upgrade", requiredMoney = 700, unitIndex = 2, targetLevel = 2, waitForUnit = 2, waitForLevel = 1},
         {type = "upgrade", requiredMoney = 700, unitIndex = 1, targetLevel = 2},
         {type = "upgrade", requiredMoney = 1500, unitIndex = 1, targetLevel = 3},
@@ -277,55 +271,6 @@ local function moneyBasedActions(strategyType)
     task.spawn(function()
         while _G.trackingEnabled do
             task.wait(0.2)
-            
-            if _G.currentWave >= 20 and not _G.unitsSold and _G.allActionsCompleted then
-                _G.unitsSold = true
-                
-                local randomDelay = 0.5 + (math.random() * 0.5)
-                task.wait(randomDelay)
-                
-                local soldCount = 0
-                
-                if #_G.myUnitIDs >= unitsToSell then
-                    for i = 1, unitsToSell do
-                        if _G.myUnitIDs[i] then
-                            local success = pcall(function()
-                                remotes.SellUnit:InvokeServer(_G.myUnitIDs[i])
-                            end)
-                            if success then
-                                soldCount = soldCount + 1
-                            end
-                            task.wait(0.05)
-                        end
-                    end
-                else
-                    for unitID = 1, unitsToSell do
-                        local success = pcall(function()
-                            remotes.SellUnit:InvokeServer(unitID)
-                        end)
-                        if success then
-                            soldCount = soldCount + 1
-                        end
-                        local randomWait = 0.3 + (math.random() * 0.2)
-                        task.wait(randomWait)
-                    end
-                end
-                
-                _G.myUnitIDs = {}
-                break
-            end
-            
-            local allDone = true
-            for i = 1, #placements do
-                if not completedActions[i] then
-                    allDone = false
-                    break
-                end
-            end
-            
-            if allDone and not _G.allActionsCompleted then
-                _G.allActionsCompleted = true
-            end
             
             local currentMoney = getMoney()
             
@@ -380,6 +325,51 @@ local function moneyBasedActions(strategyType)
                         end
                     end
                 end
+            end
+            
+            local allDone = true
+            for i = 1, #placements do
+                if not completedActions[i] then
+                    allDone = false
+                    break
+                end
+            end
+            
+            if allDone and _G.currentWave >= 20 and not _G.unitsSold then
+                _G.unitsSold = true
+                
+                local randomDelay = 0.5 + (math.random() * 0.5)
+                task.wait(randomDelay)
+                
+                local soldCount = 0
+                
+                if #_G.myUnitIDs >= unitsToSell then
+                    for i = 1, unitsToSell do
+                        if _G.myUnitIDs[i] then
+                            local success = pcall(function()
+                                remotes.SellUnit:InvokeServer(_G.myUnitIDs[i])
+                            end)
+                            if success then
+                                soldCount = soldCount + 1
+                            end
+                            task.wait(0.05)
+                        end
+                    end
+                else
+                    for unitID = 1, unitsToSell do
+                        local success = pcall(function()
+                            remotes.SellUnit:InvokeServer(unitID)
+                        end)
+                        if success then
+                            soldCount = soldCount + 1
+                        end
+                        local randomWait = 0.3 + (math.random() * 0.2)
+                        task.wait(randomWait)
+                    end
+                end
+                
+                _G.myUnitIDs = {}
+                break
             end
         end
     end)
@@ -440,7 +430,6 @@ function loadRBTomatoED_3x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
-        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -466,7 +455,6 @@ function loadRBTomatoED_2x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
-        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -492,7 +480,6 @@ function loadPesticider_3x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
-        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -518,7 +505,6 @@ function loadPesticider_2x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
-        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -661,4 +647,5 @@ end)
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
-    end
+    end)
+end)
