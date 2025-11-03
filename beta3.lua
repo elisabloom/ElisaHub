@@ -170,24 +170,6 @@ entities.ChildAdded:Connect(function(child)
     end
 end)
 
-local placements = {}
-local completedActions = {}
-local unitLevels = {}
-local upgradeDelays = {}
-
-local function generateRandomDelays()
-    upgradeDelays = {}
-    for i = 1, #placements do
-        if placements[i].type == "upgrade" then
-            upgradeDelays[i] = 0.4 + (math.random() * 0.59)
-        end
-    end
-end
-
-local function hasReachedLevel(unitIndex, targetLevel)
-    return (unitLevels[unitIndex] or 1) >= targetLevel
-end
-
 local function randomizePosition(basePosition, variation)
     variation = variation or 1.5
     local randomX = basePosition.X + (math.random() * variation * 2 - variation)
@@ -195,7 +177,7 @@ local function randomizePosition(basePosition, variation)
     return Vector3.new(randomX, basePosition.Y, randomZ)
 end
 
-local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts)
+local function tryPlaceUnit(unit, basePosition, maxAttempts)
     maxAttempts = maxAttempts or 5
     for attempt = 1, maxAttempts do
         local randomPos = randomizePosition(basePosition, 1.5)
@@ -209,169 +191,231 @@ local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts)
             return remotes.PlaceUnit:InvokeServer(unit, data)
         end)
         if success and result then
-            return true, unitIndex
+            return true
         else
-            local errorMsg = tostring(result)
-            if errorMsg:find("can't place") or errorMsg:find("Cannot place") or not result then
-                task.wait(0.15)
-            else
-                return true, unitIndex
-            end
+            task.wait(0.15)
         end
     end
-    return false, nil
+    return false
 end
 
-local function generateRBTomatoEDPlacements()
-    local randomPlacements = {
-        {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-344.7191162109375, 61.680301666259766, -702.30859375), unitIndex = 1},
-        {type = "upgrade", requiredMoney = 125, unitIndex = 1, targetLevel = 2},
-        {type = "upgrade", requiredMoney = 175, unitIndex = 1, targetLevel = 3},
-        {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-351.1462097167969, 61.68030548095703, -711.151123046875), unitIndex = 2, waitForUnit = 1, waitForLevel = 3},
-        {type = "upgrade", requiredMoney = 125, unitIndex = 2, targetLevel = 2},
-        {type = "upgrade", requiredMoney = 175, unitIndex = 2, targetLevel = 3},
-        {type = "upgrade", requiredMoney = 350, unitIndex = 2, targetLevel = 4},
-        {type = "upgrade", requiredMoney = 500, unitIndex = 2, targetLevel = 5},
-        {type = "upgrade", requiredMoney = 350, unitIndex = 1, targetLevel = 4, waitForUnit = 2, waitForLevel = 5},
-        {type = "upgrade", requiredMoney = 500, unitIndex = 1, targetLevel = 5},
-        {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-334.91607666015625, 61.6803092956543, -721.29736328125), unitIndex = 3, waitForUnit = 1, waitForLevel = 5},
-        {type = "upgrade", requiredMoney = 125, unitIndex = 3, targetLevel = 2},
-        {type = "upgrade", requiredMoney = 175, unitIndex = 3, targetLevel = 3},
-        {type = "upgrade", requiredMoney = 350, unitIndex = 3, targetLevel = 4},
-        {type = "upgrade", requiredMoney = 500, unitIndex = 3, targetLevel = 5},
-        {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-319.2539978027344, 61.68030548095703, -720.3961181640625), unitIndex = 4},
-        {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-331.4523620605469, 61.680301666259766, -735.6544799804688), unitIndex = 5},
-        {type = "place", requiredMoney = 6000, unit = "unit_golem_dragon", basePosition = Vector3.new(-319.48638916015625, 61.68030548095703, -734.1026000976562), unitIndex = 6}
-    }
-    return randomPlacements
+local function upgradeUnit(unitID)
+    local success = pcall(function()
+        remotes.UpgradeUnit:InvokeServer(unitID)
+    end)
+    return success
 end
 
-local function generatePesticiderPlacements()
-    return {
-        {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
-         basePosition = Vector3.new(-341.5465393066406, 61.68030548095703, -703.4617919921875), 
-         unitIndex = 1},
-        {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
-         basePosition = Vector3.new(-347.159912109375, 61.68030548095703, -709.947265625), 
-         unitIndex = 2, waitForUnit = 1, waitForLevel = 1},
-        {type = "upgrade", requiredMoney = 700, unitIndex = 2, targetLevel = 2, waitForUnit = 2, waitForLevel = 1},
-        {type = "upgrade", requiredMoney = 700, unitIndex = 1, targetLevel = 2},
-        {type = "upgrade", requiredMoney = 1500, unitIndex = 1, targetLevel = 3},
-        {type = "upgrade", requiredMoney = 3000, unitIndex = 1, targetLevel = 4},
-        {type = "upgrade", requiredMoney = 6000, unitIndex = 1, targetLevel = 5},
-        {type = "upgrade", requiredMoney = 1500, unitIndex = 2, targetLevel = 3, waitForUnit = 1, waitForLevel = 5},
-        {type = "upgrade", requiredMoney = 3000, unitIndex = 2, targetLevel = 4},
-        {type = "upgrade", requiredMoney = 6000, unitIndex = 2, targetLevel = 5}
-    }
-end
-
-local function moneyBasedActions(strategyType)
-    local unitsToSell = strategyType == "Pesticider" and 2 or 6
-    
+local function pesticiderStrategy()
     task.spawn(function()
-        while _G.trackingEnabled do
+        while getMoney() < 500 do task.wait(0.2) end
+        
+        local pest1Placed = tryPlaceUnit("unit_pesticider", Vector3.new(-341.5465393066406, 61.68030548095703, -703.4617919921875), 5)
+        if not pest1Placed then return end
+        task.wait(0.3)
+        
+        local waitTime = 0
+        while #_G.myUnitIDs < 1 and waitTime < 10 do
             task.wait(0.2)
-            
-            local currentMoney = getMoney()
-            
-            for i, action in ipairs(placements) do
-                if not completedActions[i] then
-                    if action.waitForUnit and action.waitForLevel then
-                        if not hasReachedLevel(action.waitForUnit, action.waitForLevel) then
-                            continue
-                        end
-                    end
-                    
-                    currentMoney = getMoney()
-                    
-                    if currentMoney >= action.requiredMoney then
-                        if action.type == "place" then
-                            local success, placedUnitIndex = tryPlaceUnit(action.unit, action.basePosition, action.unitIndex, 5)
-                            if success and placedUnitIndex then
-                                completedActions[i] = true
-                                unitLevels[action.unitIndex] = 1
-                                
-                                local waitTime = 0
-                                while #_G.myUnitIDs < action.unitIndex and waitTime < 10 do
-                                    task.wait(0.2)
-                                    waitTime = waitTime + 0.2
-                                end
-                            else
-                                completedActions[i] = true
-                            end
-                            task.wait(0.3)
-                            
-                        elseif action.type == "upgrade" then
-                            if #_G.myUnitIDs >= action.unitIndex then
-                                local unitID = _G.myUnitIDs[action.unitIndex]
-                                local currentLevel = unitLevels[action.unitIndex] or 1
-                                
-                                if currentLevel < action.targetLevel then
-                                    local success = pcall(function()
-                                        remotes.UpgradeUnit:InvokeServer(unitID)
-                                    end)
-                                    
-                                    if success then
-                                        completedActions[i] = true
-                                        unitLevels[action.unitIndex] = action.targetLevel
-                                    end
-                                    
-                                    local delay = upgradeDelays[i] or 0.5
-                                    task.wait(delay)
-                                else
-                                    completedActions[i] = true
-                                end
-                            end
-                        end
-                    end
-                end
+            waitTime = waitTime + 0.2
+        end
+        
+        while getMoney() < 500 do task.wait(0.2) end
+        
+        local pest2Placed = tryPlaceUnit("unit_pesticider", Vector3.new(-347.159912109375, 61.68030548095703, -709.947265625), 5)
+        if not pest2Placed then return end
+        task.wait(0.3)
+        
+        waitTime = 0
+        while #_G.myUnitIDs < 2 and waitTime < 10 do
+            task.wait(0.2)
+            waitTime = waitTime + 0.2
+        end
+        
+        if #_G.myUnitIDs < 2 then return end
+        
+        local pest1ID = _G.myUnitIDs[1]
+        local pest2ID = _G.myUnitIDs[2]
+        
+        while getMoney() < 700 do task.wait(0.2) end
+        upgradeUnit(pest2ID)
+        local delay1 = 0.4 + (math.random() * 0.59)
+        task.wait(delay1)
+        
+        while getMoney() < 700 do task.wait(0.2) end
+        upgradeUnit(pest1ID)
+        local delay2 = 0.4 + (math.random() * 0.59)
+        task.wait(delay2)
+        
+        while getMoney() < 1500 do task.wait(0.2) end
+        upgradeUnit(pest1ID)
+        local delay3 = 0.4 + (math.random() * 0.59)
+        task.wait(delay3)
+        
+        while getMoney() < 3000 do task.wait(0.2) end
+        upgradeUnit(pest1ID)
+        local delay4 = 0.4 + (math.random() * 0.59)
+        task.wait(delay4)
+        
+        while getMoney() < 6000 do task.wait(0.2) end
+        upgradeUnit(pest1ID)
+        local delay5 = 0.4 + (math.random() * 0.59)
+        task.wait(delay5)
+        
+        while getMoney() < 1500 do task.wait(0.2) end
+        upgradeUnit(pest2ID)
+        local delay6 = 0.4 + (math.random() * 0.59)
+        task.wait(delay6)
+        
+        while getMoney() < 3000 do task.wait(0.2) end
+        upgradeUnit(pest2ID)
+        local delay7 = 0.4 + (math.random() * 0.59)
+        task.wait(delay7)
+        
+        while getMoney() < 6000 do task.wait(0.2) end
+        upgradeUnit(pest2ID)
+        local delay8 = 0.4 + (math.random() * 0.59)
+        task.wait(delay8)
+        
+        while _G.currentWave < 20 do task.wait(0.5) end
+        
+        local randomDelay = 0.5 + (math.random() * 0.5)
+        task.wait(randomDelay)
+        
+        if #_G.myUnitIDs >= 2 then
+            pcall(function() remotes.SellUnit:InvokeServer(pest1ID) end)
+            task.wait(0.05)
+            pcall(function() remotes.SellUnit:InvokeServer(pest2ID) end)
+        else
+            pcall(function() remotes.SellUnit:InvokeServer(1) end)
+            local randomWait = 0.3 + (math.random() * 0.2)
+            task.wait(randomWait)
+            pcall(function() remotes.SellUnit:InvokeServer(2) end)
+        end
+        
+        _G.myUnitIDs = {}
+    end)
+end
+
+local function rbTomatoEDStrategy()
+    task.spawn(function())
+        while getMoney() < 100 do task.wait(0.2) end
+        tryPlaceUnit("unit_tomato_rainbow", Vector3.new(-344.7191162109375, 61.680301666259766, -702.30859375), 5)
+        task.wait(0.3)
+        
+        local waitTime = 0
+        while #_G.myUnitIDs < 1 and waitTime < 10 do
+            task.wait(0.2)
+            waitTime = waitTime + 0.2
+        end
+        
+        if #_G.myUnitIDs < 1 then return end
+        local rb1ID = _G.myUnitIDs[1]
+        
+        while getMoney() < 125 do task.wait(0.2) end
+        upgradeUnit(rb1ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 175 do task.wait(0.2) end
+        upgradeUnit(rb1ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 100 do task.wait(0.2) end
+        tryPlaceUnit("unit_tomato_rainbow", Vector3.new(-351.1462097167969, 61.68030548095703, -711.151123046875), 5)
+        task.wait(0.3)
+        
+        waitTime = 0
+        while #_G.myUnitIDs < 2 and waitTime < 10 do
+            task.wait(0.2)
+            waitTime = waitTime + 0.2
+        end
+        
+        if #_G.myUnitIDs < 2 then return end
+        local rb2ID = _G.myUnitIDs[2]
+        
+        while getMoney() < 125 do task.wait(0.2) end
+        upgradeUnit(rb2ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 175 do task.wait(0.2) end
+        upgradeUnit(rb2ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 350 do task.wait(0.2) end
+        upgradeUnit(rb2ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 500 do task.wait(0.2) end
+        upgradeUnit(rb2ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 350 do task.wait(0.2) end
+        upgradeUnit(rb1ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 500 do task.wait(0.2) end
+        upgradeUnit(rb1ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 100 do task.wait(0.2) end
+        tryPlaceUnit("unit_tomato_rainbow", Vector3.new(-334.91607666015625, 61.6803092956543, -721.29736328125), 5)
+        task.wait(0.3)
+        
+        waitTime = 0
+        while #_G.myUnitIDs < 3 and waitTime < 10 do
+            task.wait(0.2)
+            waitTime = waitTime + 0.2
+        end
+        
+        if #_G.myUnitIDs < 3 then return end
+        local rb3ID = _G.myUnitIDs[3]
+        
+        while getMoney() < 125 do task.wait(0.2) end
+        upgradeUnit(rb3ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 175 do task.wait(0.2) end
+        upgradeUnit(rb3ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 350 do task.wait(0.2) end
+        upgradeUnit(rb3ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 500 do task.wait(0.2) end
+        upgradeUnit(rb3ID)
+        task.wait(0.4 + (math.random() * 0.59))
+        
+        while getMoney() < 6000 do task.wait(0.2) end
+        tryPlaceUnit("unit_golem_dragon", Vector3.new(-319.2539978027344, 61.68030548095703, -720.3961181640625), 5)
+        task.wait(0.3)
+        
+        while getMoney() < 6000 do task.wait(0.2) end
+        tryPlaceUnit("unit_golem_dragon", Vector3.new(-331.4523620605469, 61.680301666259766, -735.6544799804688), 5)
+        task.wait(0.3)
+        
+        while getMoney() < 6000 do task.wait(0.2) end
+        tryPlaceUnit("unit_golem_dragon", Vector3.new(-319.48638916015625, 61.68030548095703, -734.1026000976562), 5)
+        task.wait(0.3)
+        
+        while _G.currentWave < 20 do task.wait(0.5) end
+        
+        local randomDelay = 0.5 + (math.random() * 0.5)
+        task.wait(randomDelay)
+        
+        if #_G.myUnitIDs >= 6 then
+            for i = 1, 6 do
+                pcall(function() remotes.SellUnit:InvokeServer(_G.myUnitIDs[i]) end)
+                task.wait(0.05)
             end
-            
-            local allDone = true
-            for i = 1, #placements do
-                if not completedActions[i] then
-                    allDone = false
-                    break
-                end
-            end
-            
-            if allDone and _G.currentWave >= 20 and not _G.unitsSold then
-                _G.unitsSold = true
-                
-                local randomDelay = 0.5 + (math.random() * 0.5)
-                task.wait(randomDelay)
-                
-                local soldCount = 0
-                
-                if #_G.myUnitIDs >= unitsToSell then
-                    for i = 1, unitsToSell do
-                        if _G.myUnitIDs[i] then
-                            local success = pcall(function()
-                                remotes.SellUnit:InvokeServer(_G.myUnitIDs[i])
-                            end)
-                            if success then
-                                soldCount = soldCount + 1
-                            end
-                            task.wait(0.05)
-                        end
-                    end
-                else
-                    for unitID = 1, unitsToSell do
-                        local success = pcall(function()
-                            remotes.SellUnit:InvokeServer(unitID)
-                        end)
-                        if success then
-                            soldCount = soldCount + 1
-                        end
-                        local randomWait = 0.3 + (math.random() * 0.2)
-                        task.wait(randomWait)
-                    end
-                end
-                
-                _G.myUnitIDs = {}
-                break
+        else
+            for unitID = 1, 6 do
+                pcall(function() remotes.SellUnit:InvokeServer(unitID) end)
+                task.wait(0.3 + (math.random() * 0.2))
             end
         end
+        
+        _G.myUnitIDs = {}
     end)
 end
 
@@ -408,10 +452,8 @@ local function clickPlayAgain()
     if not clicked then
         pcall(function()
             remotes.RestartGame:InvokeServer()
-            clicked = true
         end)
     end
-    return clicked
 end
 
 local function setupGame(tickSpeed)
@@ -428,18 +470,13 @@ end
 function loadRBTomatoED_3x()
     while true do
         _G.myUnitIDs = {}
-        _G.unitsSold = false
         _G.currentWave = 0
-        completedActions = {}
-        unitLevels = {}
         _G.trackingEnabled = true
         
-        generateRandomDelays()
         setupGame(3)
         task.wait(1.5)
         
-        placements = generateRBTomatoEDPlacements()
-        moneyBasedActions("RBTomatoED")
+        rbTomatoEDStrategy()
         
         waitForGameEnd()
         task.wait(0.5)
@@ -453,18 +490,13 @@ end
 function loadRBTomatoED_2x()
     while true do
         _G.myUnitIDs = {}
-        _G.unitsSold = false
         _G.currentWave = 0
-        completedActions = {}
-        unitLevels = {}
         _G.trackingEnabled = true
         
-        generateRandomDelays()
         setupGame(2)
         task.wait(1.5)
         
-        placements = generateRBTomatoEDPlacements()
-        moneyBasedActions("RBTomatoED")
+        rbTomatoEDStrategy()
         
         waitForGameEnd()
         task.wait(0.5)
@@ -478,18 +510,13 @@ end
 function loadPesticider_3x()
     while true do
         _G.myUnitIDs = {}
-        _G.unitsSold = false
         _G.currentWave = 0
-        completedActions = {}
-        unitLevels = {}
         _G.trackingEnabled = true
         
-        generateRandomDelays()
         setupGame(3)
         task.wait(1.5)
         
-        placements = generatePesticiderPlacements()
-        moneyBasedActions("Pesticider")
+        pesticiderStrategy()
         
         waitForGameEnd()
         task.wait(0.5)
@@ -503,18 +530,13 @@ end
 function loadPesticider_2x()
     while true do
         _G.myUnitIDs = {}
-        _G.unitsSold = false
         _G.currentWave = 0
-        completedActions = {}
-        unitLevels = {}
         _G.trackingEnabled = true
         
-        generateRandomDelays()
         setupGame(2)
         task.wait(1.5)
         
-        placements = generatePesticiderPlacements()
-        moneyBasedActions("Pesticider")
+        pesticiderStrategy()
         
         waitForGameEnd()
         task.wait(0.5)
