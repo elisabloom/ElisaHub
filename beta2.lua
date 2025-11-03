@@ -39,7 +39,6 @@ Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 local UICorner = Instance.new("UICorner", Frame)
 UICorner.CornerRadius = UDim.new(0, 10)
 
--- Key System
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
@@ -83,8 +82,8 @@ local entities = Workspace:WaitForChild("Map"):WaitForChild("Entities")
 _G.myUnitIDs = _G.myUnitIDs or {}
 _G.trackingEnabled = false
 _G.currentWave = 0
+_G.allActionsCompleted = false
 
--- Wave Detector
 local function detectWave()
     local success, result = pcall(function()
         local guiNoInset = plr.PlayerGui:FindFirstChild("GameGuiNoInset")
@@ -224,10 +223,6 @@ local function tryPlaceUnit(unit, basePosition, unitIndex, maxAttempts)
     return false, nil
 end
 
--- ========================================
--- RAINBOW TOMATO + EARTH DRAGON STRATEGY
--- ========================================
-
 local function generateRBTomatoEDPlacements()
     local randomPlacements = {
         {type = "place", requiredMoney = 100, unit = "unit_tomato_rainbow", basePosition = Vector3.new(-344.7191162109375, 61.680301666259766, -702.30859375), unitIndex = 1},
@@ -257,10 +252,6 @@ local function generateRBTomatoEDPlacements()
     return randomPlacements
 end
 
--- ========================================
--- PESTICIDER STRATEGY
--- ========================================
-
 local function generatePesticiderPlacements()
     return {
         {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
@@ -268,8 +259,8 @@ local function generatePesticiderPlacements()
          unitIndex = 1, needsPlacement = true},
         {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
          basePosition = Vector3.new(-347.159912109375, 61.68030548095703, -709.947265625), 
-         unitIndex = 2, needsPlacement = true},
-        {type = "upgrade", requiredMoney = 700, unitIndex = 2, targetLevel = 2},
+         unitIndex = 2, needsPlacement = true, waitForUnit = 1, waitForLevel = 1},
+        {type = "upgrade", requiredMoney = 700, unitIndex = 2, targetLevel = 2, waitForUnit = 2, waitForLevel = 1},
         {type = "upgrade", requiredMoney = 700, unitIndex = 1, targetLevel = 2},
         {type = "upgrade", requiredMoney = 1500, unitIndex = 1, targetLevel = 3},
         {type = "upgrade", requiredMoney = 3000, unitIndex = 1, targetLevel = 4},
@@ -280,10 +271,6 @@ local function generatePesticiderPlacements()
     }
 end
 
--- ========================================
--- MONEY-BASED ACTIONS (UNIFIED)
--- ========================================
-
 local function moneyBasedActions(strategyType)
     local unitsToSell = strategyType == "Pesticider" and 2 or 6
     
@@ -291,8 +278,7 @@ local function moneyBasedActions(strategyType)
         while _G.trackingEnabled do
             task.wait(0.2)
             
-            -- Vender unidades en wave 20
-            if _G.currentWave >= 20 and not _G.unitsSold then
+            if _G.currentWave >= 20 and not _G.unitsSold and _G.allActionsCompleted then
                 _G.unitsSold = true
                 
                 local randomDelay = 0.5 + (math.random() * 0.5)
@@ -329,7 +315,18 @@ local function moneyBasedActions(strategyType)
                 break
             end
             
-            -- Ejecutar acciones
+            local allDone = true
+            for i = 1, #placements do
+                if not completedActions[i] then
+                    allDone = false
+                    break
+                end
+            end
+            
+            if allDone and not _G.allActionsCompleted then
+                _G.allActionsCompleted = true
+            end
+            
             local currentMoney = getMoney()
             
             for i, action in ipairs(placements) do
@@ -348,6 +345,12 @@ local function moneyBasedActions(strategyType)
                             if success and placedUnitIndex then
                                 completedActions[i] = true
                                 unitLevels[action.unitIndex] = 1
+                                
+                                local waitTime = 0
+                                while #_G.myUnitIDs < action.unitIndex and waitTime < 10 do
+                                    task.wait(0.2)
+                                    waitTime = waitTime + 0.2
+                                end
                             else
                                 completedActions[i] = true
                             end
@@ -432,15 +435,12 @@ local function setupGame(tickSpeed)
     setupAutoSkip()
 end
 
--- ========================================
--- MAIN FARM LOOPS
--- ========================================
-
 function loadRBTomatoED_3x()
     while true do
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
+        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -466,6 +466,7 @@ function loadRBTomatoED_2x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
+        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -491,6 +492,7 @@ function loadPesticider_3x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
+        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -516,6 +518,7 @@ function loadPesticider_2x()
         _G.myUnitIDs = {}
         _G.unitsSold = false
         _G.currentWave = 0
+        _G.allActionsCompleted = false
         completedActions = {}
         unitLevels = {}
         _G.trackingEnabled = true
@@ -535,10 +538,6 @@ function loadPesticider_2x()
         task.wait(2)
     end
 end
-
--- ========================================
--- GUI MENUS
--- ========================================
 
 local function showStrategyMenu()
     Frame:ClearAllChildren()
