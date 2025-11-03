@@ -4,10 +4,10 @@
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = "Garden Tower Defense",
+    Title = "Noah Hub",
     Icon = "rbxassetid://10723415903",
-    Author = "Noah Hub",
-    Folder = "NoahHub_GTD",
+    Author = "by Threldor",
+    Folder = "NoahHub",
     Size = UDim2.fromOffset(580, 460),
     KeySystem = false,
     Transparent = true,
