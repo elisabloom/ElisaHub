@@ -263,20 +263,20 @@ end
 
 local function generatePesticiderPlacements()
     return {
-        {type = "place", requiredMoney = 100, unit = "unit_pesticider", 
+        {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
          basePosition = Vector3.new(-341.5465393066406, 61.68030548095703, -703.4617919921875), 
          unitIndex = 1, needsPlacement = true},
-        {type = "place", requiredMoney = 100, unit = "unit_pesticider", 
+        {type = "place", requiredMoney = 500, unit = "unit_pesticider", 
          basePosition = Vector3.new(-347.159912109375, 61.68030548095703, -709.947265625), 
          unitIndex = 2, needsPlacement = true},
-        {type = "upgrade", requiredMoney = 125, unitIndex = 2, targetLevel = 2},
-        {type = "upgrade", requiredMoney = 125, unitIndex = 1, targetLevel = 2},
-        {type = "upgrade", requiredMoney = 175, unitIndex = 1, targetLevel = 3},
-        {type = "upgrade", requiredMoney = 350, unitIndex = 1, targetLevel = 4},
-        {type = "upgrade", requiredMoney = 500, unitIndex = 1, targetLevel = 5},
-        {type = "upgrade", requiredMoney = 175, unitIndex = 2, targetLevel = 3, waitForUnit = 1, waitForLevel = 5},
-        {type = "upgrade", requiredMoney = 350, unitIndex = 2, targetLevel = 4},
-        {type = "upgrade", requiredMoney = 500, unitIndex = 2, targetLevel = 5}
+        {type = "upgrade", requiredMoney = 700, unitIndex = 2, targetLevel = 2},
+        {type = "upgrade", requiredMoney = 700, unitIndex = 1, targetLevel = 2},
+        {type = "upgrade", requiredMoney = 1500, unitIndex = 1, targetLevel = 3},
+        {type = "upgrade", requiredMoney = 3000, unitIndex = 1, targetLevel = 4},
+        {type = "upgrade", requiredMoney = 6000, unitIndex = 1, targetLevel = 5},
+        {type = "upgrade", requiredMoney = 1500, unitIndex = 2, targetLevel = 3, waitForUnit = 1, waitForLevel = 5},
+        {type = "upgrade", requiredMoney = 3000, unitIndex = 2, targetLevel = 4},
+        {type = "upgrade", requiredMoney = 6000, unitIndex = 2, targetLevel = 5}
     }
 end
 
