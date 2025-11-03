@@ -298,7 +298,7 @@ local function pesticiderStrategy()
 end
 
 local function rbTomatoEDStrategy()
-    task.spawn(function())
+    task.spawn(function()
         while getMoney() < 100 do task.wait(0.2) end
         tryPlaceUnit("unit_tomato_rainbow", Vector3.new(-344.7191162109375, 61.680301666259766, -702.30859375), 5)
         task.wait(0.3)
