@@ -1,184 +1,171 @@
---// Garden Tower Defense - Simple Wave Detector
+--// Wave Detector (Loadstring Compatible)
 
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 
-_G.currentWave = 0
-_G.detecting = true
+getgenv().currentWave = 0
+getgenv().detecting = true
 
--- GUI simple
-local function createSimpleGui()
+local function createGui()
     local gui = plr.PlayerGui:FindFirstChild("WaveDetector")
     if gui then gui:Destroy() end
     
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "WaveDetector"
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.Parent = plr.PlayerGui
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "WaveDetector"
+    sg.ResetOnSpawn = false
+    sg.Parent = plr.PlayerGui
     
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 180, 0, 80)
-    Frame.Position = UDim2.new(0, 10, 0.5, -40)
-    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Frame.BackgroundTransparency = 0.2
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true
-    Frame.Parent = ScreenGui
+    local f = Instance.new("Frame")
+    f.Size = UDim2.new(0, 180, 0, 80)
+    f.Position = UDim2.new(0, 10, 0.5, -40)
+    f.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    f.BackgroundTransparency = 0.2
+    f.BorderSizePixel = 0
+    f.Active = true
+    f.Draggable = true
+    f.Parent = sg
     
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
+    local c1 = Instance.new("UICorner", f)
+    c1.CornerRadius = UDim.new(0, 8)
     
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 25)
-    Title.BackgroundTransparency = 1
-    Title.Text = "Wave Detector"
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 13
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Parent = Frame
+    local t = Instance.new("TextLabel")
+    t.Size = UDim2.new(1, 0, 0, 25)
+    t.BackgroundTransparency = 1
+    t.Text = "Wave Detector"
+    t.Font = Enum.Font.GothamBold
+    t.TextSize = 13
+    t.TextColor3 = Color3.fromRGB(255, 255, 255)
+    t.Parent = f
     
-    local WaveLabel = Instance.new("TextLabel")
-    WaveLabel.Size = UDim2.new(1, -16, 0, 30)
-    WaveLabel.Position = UDim2.new(0, 8, 0, 30)
-    WaveLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    WaveLabel.Text = "Wave: --"
-    WaveLabel.Font = Enum.Font.GothamBold
-    WaveLabel.TextSize = 16
-    WaveLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-    WaveLabel.Parent = Frame
-    Instance.new("UICorner", WaveLabel).CornerRadius = UDim.new(0, 6)
+    local w = Instance.new("TextLabel")
+    w.Size = UDim2.new(1, -16, 0, 30)
+    w.Position = UDim2.new(0, 8, 0, 30)
+    w.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    w.Text = "Wave: --"
+    w.Font = Enum.Font.GothamBold
+    w.TextSize = 16
+    w.TextColor3 = Color3.fromRGB(100, 255, 100)
+    w.Parent = f
     
-    local MethodLabel = Instance.new("TextLabel")
-    MethodLabel.Size = UDim2.new(1, 0, 0, 15)
-    MethodLabel.Position = UDim2.new(0, 0, 1, -15)
-    MethodLabel.BackgroundTransparency = 1
-    MethodLabel.Text = "Detecting..."
-    MethodLabel.Font = Enum.Font.Gotham
-    MethodLabel.TextSize = 9
-    MethodLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-    MethodLabel.Parent = Frame
+    local c2 = Instance.new("UICorner", w)
+    c2.CornerRadius = UDim.new(0, 6)
     
-    return WaveLabel, MethodLabel
+    local m = Instance.new("TextLabel")
+    m.Size = UDim2.new(1, 0, 0, 15)
+    m.Position = UDim2.new(0, 0, 1, -15)
+    m.BackgroundTransparency = 1
+    m.Text = "Detecting..."
+    m.Font = Enum.Font.Gotham
+    m.TextSize = 9
+    m.TextColor3 = Color3.fromRGB(150, 150, 150)
+    m.Parent = f
+    
+    return w, m
 end
 
-local waveLabel, methodLabel = createSimpleGui()
+local waveLabel, methodLabel = createGui()
 
--- Métodos de detección
-local function method1_GameGui()
-    local success, result = pcall(function()
-        local gameGui = plr.PlayerGui:FindFirstChild("GameGui")
-        if not gameGui then return nil end
-        
-        for _, obj in pairs(gameGui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local text = string.lower(obj.Text)
-                if string.find(text, "wave") then
-                    local num = tonumber(string.match(obj.Text, "%d+"))
-                    if num and num > 0 then
-                        return num
-                    end
+local function m1()
+    local s, r = pcall(function()
+        local g = plr.PlayerGui:FindFirstChild("GameGui")
+        if not g then return nil end
+        for _, o in pairs(g:GetDescendants()) do
+            if o:IsA("TextLabel") then
+                local tx = string.lower(o.Text)
+                if string.find(tx, "wave") then
+                    local n = tonumber(string.match(o.Text, "%d+"))
+                    if n and n > 0 then return n end
                 end
             end
         end
     end)
-    return success and result or nil
+    return s and r or nil
 end
 
-local function method2_PlayerAttribute()
-    local success, result = pcall(function()
+local function m2()
+    local s, r = pcall(function()
         return plr:GetAttribute("CurrentWave") or plr:GetAttribute("Wave")
     end)
-    return success and result or nil
+    return s and r or nil
 end
 
-local function method3_Workspace()
-    local success, result = pcall(function()
-        local map = workspace:FindFirstChild("Map")
-        if not map then return nil end
-        
-        for _, obj in pairs(map:GetDescendants()) do
-            if obj.Name == "CurrentWave" or obj.Name == "Wave" then
-                if obj:IsA("IntValue") or obj:IsA("NumberValue") then
-                    return obj.Value
+local function m3()
+    local s, r = pcall(function()
+        local m = workspace:FindFirstChild("Map")
+        if not m then return nil end
+        for _, o in pairs(m:GetDescendants()) do
+            if o.Name == "CurrentWave" or o.Name == "Wave" then
+                if o:IsA("IntValue") or o:IsA("NumberValue") then
+                    return o.Value
                 end
             end
         end
     end)
-    return success and result or nil
+    return s and r or nil
 end
 
-local function method4_ReplicatedStorage()
-    local success, result = pcall(function()
+local function m4()
+    local s, r = pcall(function()
         local rs = game:GetService("ReplicatedStorage")
-        
-        for _, obj in pairs(rs:GetDescendants()) do
-            if obj.Name == "CurrentWave" or obj.Name == "Wave" then
-                if obj:IsA("IntValue") or obj:IsA("NumberValue") then
-                    return obj.Value
+        for _, o in pairs(rs:GetDescendants()) do
+            if o.Name == "CurrentWave" or o.Name == "Wave" then
+                if o:IsA("IntValue") or o:IsA("NumberValue") then
+                    return o.Value
                 end
             end
         end
     end)
-    return success and result or nil
+    return s and r or nil
 end
 
-local function method5_GameGuiNoInset()
-    local success, result = pcall(function()
-        local gameGui = plr.PlayerGui:FindFirstChild("GameGuiNoInset")
-        if not gameGui then return nil end
-        
-        for _, obj in pairs(gameGui:GetDescendants()) do
-            if obj:IsA("TextLabel") then
-                local text = string.lower(obj.Text)
-                if string.find(text, "wave") or string.find(text, "round") then
-                    local num = tonumber(string.match(obj.Text, "%d+"))
-                    if num and num > 0 then
-                        return num
-                    end
+local function m5()
+    local s, r = pcall(function()
+        local g = plr.PlayerGui:FindFirstChild("GameGuiNoInset")
+        if not g then return nil end
+        for _, o in pairs(g:GetDescendants()) do
+            if o:IsA("TextLabel") then
+                local tx = string.lower(o.Text)
+                if string.find(tx, "wave") or string.find(tx, "round") then
+                    local n = tonumber(string.match(o.Text, "%d+"))
+                    if n and n > 0 then return n end
                 end
             end
         end
     end)
-    return success and result or nil
+    return s and r or nil
 end
 
--- Detectar wave con todos los métodos
-local function detectWave()
+local function detect()
     local methods = {
-        {name = "GameGui", func = method1_GameGui},
-        {name = "Attribute", func = method2_PlayerAttribute},
-        {name = "Workspace", func = method3_Workspace},
-        {name = "RepStorage", func = method4_ReplicatedStorage},
-        {name = "GameGuiNoInset", func = method5_GameGuiNoInset}
+        {n = "GameGui", f = m1},
+        {n = "Attribute", f = m2},
+        {n = "Workspace", f = m3},
+        {n = "RepStorage", f = m4},
+        {n = "GameGuiNoInset", f = m5}
     }
     
-    for i, method in ipairs(methods) do
-        local wave = method.func()
-        if wave and wave > 0 then
-            return wave, method.name
+    for i, mt in ipairs(methods) do
+        local w = mt.f()
+        if w and w > 0 then
+            return w, mt.n
         end
     end
     
     return nil, "None"
 end
 
--- Loop de detección
 task.spawn(function()
-    local lastWave = 0
-    
-    while _G.detecting do
+    local last = 0
+    while getgenv().detecting do
         task.wait(0.5)
-        
-        local wave, method = detectWave()
-        
-        if wave then
-            _G.currentWave = wave
-            waveLabel.Text = "Wave: " .. wave
-            methodLabel.Text = "Method: " .. method
-            
-            if wave ~= lastWave then
-                lastWave = wave
-                warn("[WAVE] Changed to: " .. wave .. " (Method: " .. method .. ")")
+        local w, mt = detect()
+        if w then
+            getgenv().currentWave = w
+            waveLabel.Text = "Wave: " .. w
+            methodLabel.Text = "Method: " .. mt
+            if w ~= last then
+                last = w
+                print("[WAVE] Changed to: " .. w .. " (Method: " .. mt .. ")")
             end
         else
             waveLabel.Text = "Wave: --"
@@ -187,42 +174,4 @@ task.spawn(function()
     end
 end)
 
-warn("========================================")
-warn("[WAVE DETECTOR] Initialized")
-warn("[STATUS] Detection active")
-warn("========================================")
-```
-
----
-
-## ✅ **Detector Simple de Waves**
-
-### **📋 Lo que hace:**
-
-1. **Detecta el wave actual** usando 5 métodos diferentes
-2. **Muestra en GUI** el wave y qué método funcionó
-3. **Imprime en consola** cuando cambia de wave
-
-### **🎮 Output en consola:**
-```
-========================================
-[WAVE DETECTOR] Initialized
-[STATUS] Detection active
-========================================
-[WAVE] Changed to: 1 (Method: GameGuiNoInset)
-[WAVE] Changed to: 2 (Method: GameGuiNoInset)
-[WAVE] Changed to: 3 (Method: GameGuiNoInset)
-[WAVE] Changed to: 4 (Method: GameGuiNoInset)
-[WAVE] Changed to: 5 (Method: GameGuiNoInset)
-...
-[WAVE] Changed to: 15 (Method: GameGuiNoInset)
-```
-
-### **📊 GUI muestra:**
-```
-┌─────────────────┐
-│ Wave Detector   │
-├─────────────────┤
-│   Wave: 15      │
-│ Method: GameGui │
-└─────────────────┘
+print("[WAVE DETECTOR] Loaded via loadstring")
