@@ -46,7 +46,7 @@ local function createMacroGui()
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1, -30, 0, 25)
     Title.BackgroundTransparency = 1
-    Title.Text = "🎬 Macro Recorder"
+    Title.Text = "Macro Recorder"
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 13
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -74,7 +74,7 @@ local function createMacroGui()
     StatusLabel.Size = UDim2.new(1, -16, 0, 20)
     StatusLabel.Position = UDim2.new(0, 8, 0, 5)
     StatusLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    StatusLabel.Text = ⏸️ Ready"
+    StatusLabel.Text = Ready"
     StatusLabel.Font = Enum.Font.GothamBold
     StatusLabel.TextSize = 11
     StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -98,7 +98,7 @@ local function createMacroGui()
     local RecordButton = Instance.new("TextButton")
     RecordButton.Size = UDim2.new(0.48, 0, 0, 32)
     RecordButton.Position = UDim2.new(0, 8, 0, 60)
-    RecordButton.Text = "🔴 Record"
+    RecordButton.Text = "Record"
     RecordButton.Font = Enum.Font.GothamBold
     RecordButton.TextSize = 12
     RecordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -110,7 +110,7 @@ local function createMacroGui()
     local StopButton = Instance.new("TextButton")
     StopButton.Size = UDim2.new(0.48, 0, 0, 32)
     StopButton.Position = UDim2.new(0.52, 0, 0, 60)
-    StopButton.Text = "⏹️ Save"
+    StopButton.Text = "Save"
     StopButton.Font = Enum.Font.GothamBold
     StopButton.TextSize = 12
     StopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -122,7 +122,7 @@ local function createMacroGui()
     local MacroListButton = Instance.new("TextButton")
     MacroListButton.Size = UDim2.new(1, -16, 0, 28)
     MacroListButton.Position = UDim2.new(0, 8, 0, 97)
-    MacroListButton.Text = "📁 Saved Macros (0) ▼"
+    MacroListButton.Text = "Saved Macros (0) ▼"
     MacroListButton.Font = Enum.Font.GothamBold
     MacroListButton.TextSize = 11
     MacroListButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -148,7 +148,7 @@ local function createMacroGui()
     local ExportButton = Instance.new("TextButton")
     ExportButton.Size = UDim2.new(0.48, 0, 0, 28)
     ExportButton.Position = UDim2.new(0, 8, 0, 132)
-    ExportButton.Text = "📋 Export"
+    ExportButton.Text = "Export"
     ExportButton.Font = Enum.Font.GothamBold
     ExportButton.TextSize = 11
     ExportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -160,7 +160,7 @@ local function createMacroGui()
     local ImportButton = Instance.new("TextButton")
     ImportButton.Size = UDim2.new(0.48, 0, 0, 28)
     ImportButton.Position = UDim2.new(0.52, 0, 0, 132)
-    ImportButton.Text = "📥 Import"
+    ImportButton.Text = "Import"
     ImportButton.Font = Enum.Font.GothamBold
     ImportButton.TextSize = 11
     ImportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -215,7 +215,7 @@ local function toggleMacroList(gui)
         gui.MacroListFrame.Visible = true
         gui.MacroListFrame:TweenSize(UDim2.new(1, -16, 0, 120), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
         gui.MainFrame:TweenSize(UDim2.new(0, 280, 0, 380), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-        gui.MacroListButton.Text = "📁 Saved Macros (" .. #_G.savedMacros .. ") ▲"
+        gui.MacroListButton.Text = "Saved Macros (" .. #_G.savedMacros .. ") ▲"
         gui.ExportButton.Position = UDim2.new(0, 8, 0, 257)
         gui.ImportButton.Position = UDim2.new(0.52, 0, 0, 257)
         gui.SelectedLabel.Position = UDim2.new(0, 8, 0, 290)
@@ -224,7 +224,7 @@ local function toggleMacroList(gui)
             gui.MacroListFrame.Visible = false
         end)
         gui.MainFrame:TweenSize(UDim2.new(0, 280, 0, 200), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-        gui.MacroListButton.Text = "📁 Saved Macros (" .. #_G.savedMacros .. ") ▼"
+        gui.MacroListButton.Text = "Saved Macros (" .. #_G.savedMacros .. ") ▼"
         gui.ExportButton.Position = UDim2.new(0, 8, 0, 132)
         gui.ImportButton.Position = UDim2.new(0.52, 0, 0, 132)
         gui.SelectedLabel.Position = UDim2.new(0, 8, 0, 165)
@@ -236,7 +236,7 @@ local function updateMacroList(gui)
         if child:IsA("Frame") then child:Destroy() end
     end
     
-    gui.MacroListButton.Text = "📁 Saved Macros (" .. #_G.savedMacros .. ") " .. (_G.listExpanded and "▲" or "▼")
+    gui.MacroListButton.Text = "Saved Macros (" .. #_G.savedMacros .. ") " .. (_G.listExpanded and "▲" or "▼")
     
     if #_G.savedMacros == 0 then
         local EmptyLabel = Instance.new("TextLabel")
@@ -262,7 +262,7 @@ local function updateMacroList(gui)
         MacroNameLabel.Size = UDim2.new(0, 100, 1, 0)
         MacroNameLabel.Position = UDim2.new(0, 6, 0, 0)
         MacroNameLabel.BackgroundTransparency = 1
-        MacroNameLabel.Text = "📄 " .. macro.name
+        MacroNameLabel.Text = "Name " .. macro.name
         MacroNameLabel.Font = Enum.Font.GothamBold
         MacroNameLabel.TextSize = 10
         MacroNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -284,7 +284,7 @@ local function updateMacroList(gui)
         local PlayBtn = Instance.new("TextButton")
         PlayBtn.Size = UDim2.new(0, 25, 0, 25)
         PlayBtn.Position = UDim2.new(1, -83, 0.5, -12.5)
-        PlayBtn.Text = "▶️"
+        PlayBtn.Text = "Play"
         PlayBtn.Font = Enum.Font.GothamBold
         PlayBtn.TextSize = 12
         PlayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -308,7 +308,7 @@ local function updateMacroList(gui)
         local DeleteBtn = Instance.new("TextButton")
         DeleteBtn.Size = UDim2.new(0, 25, 0, 25)
         DeleteBtn.Position = UDim2.new(1, -25, 0.5, -12.5)
-        DeleteBtn.Text = "🗑️"
+        DeleteBtn.Text = "Delete"
         DeleteBtn.Font = Enum.Font.GothamBold
         DeleteBtn.TextSize = 10
         DeleteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -353,7 +353,7 @@ local function startRecording(gui)
     _G.recordedMacro = {}
     _G.placedUnits = {}
     _G.recordStartTime = tick()
-    gui.StatusLabel.Text = "🔴 Recording..."
+    gui.StatusLabel.Text = "Recording..."
     gui.StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     gui.RecordButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
     gui.StopButton.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
@@ -369,7 +369,7 @@ local function stopRecording(gui)
     warn("[MACRO] Stopping - Total actions: " .. #_G.recordedMacro)
     
     table.insert(_G.savedMacros, {name = macroName, actions = _G.recordedMacro, timestamp = os.time()})
-    gui.StatusLabel.Text = "💾 Saved: " .. macroName
+    gui.StatusLabel.Text = "Saved: " .. macroName
     gui.StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
     gui.RecordButton.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
     gui.StopButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
@@ -377,7 +377,7 @@ local function stopRecording(gui)
     updateMacroList(gui)
     warn("[MACRO] Saved '" .. macroName .. "' with " .. #_G.recordedMacro .. " actions")
     task.wait(2)
-    gui.StatusLabel.Text = "⏸️ Ready"
+    gui.StatusLabel.Text = "Ready"
     gui.StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 end
 
@@ -499,7 +499,7 @@ function playMacro(actions, gui)
     if _G.macroPlaying or not actions or #actions == 0 then return end
     _G.macroPlaying = true
     _G.placedUnits = {}
-    gui.StatusLabel.Text = "▶️ Playing..."
+    gui.StatusLabel.Text = "Playing..."
     gui.StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
     warn("[MACRO] Playing " .. #actions .. " actions")
     
@@ -536,31 +536,31 @@ function playMacro(actions, gui)
         end
         
         _G.macroPlaying = false
-        gui.StatusLabel.Text = "✅ Complete!"
+        gui.StatusLabel.Text = "Complete!"
         gui.StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         warn("[MACRO] Playback complete")
         task.wait(2)
-        gui.StatusLabel.Text = "⏸️ Ready"
+        gui.StatusLabel.Text = "Ready"
         gui.StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     end)
 end
 
 local function exportMacro(gui)
     if not _G.selectedMacro then
-        gui.StatusLabel.Text = "⚠️ Select macro"
+        gui.StatusLabel.Text = "Select macro"
         gui.StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
         task.wait(2)
-        gui.StatusLabel.Text = "⏸️ Ready"
+        gui.StatusLabel.Text = "Ready"
         gui.StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
         return
     end
     pcall(function()
         setclipboard(HttpService:JSONEncode(_G.selectedMacro))
-        gui.ExportButton.Text = "✅"
+        gui.ExportButton.Text = "export"
         gui.ExportButton.BackgroundColor3 = Color3.fromRGB(30, 150, 30)
     end)
     task.wait(1.5)
-    gui.ExportButton.Text = "📋 Export"
+    gui.ExportButton.Text = "Export"
     gui.ExportButton.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
 end
 
@@ -572,14 +572,14 @@ local function importMacro(gui)
         end
         table.insert(_G.savedMacros, result)
         updateMacroList(gui)
-        gui.ImportButton.Text = "✅"
+        gui.ImportButton.Text = "import"
         gui.ImportButton.BackgroundColor3 = Color3.fromRGB(30, 150, 30)
     else
-        gui.ImportButton.Text = "❌"
+        gui.ImportButton.Text = "x"
         gui.ImportButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     end
     task.wait(1.5)
-    gui.ImportButton.Text = "📥 Import"
+    gui.ImportButton.Text = "Import"
     gui.ImportButton.BackgroundColor3 = Color3.fromRGB(200, 100, 50)
 end
 
