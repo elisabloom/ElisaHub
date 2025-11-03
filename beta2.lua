@@ -1,4 +1,4 @@
---// Wave Detector (Loadstring Compatible)
+--// Wave Detector (FIXED - Detects correct wave number)
 
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
@@ -65,16 +65,35 @@ end
 
 local waveLabel, methodLabel = createGui()
 
-local function m1()
+-- MÉTODO MEJORADO: Busca específicamente "Wave X / Y" o "Wave X"
+local function m1_improved()
     local s, r = pcall(function()
         local g = plr.PlayerGui:FindFirstChild("GameGui")
         if not g then return nil end
+        
         for _, o in pairs(g:GetDescendants()) do
             if o:IsA("TextLabel") then
-                local tx = string.lower(o.Text)
-                if string.find(tx, "wave") then
-                    local n = tonumber(string.match(o.Text, "%d+"))
-                    if n and n > 0 then return n end
+                local text = o.Text
+                
+                -- Patrón 1: "Wave 2 / 40" o "Impossible: Wave 2 / 40"
+                local wave1, total1 = string.match(text, "[Ww]ave%s*(%d+)%s*/%s*(%d+)")
+                if wave1 then
+                    return tonumber(wave1)
+                end
+                
+                -- Patrón 2: "2 / 40" (solo números con slash)
+                local wave2, total2 = string.match(text, "^(%d+)%s*/%s*(%d+)$")
+                if wave2 then
+                    local num = tonumber(wave2)
+                    if num and num <= 100 then -- Evita números grandes falsos
+                        return num
+                    end
+                end
+                
+                -- Patrón 3: "Wave: 2"
+                local wave3 = string.match(text, "[Ww]ave:%s*(%d+)")
+                if wave3 then
+                    return tonumber(wave3)
                 end
             end
         end
@@ -118,16 +137,35 @@ local function m4()
     return s and r or nil
 end
 
-local function m5()
+-- MÉTODO MEJORADO para GameGuiNoInset
+local function m5_improved()
     local s, r = pcall(function()
         local g = plr.PlayerGui:FindFirstChild("GameGuiNoInset")
         if not g then return nil end
+        
         for _, o in pairs(g:GetDescendants()) do
             if o:IsA("TextLabel") then
-                local tx = string.lower(o.Text)
-                if string.find(tx, "wave") or string.find(tx, "round") then
-                    local n = tonumber(string.match(o.Text, "%d+"))
-                    if n and n > 0 then return n end
+                local text = o.Text
+                
+                -- Patrón 1: "Wave 2 / 40" o "Impossible: Wave 2 / 40"
+                local wave1, total1 = string.match(text, "[Ww]ave%s*(%d+)%s*/%s*(%d+)")
+                if wave1 then
+                    return tonumber(wave1)
+                end
+                
+                -- Patrón 2: "2 / 40" (solo números con slash)
+                local wave2, total2 = string.match(text, "^(%d+)%s*/%s*(%d+)$")
+                if wave2 then
+                    local num = tonumber(wave2)
+                    if num and num <= 100 then
+                        return num
+                    end
+                end
+                
+                -- Patrón 3: "Wave: 2"
+                local wave3 = string.match(text, "[Ww]ave:%s*(%d+)")
+                if wave3 then
+                    return tonumber(wave3)
                 end
             end
         end
@@ -137,16 +175,16 @@ end
 
 local function detect()
     local methods = {
-        {n = "GameGui", f = m1},
+        {n = "GameGui", f = m1_improved},
+        {n = "GameGuiNoInset", f = m5_improved},
         {n = "Attribute", f = m2},
         {n = "Workspace", f = m3},
-        {n = "RepStorage", f = m4},
-        {n = "GameGuiNoInset", f = m5}
+        {n = "RepStorage", f = m4}
     }
     
     for i, mt in ipairs(methods) do
         local w = mt.f()
-        if w and w > 0 then
+        if w and w > 0 and w <= 100 then -- Validar rango razonable
             return w, mt.n
         end
     end
@@ -174,4 +212,4 @@ task.spawn(function()
     end
 end)
 
-print("[WAVE DETECTOR] Loaded via loadstring")
+print("[WAVE DETECTOR] Loaded - Fixed pattern matching")
