@@ -374,13 +374,13 @@ end
 
 -- Create WindUI Window
 local Window = WindUI:CreateWindow({
-    Title = "GTD Auto Farm  |  Graveyard",
-    Author = "by holasoy_kier",
-    Folder = "GTDAutoFarm",
+    Title = "Noah Hub",
+    Author = "by Threldor",
+    Folder = "NoahHubUnitVer",
     Icon = "sprout",
     
     OpenButton = {
-        Title = "Open GTD Auto Farm",
+        Title = "NoahHub",
         CornerRadius = UDim.new(0, 10),
         StrokeThickness = 2,
         Enabled = true,
@@ -528,39 +528,6 @@ task.spawn(function()
             })
         end
     })
-    
-    FarmTab:Space()
-    
-    -- Info Section
-    local InfoTab = MainSection:Tab({
-        Title = "Information",
-        Icon = "info",
-    })
-    
-    InfoTab:Section({
-        Title = "About This Script",
-        TextSize = 18,
-    })
-    
-    InfoTab:Space()
-    
-    InfoTab:Paragraph({
-        Title = "GTD Auto Farm",
-        Desc = "Automated farming script for Garden Tower Defense Graveyard map using RB Tomato and Elder Dragon strategy. Works on Impossible difficulty with 2x or 3x game speed.",
-    })
-    
-    InfoTab:Space()
-    
-    InfoTab:Section({
-        Title = "Strategy Details",
-        TextSize = 16,
-    })
-    
-    InfoTab:Paragraph({
-        Title = "Units Used",
-        Desc = "• 3x Rainbow Tomato\n• 3x Elder Dragon Golem\n\nThe script automatically places and upgrades units, then sells them after wave 20 to restart.",
-    })
-end)
 
 -- Load external scripts
 task.spawn(function()
