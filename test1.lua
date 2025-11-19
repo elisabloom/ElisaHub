@@ -1933,7 +1933,7 @@ local function runGraveyardV2()
     return true
 end
 
--- ==================== DOJO: RAFFLESIA STRATEGY ====================
+-- ==================== DOJO: RAFFLESIA STRATEGY (CON DEBUGGING) ====================
 local function runDojo()
     print("[DOJO] Starting Rafflesia strategy...")
     
@@ -2004,9 +2004,16 @@ local function runDojo()
     _G.trackingEnabled = true
     setupUnifiedTracking()
     
+    print("[DOJO] ========================================")
+    print("[DOJO] 🔍 DEBUGGING MODE ACTIVATED")
+    print("[DOJO] ========================================")
+    
     -- ===== COLOCAR PRIMER RAFFLESIA (PATH 1) =====
     print("[DOJO] Placing Rafflesia 1 (Path 1)...")
-    while getMoney() < 1250 do task.wait(0.2) end
+    while getMoney() < 1250 do 
+        print("[DOJO] Waiting for $1250... Current: $" .. getMoney())
+        task.wait(0.2) 
+    end
     
     for attempt = 1, 5 do
         local placementData = getRandomPositionPath1()
@@ -2016,22 +2023,35 @@ local function runDojo()
         end)
         
         if success then 
-            print("[DOJO] ✓ Placed Rafflesia 1")
+            print("[DOJO] ✓ Placed Rafflesia 1 on attempt " .. attempt)
             break 
+        else
+            warn("[DOJO] ✗ Failed to place Rafflesia 1 on attempt " .. attempt)
         end
         task.wait(0.15)
     end
     task.wait(0.15)
     
+    print("[DOJO] Waiting for Rafflesia 1 to be tracked...")
     local waitTime = 0
     while #_G.myUnitIDs < 1 and waitTime < 10 do
+        print("[DOJO] Tracked IDs so far: " .. #_G.myUnitIDs)
         task.wait(0.2)
         waitTime = waitTime + 0.2
     end
     
+    if #_G.myUnitIDs < 1 then
+        warn("[DOJO] ❌ FAILED TO TRACK RAFFLESIA 1 AFTER " .. waitTime .. " SECONDS!")
+        _G.trackingEnabled = false
+        return false
+    end
+    
     -- ===== COLOCAR SEGUNDO RAFFLESIA (PATH 2) =====
     print("[DOJO] Placing Rafflesia 2 (Path 2)...")
-    while getMoney() < 1250 do task.wait(0.2) end
+    while getMoney() < 1250 do 
+        print("[DOJO] Waiting for $1250... Current: $" .. getMoney())
+        task.wait(0.2) 
+    end
     
     for attempt = 1, 5 do
         local placementData = getRandomPositionPath2()
@@ -2041,47 +2061,121 @@ local function runDojo()
         end)
         
         if success then 
-            print("[DOJO] ✓ Placed Rafflesia 2")
+            print("[DOJO] ✓ Placed Rafflesia 2 on attempt " .. attempt)
             break 
+        else
+            warn("[DOJO] ✗ Failed to place Rafflesia 2 on attempt " .. attempt)
         end
         task.wait(0.15)
     end
     task.wait(0.15)
     
+    print("[DOJO] Waiting for Rafflesia 2 to be tracked...")
     waitTime = 0
     while #_G.myUnitIDs < 2 and waitTime < 10 do
+        print("[DOJO] Tracked IDs so far: " .. #_G.myUnitIDs)
         task.wait(0.2)
         waitTime = waitTime + 0.2
     end
     
     if #_G.myUnitIDs < 2 then
+        warn("[DOJO] ❌ FAILED TO TRACK RAFFLESIA 2!")
+        warn("[DOJO] Only tracked " .. #_G.myUnitIDs .. " unit(s)")
         _G.trackingEnabled = false
-        warn("[DOJO] Failed to track both units!")
         return false
     end
     
+    -- ✅ OBTENER IDs Y HACER DEBUGGING COMPLETO
     local raff1ID = _G.myUnitIDs[1]
     local raff2ID = _G.myUnitIDs[2]
     
-    print("[DOJO] raff1ID: " .. tostring(raff1ID))
-    print("[DOJO] raff2ID: " .. tostring(raff2ID))
+    print("[DOJO] ==========================================")
+    print("[DOJO] 📊 TRACKING RESULTS:")
+    print("[DOJO] ==========================================")
+    print("[DOJO] Total units tracked: " .. #_G.myUnitIDs)
+    print("[DOJO] ")
+    print("[DOJO] Rafflesia 1:")
+    print("[DOJO]   - ID Value: " .. tostring(raff1ID))
+    print("[DOJO]   - ID Type: " .. type(raff1ID))
+    print("[DOJO] ")
+    print("[DOJO] Rafflesia 2:")
+    print("[DOJO]   - ID Value: " .. tostring(raff2ID))
+    print("[DOJO]   - ID Type: " .. type(raff2ID))
+    print("[DOJO] ==========================================")
     
-    -- ===== UPGRADES: Ambas Rafflesias a máximo (8000 cada una) =====
-    print("[DOJO] Upgrading Rafflesia 1...")
-    while getMoney() < 8000 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(raff1ID)
+    -- ===== UPGRADE RAFFLESIA 1 CON DEBUGGING =====
+    print("[DOJO] ")
+    print("[DOJO] ========================================")
+    print("[DOJO] 🔧 ATTEMPTING UPGRADE: Rafflesia 1")
+    print("[DOJO] ========================================")
+    print("[DOJO] Waiting for $8000...")
+    
+    while getMoney() < 8000 do 
+        if getMoney() % 1000 == 0 or getMoney() >= 7900 then
+            print("[DOJO] Current money: $" .. getMoney())
+        end
+        task.wait(0.2) 
+    end
+    
+    print("[DOJO] ✓ Money reached! Sending upgrade command...")
+    print("[DOJO] Upgrade parameters:")
+    print("[DOJO]   - Unit ID: " .. tostring(raff1ID))
+    print("[DOJO]   - Unit ID Type: " .. type(raff1ID))
+    
+    local upgradeSuccess1, upgradeError1 = pcall(function()
+        local result = ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(raff1ID)
+        print("[DOJO] UpgradeUnit InvokeServer returned: " .. tostring(result))
+        return result
     end)
+    
+    if upgradeSuccess1 then
+        print("[DOJO] ✅ UPGRADE COMMAND SENT SUCCESSFULLY FOR RAFFLESIA 1")
+    else
+        warn("[DOJO] ❌ UPGRADE FAILED FOR RAFFLESIA 1!")
+        warn("[DOJO] Error: " .. tostring(upgradeError1))
+    end
+    
     task.wait(0.4 + (math.random() * 0.59))
     
-    print("[DOJO] Upgrading Rafflesia 2...")
-    while getMoney() < 8000 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(raff2ID)
+    -- ===== UPGRADE RAFFLESIA 2 CON DEBUGGING =====
+    print("[DOJO] ")
+    print("[DOJO] ========================================")
+    print("[DOJO] 🔧 ATTEMPTING UPGRADE: Rafflesia 2")
+    print("[DOJO] ========================================")
+    print("[DOJO] Waiting for $8000...")
+    
+    while getMoney() < 8000 do 
+        if getMoney() % 1000 == 0 or getMoney() >= 7900 then
+            print("[DOJO] Current money: $" .. getMoney())
+        end
+        task.wait(0.2) 
+    end
+    
+    print("[DOJO] ✓ Money reached! Sending upgrade command...")
+    print("[DOJO] Upgrade parameters:")
+    print("[DOJO]   - Unit ID: " .. tostring(raff2ID))
+    print("[DOJO]   - Unit ID Type: " .. type(raff2ID))
+    
+    local upgradeSuccess2, upgradeError2 = pcall(function()
+        local result = ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(raff2ID)
+        print("[DOJO] UpgradeUnit InvokeServer returned: " .. tostring(result))
+        return result
     end)
+    
+    if upgradeSuccess2 then
+        print("[DOJO] ✅ UPGRADE COMMAND SENT SUCCESSFULLY FOR RAFFLESIA 2")
+    else
+        warn("[DOJO] ❌ UPGRADE FAILED FOR RAFFLESIA 2!")
+        warn("[DOJO] Error: " .. tostring(upgradeError2))
+    end
+    
     task.wait(0.4 + (math.random() * 0.59))
     
-    print("[DOJO] ========== ALL UPGRADES COMPLETE - WAITING FOR WAVE 10 ==========")
+    print("[DOJO] ")
+    print("[DOJO] ========================================")
+    print("[DOJO] ✅ ALL UPGRADES COMPLETE")
+    print("[DOJO] ========================================")
+    print("[DOJO] Waiting for Wave 10...")
     
     -- ===== ESPERAR WAVE 10 =====
     local currentWave = 0
@@ -2092,13 +2186,11 @@ local function runDojo()
         checkCount = checkCount + 1
         
         pcall(function()
-            -- Intentar GameGuiNoInset primero
             local gui = PlayerGui:FindFirstChild("GameGuiNoInset")
             if gui then
                 for _, obj in pairs(gui:GetDescendants()) do
                     if obj:IsA("TextLabel") and obj.Visible and obj.Name == "Title" then
                         local text = obj.Text
-                        -- Patrón más estricto: "Wave X" o "Wave X/Y"
                         local waveNum = string.match(text, "^Wave%s*(%d+)")
                         if not waveNum then
                             waveNum = string.match(text, "Wave%s*(%d+)%s*/")
@@ -2107,13 +2199,12 @@ local function runDojo()
                         if waveNum then
                             local newWave = tonumber(waveNum)
                             
-                            -- Solo actualizar si cambió
                             if newWave and newWave ~= currentWave then
                                 currentWave = newWave
-                                print("[DOJO] Wave detected: " .. currentWave .. " (from: '" .. text .. "')")
+                                print("[DOJO] 🌊 Wave detected: " .. currentWave)
                                 
                                 if currentWave >= 10 then
-                                    print("[DOJO] ✓✓✓ WAVE 10 REACHED! PREPARING TO SELL ✓✓✓")
+                                    print("[DOJO] ✅✅✅ WAVE 10 REACHED! ✅✅✅")
                                     wave10Detected = true
                                     return
                                 end
@@ -2123,14 +2214,12 @@ local function runDojo()
                 end
             end
             
-            -- Si no encontró, intentar GameGui
             if not wave10Detected then
                 gui = PlayerGui:FindFirstChild("GameGui")
                 if gui then
                     for _, obj in pairs(gui:GetDescendants()) do
                         if obj:IsA("TextLabel") and obj.Visible and obj.Name == "Title" then
                             local text = obj.Text
-                            -- Patrón más estricto: "Wave X" o "Wave X/Y"
                             local waveNum = string.match(text, "^Wave%s*(%d+)")
                             if not waveNum then
                                 waveNum = string.match(text, "Wave%s*(%d+)%s*/")
@@ -2141,10 +2230,10 @@ local function runDojo()
                                 
                                 if newWave and newWave ~= currentWave then
                                     currentWave = newWave
-                                    print("[DOJO] Wave detected: " .. currentWave .. " (from: '" .. text .. "')")
+                                    print("[DOJO] 🌊 Wave detected: " .. currentWave)
                                     
                                     if currentWave >= 10 then
-                                        print("[DOJO] ✓✓✓ WAVE 10 REACHED! PREPARING TO SELL ✓✓✓")
+                                        print("[DOJO] ✅✅✅ WAVE 10 REACHED! ✅✅✅")
                                         wave10Detected = true
                                         return
                                     end
@@ -2156,173 +2245,65 @@ local function runDojo()
             end
         end)
         
-        -- Debug cada 10 checks
         if checkCount % 10 == 0 then
-            print("[DOJO] Still waiting for Wave 10... Current: " .. currentWave .. " (check #" .. checkCount .. ")")
+            print("[DOJO] Still waiting for Wave 10... Current: " .. currentWave)
         end
         
-        if wave10Detected then 
-            print("[DOJO] Breaking wave detection loop...")
-            break 
-        end
-        
+        if wave10Detected then break end
         task.wait(0.5)
     end
     
-    if not getgenv().AutoFarmConfig.DojoActive then
-        print("[DOJO] Farm stopped before reaching Wave 10")
-        _G.trackingEnabled = false
-        return false
-    end
-    
     if not wave10Detected then
-        warn("[DOJO] Wave 10 detection failed after " .. checkCount .. " checks")
+        warn("[DOJO] Wave 10 detection failed")
         _G.trackingEnabled = false
         return false
     end
     
-    print("[DOJO] ========== WAVE 10 REACHED - STARTING SELL PROCESS ==========")
-    print("[DOJO] raff1ID value: " .. tostring(raff1ID) .. " (type: " .. type(raff1ID) .. ")")
-    print("[DOJO] raff2ID value: " .. tostring(raff2ID) .. " (type: " .. type(raff2ID) .. ")")
+    print("[DOJO] ")
+    print("[DOJO] ========================================")
+    print("[DOJO] 💰 WAVE 10 REACHED - SELLING UNITS")
+    print("[DOJO] ========================================")
     
-    -- ===== VENDER CON DELAY CORTO =====
     local randomDelay = 0.3 + (math.random() * 0.3)
-    print("[DOJO] Waiting " .. string.format("%.2f", randomDelay) .. " seconds before selling...")
+    print("[DOJO] Waiting " .. string.format("%.2f", randomDelay) .. " seconds...")
     task.wait(randomDelay)
     
-    print("[DOJO] Attempting to sell raff1 (ID: " .. tostring(raff1ID) .. ")...")
-    local success1, err1 = pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("SellUnit"):InvokeServer(raff1ID)
+    -- ===== VENDER RAFFLESIA 1 =====
+    print("[DOJO] Selling Rafflesia 1 (ID: " .. tostring(raff1ID) .. ")...")
+    local sellSuccess1, sellError1 = pcall(function()
+        local result = ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("SellUnit"):InvokeServer(raff1ID)
+        print("[DOJO] SellUnit returned: " .. tostring(result))
+        return result
     end)
-    print("[DOJO] Sell raff1 result: " .. tostring(success1))
-    if not success1 then
-        warn("[DOJO] Sell raff1 ERROR: " .. tostring(err1))
+    
+    if sellSuccess1 then
+        print("[DOJO] ✅ Rafflesia 1 sold successfully")
+    else
+        warn("[DOJO] ❌ Failed to sell Rafflesia 1: " .. tostring(sellError1))
     end
     
     task.wait(0.05)
     
-    print("[DOJO] Attempting to sell raff2 (ID: " .. tostring(raff2ID) .. ")...")
-    local success2, err2 = pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("SellUnit"):InvokeServer(raff2ID)
+    -- ===== VENDER RAFFLESIA 2 =====
+    print("[DOJO] Selling Rafflesia 2 (ID: " .. tostring(raff2ID) .. ")...")
+    local sellSuccess2, sellError2 = pcall(function()
+        local result = ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("SellUnit"):InvokeServer(raff2ID)
+        print("[DOJO] SellUnit returned: " .. tostring(result))
+        return result
     end)
-    print("[DOJO] Sell raff2 result: " .. tostring(success2))
-    if not success2 then
-        warn("[DOJO] Sell raff2 ERROR: " .. tostring(err2))
+    
+    if sellSuccess2 then
+        print("[DOJO] ✅ Rafflesia 2 sold successfully")
+    else
+        warn("[DOJO] ❌ Failed to sell Rafflesia 2: " .. tostring(sellError2))
     end
     
-    print("[DOJO] ========== SELL PROCESS COMPLETE ==========")
+    print("[DOJO] ")
+    print("[DOJO] ========================================")
+    print("[DOJO] ✅ DOJO STRATEGY COMPLETE!")
+    print("[DOJO] ========================================")
     
-    -- Limpiar tracking
     _G.trackingEnabled = false
-    
-    print("[DOJO] Strategy complete! All actions finished.")
-    
-    return true
-end
-
--- ==================== AUTO WIN V1: TOMATO PLANT STRATEGY ====================
-local function runAutoWinV1()
-    print("[AUTO WIN V1] Starting Tomato Plant strategy...")
-    
-    local mapFolder = Workspace:FindFirstChild("Map")
-    if not mapFolder then
-        warn("[AUTO WIN V1] Map not found!")
-        return false
-    end
-    
-    local entities = mapFolder:FindFirstChild("Entities")
-    if not entities then
-        warn("[AUTO WIN V1] Entities not found!")
-        return false
-    end
-    
-    -- ✅ RESETEAR ESTADO
-    _G.myUnitIDs = {}
-    _G.trackingEnabled = true
-    setupUnifiedTracking()
-    
-    -- ===== COORDENADAS EXACTAS DEL DOCUMENTO 2 =====
-    local tomatoPositions = {
-        {cframe = CFrame.new(-326.81658935546875, 61.68030548095703, -105.2947998046875, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-326.57305908203125, 61.68030548095703, -110.16496276855469, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-340.4522705078125, 61.68030548095703, -102.63774108886719, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-341.37030029296875, 61.68030548095703, -108.40327453613281, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-330.5658264160156, 61.68030548095703, -107.22344970703125, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-331.0650634765625, 61.68030548095703, -112.37507629394531, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-325.50054931640625, 61.68030548095703, -114.86784362792969, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-340.1313781738281, 61.68030548095703, -112.30937194824219, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-330.9828186035156, 61.68030548095703, -115.9708480834961, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-345.5301513671875, 61.68030548095703, -105.17726135253906, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-341.2877197265625, 61.68030548095703, -116.77902221679688, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-345.55413818359375, 61.68030548095703, -111.3570327758789, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-327.5501708984375, 61.68030548095703, -118.89196014404297, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-339.9394836425781, 61.68030548095703, -120.87809753417969, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-345.091064453125, 61.68030548095703, -118.65930938720703, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-331.5858154296875, 61.680301666259766, -121.98548889160156, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-340.29302978515625, 61.68030548095703, -124.85790252685547, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        {cframe = CFrame.new(-329.318115234375, 61.68030548095703, -125.80452728271484, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180}
-    }
-    
-    -- ===== PLANTAR Y UPGRADEAR 18 TOMATO PLANTS =====
-    local upgradeCosts = {125, 175, 350, 500}
-    
-    for i = 1, #tomatoPositions do
-        print("[AUTO WIN V1] Planting Tomato " .. i .. "/18...")
-        
-        -- Esperar dinero para plantar
-        while getMoney() < 100 do task.wait(0.2) end
-        
-        -- Plantar con reintentos
-        for attempt = 1, 5 do
-            local placed = placeUnit("unit_tomato_plant", tomatoPositions[i].cframe, tomatoPositions[i].rotation)
-            if placed then 
-                print("[AUTO WIN V1] ✓ Placed Tomato " .. i)
-                break 
-            end
-            task.wait(0.15)
-        end
-        task.wait(0.15)
-        
-        -- Esperar tracking
-        local waitTime = 0
-        while #_G.myUnitIDs < i and waitTime < 10 do
-            task.wait(0.2)
-            waitTime = waitTime + 0.2
-        end
-        
-        if #_G.myUnitIDs < i then
-            _G.trackingEnabled = false
-            warn("[AUTO WIN V1] Failed to track Tomato " .. i)
-            return false
-        end
-        
-        local tomatoID = _G.myUnitIDs[i]
-        print("[AUTO WIN V1] Tomato " .. i .. " ID: " .. tostring(tomatoID))
-        
-        -- Upgradear a nivel 5
-        for level = 2, 5 do
-            local cost = upgradeCosts[level - 1]
-            print("[AUTO WIN V1] Upgrading Tomato " .. i .. " to Level " .. level .. "...")
-            
-            while getMoney() < cost do task.wait(0.2) end
-            
-            pcall(function()
-                ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(tomatoID)
-            end)
-            
-            task.wait(0.4 + (math.random() * 0.38))
-        end
-        
-        print("[AUTO WIN V1] ✓ Tomato " .. i .. " fully upgraded (Level 5)")
-    end
-    
-    print("[AUTO WIN V1] ========== ALL 18 TOMATO PLANTS PLACED AND UPGRADED ==========")
-    
-    -- Limpiar tracking
-    _G.trackingEnabled = false
-    
-    print("[AUTO WIN V1] Strategy complete! All actions finished.")
-    
     return true
 end
 
