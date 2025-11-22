@@ -1971,7 +1971,7 @@ local function runDojo()
     while getMoney() < 1250 do task.wait(0.2) end
     
     if not plantRafflesiaWithRetry(getRandomPositionPath1, "Rafflesia 1", 10) then
-        WindUI:Notify({
+        getgenv().NoahHubWindow:Notify({
             Title = "Dojo Error",
             Content = "Failed to plant Rafflesia 1 after 10 attempts",
             Duration = 5
@@ -1989,7 +1989,7 @@ local function runDojo()
     while getMoney() < 1250 do task.wait(0.2) end
     
     if not plantRafflesiaWithRetry(getRandomPositionPath2, "Rafflesia 2", 10) then
-        WindUI:Notify({
+        getgenv().NoahHubWindow:Notify({
             Title = "Dojo Error",
             Content = "Failed to plant Rafflesia 2 after 10 attempts",
             Duration = 5
@@ -2076,7 +2076,7 @@ local function runDojo()
     warn("[DOJO] Waiting for game end")
     warn("==========================================")
     
-    WindUI:Notify({
+    getgenv().NoahHubWindow:Notify({
         Title = "Dojo Match Failed",
         Content = "Match " .. currentMatchNumber .. " failed continuing to next",
         Duration = 5
