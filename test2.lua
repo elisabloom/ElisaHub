@@ -1928,6 +1928,7 @@ end
 local function runDojo()
     print("[DOJO] Starting Rafflesia strategy...")
     
+    local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     local myUnitIDs = getgenv().GlobalTracking.unitIDs
     
     local macroFailed = false
