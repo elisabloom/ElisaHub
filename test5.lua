@@ -125,6 +125,414 @@ local function removeBlackScreen()
     end
 end
 
+-- ==================== LOW GRAPHICS MODE CONFIG ====================
+getgenv().LowGraphicsConfig = getgenv().LowGraphicsConfig or {
+    Enabled = false,
+    OriginalSettings = {},
+    RemovedObjects = {}
+}
+
+-- ==================== FUNCIONES LOW GRAPHICS MODE ====================
+local function saveLightingSettings()
+    local Lighting = game:GetService("Lighting")
+    local Workspace = game:GetService("Workspace")
+    local terrain = Workspace:FindFirstChildOfClass("Terrain")
+    
+    -- ✅ GUARDAR RENDER DISTANCE ANTES DE CUALQUIER OTRA COSA
+    local currentQuality = settings().Rendering.QualityLevel
+    print("[LOW GRAPHICS] 📊 Current Quality Level: " .. tostring(currentQuality))
+    
+    getgenv().LowGraphicsConfig.OriginalSettings = {
+        -- Lighting
+        Brightness = Lighting.Brightness,
+        GlobalShadows = Lighting.GlobalShadows,
+        Technology = Lighting.Technology,
+        
+        -- Terrain Water
+        WaterReflectance = terrain and terrain.WaterReflectance or 1,
+        WaterTransparency = terrain and terrain.WaterTransparency or 0.3,
+        WaterWaveSize = terrain and terrain.WaterWaveSize or 0.15,
+        WaterWaveSpeed = terrain and terrain.WaterWaveSpeed or 10,
+        
+        -- ✅ GUARDAR RENDER DISTANCE ORIGINAL
+        RenderDistance = currentQuality,
+        
+        -- Effects
+        PostEffects = {}
+    }
+    
+    print("[LOW GRAPHICS] ✓ Saved Quality Level: " .. tostring(getgenv().LowGraphicsConfig.OriginalSettings.RenderDistance))
+    
+    -- ✅ GUARDAR EFECTOS CON TODAS SUS PROPIEDADES
+    for _, effect in pairs(Lighting:GetChildren()) do
+        if effect:IsA("PostEffect") or effect:IsA("Atmosphere") or effect:IsA("Sky") or effect:IsA("Clouds") then
+            local savedEffect = {
+                Object = effect,
+                Type = effect.ClassName,
+                Enabled = effect:IsA("PostEffect") and effect.Enabled or true
+            }
+            
+            -- ✅ GUARDAR PROPIEDADES ESPECÍFICAS DE CADA TIPO
+            if effect:IsA("ColorCorrectionEffect") then
+                savedEffect.Brightness = effect.Brightness
+                savedEffect.Contrast = effect.Contrast
+                savedEffect.Saturation = effect.Saturation
+                savedEffect.TintColor = effect.TintColor
+            elseif effect:IsA("BloomEffect") then
+                savedEffect.Intensity = effect.Intensity
+                savedEffect.Size = effect.Size
+                savedEffect.Threshold = effect.Threshold
+            elseif effect:IsA("SunRaysEffect") then
+                savedEffect.Intensity = effect.Intensity
+                savedEffect.Spread = effect.Spread
+            elseif effect:IsA("BlurEffect") then
+                savedEffect.Size = effect.Size
+            elseif effect:IsA("Atmosphere") then
+                savedEffect.Density = effect.Density
+                savedEffect.Offset = effect.Offset
+                savedEffect.Color = effect.Color
+                savedEffect.Decay = effect.Decay
+                savedEffect.Glare = effect.Glare
+                savedEffect.Haze = effect.Haze
+            elseif effect:IsA("Sky") then
+                savedEffect.SkyboxBk = effect.SkyboxBk
+                savedEffect.SkyboxDn = effect.SkyboxDn
+                savedEffect.SkyboxFt = effect.SkyboxFt
+                savedEffect.SkyboxLf = effect.SkyboxLf
+                savedEffect.SkyboxRt = effect.SkyboxRt
+                savedEffect.SkyboxUp = effect.SkyboxUp
+            elseif effect:IsA("Clouds") then
+                savedEffect.Cover = effect.Cover
+                savedEffect.Density = effect.Density
+                savedEffect.Color = effect.Color
+            end
+            
+            table.insert(getgenv().LowGraphicsConfig.OriginalSettings.PostEffects, savedEffect)
+        end
+    end
+    
+    print("[LOW GRAPHICS] ✓ Saved " .. #getgenv().LowGraphicsConfig.OriginalSettings.PostEffects .. " lighting effects")
+end
+
+local function enableLowGraphics()
+    pcall(function()
+        local Lighting = game:GetService("Lighting")
+        local Workspace = game:GetService("Workspace")
+        local terrain = Workspace:FindFirstChildOfClass("Terrain")
+        
+        print("[LOW GRAPHICS] 🎨 Applying optimizations...")
+        
+-- 1. OPTIMIZAR LIGHTING
+Lighting.Brightness = 2
+Lighting.GlobalShadows = false
+Lighting.Technology = Enum.Technology.Legacy
+
+-- ✅ REDUCIR RENDER DISTANCE (Quality Level)
+settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+print("[LOW GRAPHICS] ✓ Render distance set to minimum (Level 1)")
+
+        
+        -- 2. DESACTIVAR POST EFFECTS
+        local effectsDisabled = 0
+        for _, effect in pairs(Lighting:GetChildren()) do
+            if effect:IsA("PostEffect") then
+                effect.Enabled = false
+                effectsDisabled = effectsDisabled + 1
+            elseif effect:IsA("Atmosphere") then
+                effect.Density = 0
+                effect.Offset = 0
+                effectsDisabled = effectsDisabled + 1
+            elseif effect:IsA("Sky") then
+                effect.Parent = nil
+                getgenv().LowGraphicsConfig.RemovedObjects[#getgenv().LowGraphicsConfig.RemovedObjects + 1] = {
+                    Object = effect,
+                    OriginalParent = Lighting
+                }
+                effectsDisabled = effectsDisabled + 1
+            elseif effect:IsA("Clouds") then
+                effect.Parent = nil
+                getgenv().LowGraphicsConfig.RemovedObjects[#getgenv().LowGraphicsConfig.RemovedObjects + 1] = {
+                    Object = effect,
+                    OriginalParent = Lighting
+                }
+                effectsDisabled = effectsDisabled + 1
+            end
+        end
+        print("[LOW GRAPHICS] ✓ Disabled " .. effectsDisabled .. " post effects")
+        
+        -- 3. OPTIMIZAR TERRAIN WATER
+        if terrain then
+            terrain.WaterReflectance = 0
+            terrain.WaterTransparency = 1
+            terrain.WaterWaveSize = 0
+            terrain.WaterWaveSpeed = 0
+            print("[LOW GRAPHICS] ✓ Water effects disabled")
+        end
+        
+        -- 4. ELIMINAR TEXTURAS DECORATIVAS
+        local texturesRemoved = 0
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Decal") or obj:IsA("Texture") then
+                -- Solo eliminar si NO está en Entities (unidades del juego)
+                if not obj:FindFirstAncestorOfClass("Folder") or obj:FindFirstAncestorOfClass("Folder").Name ~= "Entities" then
+                    obj.Parent = nil
+                    getgenv().LowGraphicsConfig.RemovedObjects[#getgenv().LowGraphicsConfig.RemovedObjects + 1] = {
+                        Object = obj,
+                        OriginalParent = obj.Parent
+                    }
+                    texturesRemoved = texturesRemoved + 1
+                end
+            end
+        end
+        print("[LOW GRAPHICS] ✓ Removed " .. texturesRemoved .. " textures")
+        
+-- 5. OPTIMIZAR MATERIALES PESADOS (con backup)
+local materialsOptimized = 0
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("BasePart") then
+        -- Solo optimizar si NO está en Entities
+        if not obj:FindFirstAncestorOfClass("Folder") or obj:FindFirstAncestorOfClass("Folder").Name ~= "Entities" then
+            -- Convertir materiales pesados a SmoothPlastic
+            if obj.Material == Enum.Material.Neon or 
+               obj.Material == Enum.Material.Glass or
+               obj.Material == Enum.Material.Ice or
+               obj.Material == Enum.Material.ForceField then
+                
+                -- ✅ GUARDAR MATERIAL ORIGINAL
+                table.insert(getgenv().LowGraphicsConfig.RemovedObjects, {
+                    Object = obj,
+                    OriginalMaterial = obj.Material,
+                    OriginalReflectance = obj.Reflectance,
+                    Type = "Material"
+                })
+                
+                obj.Material = Enum.Material.SmoothPlastic
+                materialsOptimized = materialsOptimized + 1
+            end
+            
+            -- Eliminar reflectancia
+            if obj.Reflectance > 0 then
+                obj.Reflectance = 0
+            end
+        end
+    end
+end
+print("[LOW GRAPHICS] ✓ Optimized " .. materialsOptimized .. " materials")
+        
+        -- 6. ELIMINAR DECORACIÓN DEL MAP (solo en partida)
+        local mapDecorationRemoved = 0
+        local mapFolder = Workspace:FindFirstChild("Map")
+        if mapFolder then
+            for _, obj in pairs(mapFolder:GetDescendants()) do
+                if obj:IsA("Model") or obj:IsA("Part") or obj:IsA("MeshPart") then
+                    local name = obj.Name:lower()
+                    -- Eliminar solo decoración, NO gameplay elements
+                    if name:find("tree") or name:find("plant") or name:find("grass") or 
+                       name:find("bush") or name:find("flower") or name:find("rock") or 
+                       name:find("stone") or name:find("cloud") or name:find("decor") or 
+                       name:find("prop") then
+                        obj.Parent = nil
+                        getgenv().LowGraphicsConfig.RemovedObjects[#getgenv().LowGraphicsConfig.RemovedObjects + 1] = {
+                            Object = obj,
+                            OriginalParent = obj.Parent
+                        }
+                        mapDecorationRemoved = mapDecorationRemoved + 1
+                    end
+                end
+            end
+            if mapDecorationRemoved > 0 then
+                print("[LOW GRAPHICS] ✓ Removed " .. mapDecorationRemoved .. " map decorations")
+            end
+        end
+        
+        -- 7. DESACTIVAR PARTICLE EFFECTS
+        local particlesDisabled = 0
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+                -- Solo desactivar si NO está en Entities
+                if not obj:FindFirstAncestorOfClass("Folder") or obj:FindFirstAncestorOfClass("Folder").Name ~= "Entities" then
+                    obj.Enabled = false
+                    particlesDisabled = particlesDisabled + 1
+                end
+            end
+        end
+        if particlesDisabled > 0 then
+            print("[LOW GRAPHICS] ✓ Disabled " .. particlesDisabled .. " particle effects")
+        end
+        
+        print("[LOW GRAPHICS] ✅ All optimizations applied!")
+    end)
+end
+
+local function restoreGraphics()
+    pcall(function()
+        print("[LOW GRAPHICS] 🔄 Restoring original settings...")
+        
+        local Lighting = game:GetService("Lighting")
+        local Workspace = game:GetService("Workspace")
+        local terrain = Workspace:FindFirstChildOfClass("Terrain")
+        local savedSettings = getgenv().LowGraphicsConfig.OriginalSettings
+        
+        -- ✅ VERIFICAR QUE EXISTAN SETTINGS GUARDADOS
+        if not savedSettings or not next(savedSettings) then
+            warn("[LOW GRAPHICS] ⚠️ No saved settings found! Cannot restore.")
+            WindUI:Notify({
+                Title = "Restore Warning",
+                Content = "No original settings found. Graphics may not restore properly.",
+                Duration = 3
+            })
+            return
+        end
+        
+        -- ✅ RESTAURAR LIGHTING (usando valores guardados)
+        if savedSettings.Brightness then
+            Lighting.Brightness = savedSettings.Brightness
+        end
+        if savedSettings.GlobalShadows ~= nil then
+            Lighting.GlobalShadows = savedSettings.GlobalShadows
+        end
+        if savedSettings.Technology then
+            Lighting.Technology = savedSettings.Technology
+        end
+        
+        -- ✅ RESTAURAR RENDER DISTANCE ORIGINAL (CON DEBUG CORREGIDO)
+        if savedSettings.RenderDistance then
+            local currentQuality = settings().Rendering.QualityLevel
+            print("[LOW GRAPHICS] 📊 Restoring Quality Level from: " .. tostring(currentQuality) .. " to: " .. tostring(savedSettings.RenderDistance))
+            
+            pcall(function()
+                settings().Rendering.QualityLevel = savedSettings.RenderDistance
+            end)
+            
+            task.wait(0.1)
+            
+            local newQuality = settings().Rendering.QualityLevel
+            print("[LOW GRAPHICS] 📊 Quality Level after restore: " .. tostring(newQuality))
+            
+            if newQuality == savedSettings.RenderDistance then
+                print("[LOW GRAPHICS] ✓ Render distance restored successfully!")
+            else
+                warn("[LOW GRAPHICS] ⚠️ Render distance may not have restored properly")
+            end
+        else
+            warn("[LOW GRAPHICS] ⚠️ No RenderDistance saved!")
+        end
+        
+        print("[LOW GRAPHICS] ✓ Lighting settings restored")
+        
+        -- ✅ RESTAURAR POST EFFECTS CON TODAS SUS PROPIEDADES
+        local effectsRestored = 0
+        for _, effectData in pairs(savedSettings.PostEffects or {}) do
+            if effectData.Object then
+                pcall(function()
+                    -- Restaurar enabled
+                    if effectData.Object:IsA("PostEffect") then
+                        effectData.Object.Enabled = effectData.Enabled
+                    end
+                    
+                    -- ✅ RESTAURAR PROPIEDADES ESPECÍFICAS
+                    if effectData.Type == "ColorCorrectionEffect" then
+                        effectData.Object.Brightness = effectData.Brightness or 0
+                        effectData.Object.Contrast = effectData.Contrast or 0
+                        effectData.Object.Saturation = effectData.Saturation or 0
+                        effectData.Object.TintColor = effectData.TintColor or Color3.fromRGB(255, 255, 255)
+                    elseif effectData.Type == "BloomEffect" then
+                        effectData.Object.Intensity = effectData.Intensity or 1
+                        effectData.Object.Size = effectData.Size or 24
+                        effectData.Object.Threshold = effectData.Threshold or 2
+                    elseif effectData.Type == "SunRaysEffect" then
+                        effectData.Object.Intensity = effectData.Intensity or 0.25
+                        effectData.Object.Spread = effectData.Spread or 1
+                    elseif effectData.Type == "BlurEffect" then
+                        effectData.Object.Size = effectData.Size or 24
+                    elseif effectData.Type == "Atmosphere" then
+                        effectData.Object.Density = effectData.Density or 0.3
+                        effectData.Object.Offset = effectData.Offset or 0.25
+                        effectData.Object.Color = effectData.Color or Color3.fromRGB(199, 199, 199)
+                        effectData.Object.Decay = effectData.Decay or Color3.fromRGB(92, 60, 13)
+                        effectData.Object.Glare = effectData.Glare or 0
+                        effectData.Object.Haze = effectData.Haze or 0
+                    elseif effectData.Type == "Sky" then
+                        if effectData.SkyboxBk then effectData.Object.SkyboxBk = effectData.SkyboxBk end
+                        if effectData.SkyboxDn then effectData.Object.SkyboxDn = effectData.SkyboxDn end
+                        if effectData.SkyboxFt then effectData.Object.SkyboxFt = effectData.SkyboxFt end
+                        if effectData.SkyboxLf then effectData.Object.SkyboxLf = effectData.SkyboxLf end
+                        if effectData.SkyboxRt then effectData.Object.SkyboxRt = effectData.SkyboxRt end
+                        if effectData.SkyboxUp then effectData.Object.SkyboxUp = effectData.SkyboxUp end
+                    elseif effectData.Type == "Clouds" then
+                        effectData.Object.Cover = effectData.Cover or 0.5
+                        effectData.Object.Density = effectData.Density or 0.5
+                        effectData.Object.Color = effectData.Color or Color3.fromRGB(255, 255, 255)
+                    end
+                    
+                    effectsRestored = effectsRestored + 1
+                end)
+            end
+        end
+        print("[LOW GRAPHICS] ✓ Restored " .. effectsRestored .. " post effects with original properties")
+        
+        -- ✅ RESTAURAR TERRAIN WATER (usando valores guardados)
+        if terrain and savedSettings.WaterReflectance then
+            terrain.WaterReflectance = savedSettings.WaterReflectance
+            terrain.WaterTransparency = savedSettings.WaterTransparency or 0.3
+            terrain.WaterWaveSize = savedSettings.WaterWaveSize or 0.15
+            terrain.WaterWaveSpeed = savedSettings.WaterWaveSpeed or 10
+            print("[LOW GRAPHICS] ✓ Water effects restored")
+        end
+        
+        -- ✅ RESTAURAR OBJETOS ELIMINADOS (Sky, Clouds, Texturas, Decoración)
+        local objectsRestored = 0
+        for _, data in pairs(getgenv().LowGraphicsConfig.RemovedObjects) do
+            if data.Object and data.OriginalParent then
+                pcall(function()
+                    data.Object.Parent = data.OriginalParent
+                    objectsRestored = objectsRestored + 1
+                end)
+            end
+        end
+        if objectsRestored > 0 then
+            print("[LOW GRAPHICS] ✓ Restored " .. objectsRestored .. " removed objects")
+        end
+        
+        -- ✅ RESTAURAR MATERIALES ORIGINALES
+        local materialsRestored = 0
+        for _, data in pairs(getgenv().LowGraphicsConfig.RemovedObjects) do
+            if data.Type == "Material" and data.Object and data.OriginalMaterial then
+                pcall(function()
+                    data.Object.Material = data.OriginalMaterial
+                    if data.OriginalReflectance then
+                        data.Object.Reflectance = data.OriginalReflectance
+                    end
+                    materialsRestored = materialsRestored + 1
+                end)
+            end
+        end
+        if materialsRestored > 0 then
+            print("[LOW GRAPHICS] ✓ Restored " .. materialsRestored .. " materials")
+        end
+        
+        -- ✅ RESTAURAR PARTICLE EFFECTS (reactivar)
+        local particlesRestored = 0
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if (obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")) and not obj.Enabled then
+                -- Solo reactivar si NO está en Entities
+                if not obj:FindFirstAncestorOfClass("Folder") or obj:FindFirstAncestorOfClass("Folder").Name ~= "Entities" then
+                    obj.Enabled = true
+                    particlesRestored = particlesRestored + 1
+                end
+            end
+        end
+        if particlesRestored > 0 then
+            print("[LOW GRAPHICS] ✓ Restored " .. particlesRestored .. " particle effects")
+        end
+        
+        -- ✅ LIMPIAR TABLA DE OBJETOS ELIMINADOS
+        getgenv().LowGraphicsConfig.RemovedObjects = {}
+        
+        print("[LOW GRAPHICS] ✅ Graphics restored to original!")
+    end)
+end
+
 -- ==================== CARGAR WEBHOOK CONFIG GUARDADA ====================
 local function loadWebhookConfig()
     local configPath = "NoahScriptHub/WebhookConfig.json"
@@ -1248,6 +1656,42 @@ local PerformanceModeToggle = MainTab:Toggle({
 
 -- ✅ GUARDAR REFERENCIA GLOBAL
 getgenv().PerformanceModeToggle = PerformanceModeToggle
+
+MainTab:Space()
+
+-- ==================== LOW GRAPHICS MODE TOGGLE ====================
+local LowGraphicsToggle = MainTab:Toggle({
+    Flag = "LowGraphicsMode",
+    Title = "Low Graphics Mode",
+    Desc = "Remove decorations & optimize materials for better FPS",
+    Default = getgenv().LowGraphicsConfig.Enabled,
+    Callback = function(state)
+        getgenv().LowGraphicsConfig.Enabled = state
+        
+        if state then
+            -- Guardar configuración original antes de aplicar cambios
+            saveLightingSettings()
+            
+            -- Aplicar optimizaciones
+            enableLowGraphics()
+            
+            WindUI:Notify({
+                Title = "Low Graphics ON", 
+                Content = "Textures, effects, and decorations removed", 
+                Duration = 3
+            })
+        else
+            -- Restaurar gráficos originales
+            restoreGraphics()
+            
+            WindUI:Notify({
+                Title = "Low Graphics OFF", 
+                Content = "Graphics restored to original", 
+                Duration = 2
+            })
+        end
+    end
+})
 
 MainTab:Space()
 
