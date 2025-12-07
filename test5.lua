@@ -4039,10 +4039,8 @@ task.spawn(function()
     local AutoDeleteConfig = {
         -- Classic Summon: GODLY = Bloodvine
         ["ub_classic_v8"] = {
-            "unit_cactus", "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc",
-            "unit_potato", "unit_pineapple", "unit_mushroom", "unit_chili_pepper",
-            "unit_money_tree", "unit_bamboo", "unit_roses", "unit_carrots",
-            "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon", "unit_sunflower"
+            "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc", "unit_pineapple",
+            "unit_money_tree", "unit_bamboo","unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon",
         },
         
         -- Enchanted Summon: GODLY = Venus Flytrap
@@ -4053,7 +4051,7 @@ task.spawn(function()
         
         -- Sun Summon: GODLY = Pyropetal, Lucky Clover
         ["ub_sun"] = {
-            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler", "unit_razor"
+            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler"
         },
         
         -- Astral Summon: GODLY = Mudmauler, Robo Flower
