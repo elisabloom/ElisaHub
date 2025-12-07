@@ -4030,22 +4030,6 @@ task.spawn(function()
         AutoDeleteEnabled = false
     }
     
--- ==================== CARGAR CONTENIDO DEL SUMMON TAB ====================
-task.spawn(function()
-    wait(0.3)
-    print("[SUMMON TAB] Loading content...")
-    
-    local AutoSummonToggle
-    
-    local SummonConfig = {
-        SelectedCrate = nil,
-        SelectedCrateName = nil,
-        BuyType = nil,
-        BuyAmount = nil,
-        IsRunning = false,
-        AutoDeleteEnabled = false
-    }
-    
     -- ==================== AUTO DELETE CONFIGURATION ====================
     -- Solo se PROTEGEN las unidades GODLY (🟣 ROSA)
     -- LISTA CORRECTA DE GODLIES: Bloodvine, Venus Flytrap, Pyropetal, Lucky Clover, 
