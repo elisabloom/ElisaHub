@@ -4053,7 +4053,7 @@ task.spawn(function()
         
         -- Sun Summon: GODLY = Pyropetal, Lucky Clover
         ["ub_sun"] = {
-            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler"
+            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler", "unit_razor"
         },
         
         -- Astral Summon: GODLY = Mudmauler, Robo Flower
