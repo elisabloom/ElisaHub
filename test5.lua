@@ -4036,14 +4036,25 @@ task.spawn(function()
     -- Mudmauler, Robo Flower, Rangeleaf, Fungal Barrage, Electroleaf, Mango Cluster,
     -- Stun Flower, Confusion Plant, Ballistic Banana, Beehive, Passion Shooter, 
     -- Shadestool, Snowblossom, Subzero Stem
+    
+    -- ✅ LISTA DE UNIDADES A BANEAR PARA CLASSIC SUMMON (todas las versiones v1-v8)
+    local classicBanList = {
+        "unit_cactus", "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc",
+        "unit_potato", "unit_pineapple", "unit_mushroom", "unit_chili_pepper",
+        "unit_money_tree", "unit_bamboo", "unit_roses", "unit_carrots",
+        "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon", "unit_sunflower"
+    }
+    
     local AutoDeleteConfig = {
-        -- Classic Summon: GODLY = Bloodvine
-        ["ub_classic_v8"] = {
-            "unit_cactus", "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc",
-            "unit_potato", "unit_pineapple", "unit_mushroom", "unit_chili_pepper",
-            "unit_money_tree", "unit_bamboo", "unit_roses", "unit_carrots",
-            "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon", "unit_sunflower"
-        },
+        -- Classic Summon v1-v8: GODLY = Bloodvine
+        ["ub_classic_v1"] = classicBanList,
+        ["ub_classic_v2"] = classicBanList,
+        ["ub_classic_v3"] = classicBanList,
+        ["ub_classic_v4"] = classicBanList,
+        ["ub_classic_v5"] = classicBanList,
+        ["ub_classic_v6"] = classicBanList,
+        ["ub_classic_v7"] = classicBanList,
+        ["ub_classic_v8"] = classicBanList,
         
         -- Enchanted Summon: GODLY = Venus Flytrap
         ["ub_jungle"] = {
@@ -4053,7 +4064,7 @@ task.spawn(function()
         
         -- Sun Summon: GODLY = Pyropetal, Lucky Clover
         ["ub_sun"] = {
-            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler", "unit_razor"
+            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler"
         },
         
         -- Astral Summon: GODLY = Mudmauler, Robo Flower
@@ -4170,7 +4181,7 @@ task.spawn(function()
         TextTransparency = 0.5,
     })
     
-    local SelectCrateDropdown = SummonTab:Dropdown({
+local SelectCrateDropdown = SummonTab:Dropdown({
         Flag = "SelectedCrate",
         Title = "Select Crate",
         Values = {
@@ -4187,7 +4198,34 @@ task.spawn(function()
         },
         Callback = function(option)
             SummonConfig.SelectedCrateName = option.Title
-            SummonConfig.SelectedCrate = CrateMapping[option.Title]
+            
+            -- ✅ DETECTAR AUTOMÁTICAMENTE LA VERSIÓN DE CLASSIC SUMMON
+            if option.Title == "Classic Summon" then
+                -- Intentar detectar la versión actual revisando el juego
+                local detectedVersion = nil
+                
+                -- Probar cada versión para ver cuál existe
+                for version = 1, 8 do
+                    local testVersion = "ub_classic_v" .. version
+                    local success = pcall(function()
+                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunctions"):WaitForChild("BuyUnitBox"):InvokeServer(testVersion, 1)
+                    end)
+                    
+                    -- Si no da error de "crate no existe", es la versión correcta
+                    if success then
+                        detectedVersion = testVersion
+                        print("[AUTO DELETE] ✓ Detected Classic Summon version: " .. testVersion)
+                        break
+                    end
+                end
+                
+                -- Si no detectó ninguna, usar v8 por defecto
+                SummonConfig.SelectedCrate = detectedVersion or "ub_classic_v8"
+                print("[AUTO DELETE] Using: " .. SummonConfig.SelectedCrate)
+            else
+                SummonConfig.SelectedCrate = CrateMapping[option.Title]
+            end
+            
             SelectCrateDropdown:Highlight()
         end
     })
