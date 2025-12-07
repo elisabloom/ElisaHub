@@ -4039,10 +4039,8 @@ task.spawn(function()
     local AutoDeleteConfig = {
         -- Classic Summon: GODLY = Bloodvine
         ["ub_classic_v4"] = {
-            "unit_cactus", "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc",
-            "unit_potato", "unit_pineapple", "unit_mushroom", "unit_chili_pepper",
-            "unit_money_tree", "unit_bamboo", "unit_roses", "unit_carrots",
-            "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon"
+            "unit_tomato_plant", "unit_farmer_npc", "unit_pineapple",  "unit_potato",  "unit_carrots", "unit_roses",
+            "unit_palm_tree", "unit_broccoli", "unit_watermelon", "unit_sunflower"
         },
         
         -- Enchanted Summon: GODLY = Venus Flytrap
