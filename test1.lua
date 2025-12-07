@@ -2748,6 +2748,12 @@ local function runGraveyardV2()
     task.wait(0.15)
     while #myUnitIDs < 11 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[11], 5, costs.witch, "Witch 3")
+
+        -- ===== PASO 7: Upgrade Dragons 1, 2, 3 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== UPGRADING ALL DRAGONS BEFORE CORRUPTED ==========")
+    upgradeToLevel(myUnitIDs[2], 5, costs.dragon, "Dragon 1")
+    upgradeToLevel(myUnitIDs[3], 5, costs.dragon, "Dragon 2")
+    upgradeToLevel(myUnitIDs[4], 5, costs.dragon, "Dragon 3")
     
     -- ===== PASO 9: Corrupted 1 y 2 → Lvl 5 =====
     print("[GRAVEYARD V2] ========== PASO 9: CORRUPTED 1 Y 2 ==========")
