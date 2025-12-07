@@ -4038,9 +4038,11 @@ task.spawn(function()
     -- Shadestool, Snowblossom, Subzero Stem
     local AutoDeleteConfig = {
         -- Classic Summon: GODLY = Bloodvine
-        ["ub_classic_v2"] = {
-            "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc", "unit_pineapple",
-            "unit_money_tree", "unit_bamboo","unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon",
+        ["ub_classic_v4"] = {
+            "unit_cactus", "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc",
+            "unit_potato", "unit_pineapple", "unit_mushroom", "unit_chili_pepper",
+            "unit_money_tree", "unit_bamboo", "unit_roses", "unit_carrots",
+            "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon", "unit_sunflower"
         },
         
         -- Enchanted Summon: GODLY = Venus Flytrap
@@ -4051,7 +4053,7 @@ task.spawn(function()
         
         -- Sun Summon: GODLY = Pyropetal, Lucky Clover
         ["ub_sun"] = {
-            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler"
+            "unit_sunflower", "unit_eggplant", "unit_durian", "unit_sound_plant", "unit_sprinkler", "unit_razor"
         },
         
         -- Astral Summon: GODLY = Mudmauler, Robo Flower
