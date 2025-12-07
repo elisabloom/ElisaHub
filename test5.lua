@@ -4038,7 +4038,7 @@ task.spawn(function()
     -- Shadestool, Snowblossom, Subzero Stem
     local AutoDeleteConfig = {
         -- Classic Summon: GODLY = Bloodvine
-        ["ub_classic_v4"] = {
+        ["ub_classic_v8"] = {
             "unit_tomato_plant", "unit_farmer_npc", "unit_pineapple",  "unit_potato",  "unit_carrots", "unit_roses",
             "unit_palm_tree", "unit_broccoli", "unit_watermelon", "unit_sunflower"
         },
