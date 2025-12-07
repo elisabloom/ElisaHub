@@ -2636,8 +2636,9 @@ local function runGraveyardV2()
         blackclover1 = {cframe = CFrame.new(-331.47357177734375, 61.6803092956543, -713.38330078125, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         corrupted1 = {cframe = CFrame.new(-336.26654052734375, 61.680301666259766, -712.6754760742188, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         corrupted2 = {cframe = CFrame.new(-340.38153076171875, 61.6803092956543, -718.155029296875, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        rose1 = {cframe = CFrame.new(-340.619873046875, 61.68030548095703, -695.4280395507812, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        rose2 = {cframe = CFrame.new(-328.5089416503906, 61.68030548095703, -697.7555541992188, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        frostgolem1 = {cframe = CFrame.new(-340.619873046875, 61.68030548095703, -695.4280395507812, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        frostgolem2 = {cframe = CFrame.new(-328.5089416503906, 61.68030548095703, -697.7555541992188, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        frostgolem3 = {cframe = CFrame.new(-327.0, 61.68030548095703, -715.0, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         prismleaf2 = {cframe = CFrame.new(-345.2245178222656, 61.68030548095703, -709.4812622070312, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         prismleaf3 = {cframe = CFrame.new(-348.204345703125, 61.68030548095703, -712.9251098632812, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         prismleaf4 = {cframe = CFrame.new(-347.61895751953125, 61.6803092956543, -705.2569580078125, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
@@ -2647,7 +2648,7 @@ local function runGraveyardV2()
     local costs = {
         prismleaf = {300, 475, 800, 1100},
         blackclover = {3000, 4000, 7500, 15000},
-        rose = {4000, 7000, 10000, 14000},
+        frostgolem = {15000, 25500, 39000, 56000},
         potato = {6000, 9000, 14000, 40000},
         witch = {9000, 17000, 25000, 35000},
         dragon = {8000, 12500, 26000, 35000},
@@ -2748,12 +2749,6 @@ local function runGraveyardV2()
     task.wait(0.15)
     while #myUnitIDs < 11 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[11], 5, costs.witch, "Witch 3")
-
-        -- ===== PASO 7: Upgrade Dragons 1, 2, 3 → Lvl 5 =====
-    print("[GRAVEYARD V2] ========== UPGRADING ALL DRAGONS BEFORE CORRUPTED ==========")
-    upgradeToLevel(myUnitIDs[2], 5, costs.dragon, "Dragon 1")
-    upgradeToLevel(myUnitIDs[3], 5, costs.dragon, "Dragon 2")
-    upgradeToLevel(myUnitIDs[4], 5, costs.dragon, "Dragon 3")
     
     -- ===== PASO 9: Corrupted 1 y 2 → Lvl 5 =====
     print("[GRAVEYARD V2] ========== PASO 9: CORRUPTED 1 Y 2 ==========")
