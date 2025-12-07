@@ -4038,11 +4038,11 @@ task.spawn(function()
     -- Shadestool, Snowblossom, Subzero Stem
     local AutoDeleteConfig = {
         -- Classic Summon: GODLY = Bloodvine
-        ["ub_classic_v8"] = {
+        ["ub_classic_v4"] = {
             "unit_cactus", "unit_tomato_plant", "unit_farmer_npc", "unit_gnome_npc",
             "unit_potato", "unit_pineapple", "unit_mushroom", "unit_chili_pepper",
             "unit_money_tree", "unit_bamboo", "unit_roses", "unit_carrots",
-            "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon"
+            "unit_palm_tree", "unit_broccoli", "unit_peas", "unit_watermelon", "unit_sunflower"
         },
         
         -- Enchanted Summon: GODLY = Venus Flytrap
@@ -4146,7 +4146,7 @@ task.spawn(function()
     end
     
     local CrateMapping = {
-        ["Classic Summon"] = "ub_classic_v8",
+        ["Classic Summon"] = "ub_classic_v4",
         ["Enchanted Summon"] = "ub_jungle",
         ["Sun Summon"] = "ub_sun",
         ["Astral Summon"] = "ub_astral",
