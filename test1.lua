@@ -2561,9 +2561,9 @@ local function runGraveyardV1()
     return true
 end
 
--- ==================== GRAVEYARD V2: MULTIPLE UNITS STRATEGY (ORDEN ACTUALIZADO) ====================
+-- ==================== GRAVEYARD V2: NUEVO ORDEN OPTIMIZADO ====================
 local function runGraveyardV2()
-    print("[GRAVEYARD V2] Starting Multi-Unit strategy...")
+    print("[GRAVEYARD V2] Starting optimized Multi-Unit strategy...")
     
     -- ✅ USAR TRACKING GLOBAL
     local myUnitIDs = getgenv().GlobalTracking.unitIDs
@@ -2628,16 +2628,16 @@ local function runGraveyardV2()
         dragon2 = {cframe = CFrame.new(-321.40118408203125, 61.6803092956543, -718.98583984375, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         dragon3 = {cframe = CFrame.new(-324.6614990234375, 61.68030548095703, -712.499755859375, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         witch1 = {cframe = CFrame.new(-330.850341796875, 61.680301666259766, -708.5601806640625, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        potato1 = {cframe = CFrame.new(-333.68597412109375, 61.6803092956543, -716.2599487304688, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        blackclover1 = {cframe = CFrame.new(-331.47357177734375, 61.6803092956543, -713.38330078125, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        rose1 = {cframe = CFrame.new(-340.619873046875, 61.68030548095703, -695.4280395507812, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
-        rose2 = {cframe = CFrame.new(-328.5089416503906, 61.68030548095703, -697.7555541992188, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         witch2 = {cframe = CFrame.new(-327.02313232421875, 61.6803092956543, -706.6849365234375, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         witch3 = {cframe = CFrame.new(-331.0621643066406, 61.68030548095703, -703.8416137695312, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        potato1 = {cframe = CFrame.new(-333.68597412109375, 61.6803092956543, -716.2599487304688, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         potato2 = {cframe = CFrame.new(-330.1884765625, 61.680301666259766, -719.8148193359375, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         potato3 = {cframe = CFrame.new(-335.74871826171875, 61.68030548095703, -719.666015625, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        blackclover1 = {cframe = CFrame.new(-331.47357177734375, 61.6803092956543, -713.38330078125, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         corrupted1 = {cframe = CFrame.new(-336.26654052734375, 61.680301666259766, -712.6754760742188, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         corrupted2 = {cframe = CFrame.new(-340.38153076171875, 61.6803092956543, -718.155029296875, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        rose1 = {cframe = CFrame.new(-340.619873046875, 61.68030548095703, -695.4280395507812, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
+        rose2 = {cframe = CFrame.new(-328.5089416503906, 61.68030548095703, -697.7555541992188, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         prismleaf2 = {cframe = CFrame.new(-345.2245178222656, 61.68030548095703, -709.4812622070312, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         prismleaf3 = {cframe = CFrame.new(-348.204345703125, 61.68030548095703, -712.9251098632812, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         prismleaf4 = {cframe = CFrame.new(-347.61895751953125, 61.6803092956543, -705.2569580078125, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
@@ -2655,6 +2655,7 @@ local function runGraveyardV2()
     }
     
     -- ===== PASO 1: Prismleaf 1 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 1: PRISMLEAF 1 ==========")
     while getMoney() < 225 do task.wait(0.2) end
     if not plantWithRetry("unit_glow_ray", positions.prismleaf1, "Prismleaf 1") then
        return false
@@ -2664,6 +2665,7 @@ local function runGraveyardV2()
     upgradeToLevel(myUnitIDs[1], 5, costs.prismleaf, "Prismleaf 1")
     
     -- ===== PASO 2: 3 Dragons (sin upgrade) =====
+    print("[GRAVEYARD V2] ========== PASO 2: 3 DRAGONS (SIN UPGRADE) ==========")
     for i = 1, 3 do
         while getMoney() < 6000 do task.wait(0.2) end
         if not plantWithRetry("unit_golem_dragon", positions["dragon"..i], "Dragon " .. i) then
@@ -2674,6 +2676,7 @@ local function runGraveyardV2()
     while #myUnitIDs < 4 do task.wait(0.2) end
     
     -- ===== PASO 3: Witch 1 → Lvl 3 =====
+    print("[GRAVEYARD V2] ========== PASO 3: WITCH 1 → LVL 3 ==========")
     while getMoney() < 4500 do task.wait(0.2) end
     if not plantWithRetry("unit_witch", positions.witch1, "Witch 1") then
        return false
@@ -2682,7 +2685,10 @@ local function runGraveyardV2()
     while #myUnitIDs < 5 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[5], 3, costs.witch, "Witch 1")
     
-    -- ===== PASO 4: Potato 1 → Lvl 5 =====
+    -- ===== PASO 4: Potato 1 → Lvl 5 (UNO POR UNO) =====
+    print("[GRAVEYARD V2] ========== PASO 4: POTATOES UNO POR UNO ==========")
+    
+    -- Potato 1
     while getMoney() < 4500 do task.wait(0.2) end
     if not plantWithRetry("unit_punch_potato", positions.potato1, "Potato 1") then
        return false
@@ -2691,43 +2697,40 @@ local function runGraveyardV2()
     while #myUnitIDs < 6 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[6], 5, costs.potato, "Potato 1")
     
-    -- ===== PASO 5: Black Clover 1 → Lvl 5 =====
+    -- Potato 2
+    while getMoney() < 4500 do task.wait(0.2) end
+    if not plantWithRetry("unit_punch_potato", positions.potato2, "Potato 2") then
+       return false
+    end
+    task.wait(0.15)
+    while #myUnitIDs < 7 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[7], 5, costs.potato, "Potato 2")
+    
+    -- Potato 3
+    while getMoney() < 4500 do task.wait(0.2) end
+    if not plantWithRetry("unit_punch_potato", positions.potato3, "Potato 3") then
+       return false
+    end
+    task.wait(0.15)
+    while #myUnitIDs < 8 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[8], 5, costs.potato, "Potato 3")
+    
+    -- ===== PASO 5: Witch 1 → Lvl 5 (desde lvl 3) =====
+    print("[GRAVEYARD V2] ========== PASO 5: WITCH 1 → LVL 5 ==========")
+    upgradeToLevel(myUnitIDs[5], 5, costs.witch, "Witch 1", 3)
+    
+    -- ===== PASO 6: Black Clover 1 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 6: BLACK CLOVER ==========")
     while getMoney() < 1500 do task.wait(0.2) end
     if not plantWithRetry("unit_black_clover", positions.blackclover1, "Black Clover 1") then
        return false
     end
     task.wait(0.15)
-    while #myUnitIDs < 7 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[7], 5, costs.blackclover, "Black Clover 1")
-    
-    -- ===== PASO 6: Witch 1 → Lvl 5 (ya está en level 3) =====
-    upgradeToLevel(myUnitIDs[5], 5, costs.witch, "Witch 1", 3)
-    
-    -- ===== PASO 7: Upgrade Dragons 1, 2, 3 → Lvl 5 =====
-    print("[GRAVEYARD V2] ========== UPGRADING ALL DRAGONS BEFORE ROSES ==========")
-    upgradeToLevel(myUnitIDs[2], 5, costs.dragon, "Dragon 1")
-    upgradeToLevel(myUnitIDs[3], 5, costs.dragon, "Dragon 2")
-    upgradeToLevel(myUnitIDs[4], 5, costs.dragon, "Dragon 3")
-    
-    -- ===== PASO 8: Rose 1 → Lvl 5 =====
-    while getMoney() < 2000 do task.wait(0.2) end
-    if not plantWithRetry("unit_pink_rose", positions.rose1, "Rose 1") then
-       return false
-    end
-    task.wait(0.15)
-    while #myUnitIDs < 8 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[8], 5, costs.rose, "Rose 1")
-    
-    -- ===== PASO 9: Rose 2 → Lvl 5 =====
-    while getMoney() < 2000 do task.wait(0.2) end
-    if not plantWithRetry("unit_pink_rose", positions.rose2, "Rose 2") then
-       return false
-    end
-    task.wait(0.15)
     while #myUnitIDs < 9 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[9], 5, costs.rose, "Rose 2")
+    upgradeToLevel(myUnitIDs[9], 5, costs.blackclover, "Black Clover 1")
     
-    -- ===== PASO 10: Witch 2 → Lvl 5 =====
+    -- ===== PASO 7: Witch 2 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 7: WITCH 2 ==========")
     while getMoney() < 4500 do task.wait(0.2) end
     if not plantWithRetry("unit_witch", positions.witch2, "Witch 2") then
        return false
@@ -2736,7 +2739,8 @@ local function runGraveyardV2()
     while #myUnitIDs < 10 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[10], 5, costs.witch, "Witch 2")
     
-    -- ===== PASO 11: Witch 3 → Lvl 5 =====
+    -- ===== PASO 8: Witch 3 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 8: WITCH 3 ==========")
     while getMoney() < 4500 do task.wait(0.2) end
     if not plantWithRetry("unit_witch", positions.witch3, "Witch 3") then
        return false
@@ -2745,43 +2749,50 @@ local function runGraveyardV2()
     while #myUnitIDs < 11 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[11], 5, costs.witch, "Witch 3")
     
-    -- ===== PASO 12: Potato 2 → Lvl 5 =====
-    while getMoney() < 4500 do task.wait(0.2) end
-    if not plantWithRetry("unit_punch_potato", positions.potato2, "Potato 2") then
-       return false
-    end
-    task.wait(0.15)
-    while #myUnitIDs < 12 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[12], 5, costs.potato, "Potato 2")
+    -- ===== PASO 9: Corrupted 1 y 2 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 9: CORRUPTED 1 Y 2 ==========")
     
-    -- ===== PASO 13: Potato 3 → Lvl 5 =====
-    while getMoney() < 4500 do task.wait(0.2) end
-    if not plantWithRetry("unit_punch_potato", positions.potato3, "Potato 3") then
-       return false
-    end
-    task.wait(0.15)
-    while #myUnitIDs < 13 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[13], 5, costs.potato, "Potato 3")
-    
-    -- ===== PASO 14: Corrupted 1 → Lvl 5 =====
+    -- Corrupted 1
     while getMoney() < 8666 do task.wait(0.2) end
     if not plantWithRetry("unit_eyeball", positions.corrupted1, "Corrupted 1") then
        return false
     end
     task.wait(0.15)
-    while #myUnitIDs < 14 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[14], 5, costs.corrupted, "Corrupted 1")
+    while #myUnitIDs < 12 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[12], 5, costs.corrupted, "Corrupted 1")
     
-    -- ===== PASO 15: Corrupted 2 → Lvl 5 =====
+    -- Corrupted 2
     while getMoney() < 8666 do task.wait(0.2) end
     if not plantWithRetry("unit_eyeball", positions.corrupted2, "Corrupted 2") then
        return false
     end
     task.wait(0.15)
-    while #myUnitIDs < 15 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[15], 5, costs.corrupted, "Corrupted 2")
+    while #myUnitIDs < 13 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[13], 5, costs.corrupted, "Corrupted 2")
     
-    -- ===== PASO 16: Prismleafs 2-5 → Lvl 5 =====
+    -- ===== PASO 10: Pink Rose 1 y 2 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 10: PINK ROSES ==========")
+    
+    -- Rose 1
+    while getMoney() < 2000 do task.wait(0.2) end
+    if not plantWithRetry("unit_pink_rose", positions.rose1, "Rose 1") then
+       return false
+    end
+    task.wait(0.15)
+    while #myUnitIDs < 14 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[14], 5, costs.rose, "Rose 1")
+    
+    -- Rose 2
+    while getMoney() < 2000 do task.wait(0.2) end
+    if not plantWithRetry("unit_pink_rose", positions.rose2, "Rose 2") then
+       return false
+    end
+    task.wait(0.15)
+    while #myUnitIDs < 15 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[15], 5, costs.rose, "Rose 2")
+    
+    -- ===== PASO 11: Prismleafs 2-5 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 11: PRISMLEAFS RESTANTES ==========")
     for i = 2, 5 do
         while getMoney() < 225 do task.wait(0.2) end
         if not plantWithRetry("unit_glow_ray", positions["prismleaf"..i], "Prismleaf " .. i) then
@@ -2792,7 +2803,7 @@ local function runGraveyardV2()
         upgradeToLevel(myUnitIDs[15 + i - 1], 5, costs.prismleaf, "Prismleaf " .. i)
     end
 
-    print("[GRAVEYARD V2] ========== COMPLETE ==========")
+    print("[GRAVEYARD V2] ========== COMPLETE - 19 UNITS PLANTED ==========")
     return true
 end
 
