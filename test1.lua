@@ -905,27 +905,14 @@ local function getPresentsFromScreen()
         local gui = PlayerGui:FindFirstChild("GameGui")
         if not gui then return "N/A" end
         
-        -- Buscar PresentsDisplay
-        local presentsDisplay = gui:FindFirstChild("PresentsDisplay", true)
+        -- ✅ BUSCAR ChristmasGiftsDisplay (nombre interno correcto)
+        local presentsDisplay = gui:FindFirstChild("ChristmasGiftsDisplay", true)
         
         if presentsDisplay then
             local titleLabel = presentsDisplay:FindFirstChild("Title")
             if titleLabel and titleLabel:IsA("TextLabel") then
                 local num = titleLabel.Text:match("(%d+)")
                 if num then return num end
-            end
-        end
-        
-        -- Fallback: buscar en CurrencyDisplay
-        local currencyDisplay = gui:FindFirstChild("CurrencyDisplay", true)
-        if currencyDisplay then
-            local presentsDisplay2 = currencyDisplay:FindFirstChild("PresentsDisplay")
-            if presentsDisplay2 then
-                local titleLabel = presentsDisplay2:FindFirstChild("Title")
-                if titleLabel and titleLabel:IsA("TextLabel") then
-                    local num = titleLabel.Text:match("(%d+)")
-                    if num then return num end
-                end
             end
         end
         
@@ -1088,14 +1075,14 @@ local function sendWebhook(endFrame, isTest)
                 "**Matches Played:** %d\n\n" ..
                 "**Stats**\n" ..
                 "🌱 Seeds: %s\n" ..
-                "🎁 Presents: %s\n\n" ..  -- ✅ CAMBIADO
+                "🎁 Presents: %s\n\n" ..
                 "**Match Results**\n" ..
                 "%s\n" ..
                 "⏱️ Run Time: %s",
                 userName,
                 getgenv().WebhookConfig.GamesPlayed,
                 seeds,
-                presents,  -- ✅ CAMBIADO
+                presents,
                 result,
                 runTime
             )
@@ -1106,14 +1093,14 @@ local function sendWebhook(endFrame, isTest)
                 "**Matches Played:** %d\n\n" ..
                 "**Stats**\n" ..
                 "🌱 Seeds: %s\n" ..
-                "🎁 Presents: %s\n\n" ..  -- ✅ CAMBIADO
+                "🎁 Presents: %s\n\n" ..
                 "**Match Results**\n" ..
                 "%s\n" ..
                 "⏱️ Run Time: %s",
                 userName,
                 getgenv().WebhookConfig.GamesPlayed,
                 seeds,
-                presents,  -- ✅ CAMBIADO
+                presents,
                 result,
                 runTime
             )
@@ -1155,6 +1142,7 @@ local function sendWebhook(endFrame, isTest)
     
     return true
 end
+
 
 local function startWebhookTracking()
     task.spawn(function()
