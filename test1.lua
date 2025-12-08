@@ -2749,9 +2749,15 @@ local function runGraveyardV2()
     task.wait(0.15)
     while #myUnitIDs < 11 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[11], 5, costs.witch, "Witch 3")
+
+    -- ===== PASO 9: Upgrade Dragons 1, 2, 3 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 9: UPGRADING ALL DRAGONS ==========")
+    upgradeToLevel(myUnitIDs[2], 5, costs.dragon, "Dragon 1")
+    upgradeToLevel(myUnitIDs[3], 5, costs.dragon, "Dragon 2")
+    upgradeToLevel(myUnitIDs[4], 5, costs.dragon, "Dragon 3")
     
-    -- ===== PASO 9: Corrupted 1 y 2 → Lvl 5 =====
-    print("[GRAVEYARD V2] ========== PASO 9: CORRUPTED 1 Y 2 ==========")
+    -- ===== PASO 10: Corrupted 1 y 2 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 10: CORRUPTED 1 Y 2 ==========")
     
     -- Corrupted 1
     while getMoney() < 8666 do task.wait(0.2) end
@@ -2771,40 +2777,49 @@ local function runGraveyardV2()
     while #myUnitIDs < 13 do task.wait(0.2) end
     upgradeToLevel(myUnitIDs[13], 5, costs.corrupted, "Corrupted 2")
     
-    -- ===== PASO 10: Pink Rose 1 y 2 → Lvl 5 =====
-    print("[GRAVEYARD V2] ========== PASO 10: PINK ROSES ==========")
+    -- ===== PASO 11: Frost Golem 1, 2, 3 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 11: FROST GOLEMS ==========")
     
-    -- Rose 1
-    while getMoney() < 2000 do task.wait(0.2) end
-    if not plantWithRetry("unit_pink_rose", positions.rose1, "Rose 1") then
+    -- Frost Golem 1
+    while getMoney() < 7000 do task.wait(0.2) end
+    if not plantWithRetry("unit_frost_golem", positions.frostgolem1, "Frost Golem 1") then
        return false
     end
     task.wait(0.15)
     while #myUnitIDs < 14 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[14], 5, costs.rose, "Rose 1")
+    upgradeToLevel(myUnitIDs[14], 5, costs.frostgolem, "Frost Golem 1")
     
-    -- Rose 2
-    while getMoney() < 2000 do task.wait(0.2) end
-    if not plantWithRetry("unit_pink_rose", positions.rose2, "Rose 2") then
+    -- Frost Golem 2
+    while getMoney() < 7000 do task.wait(0.2) end
+    if not plantWithRetry("unit_frost_golem", positions.frostgolem2, "Frost Golem 2") then
        return false
     end
     task.wait(0.15)
     while #myUnitIDs < 15 do task.wait(0.2) end
-    upgradeToLevel(myUnitIDs[15], 5, costs.rose, "Rose 2")
+    upgradeToLevel(myUnitIDs[15], 5, costs.frostgolem, "Frost Golem 2")
     
-    -- ===== PASO 11: Prismleafs 2-5 → Lvl 5 =====
-    print("[GRAVEYARD V2] ========== PASO 11: PRISMLEAFS RESTANTES ==========")
+    -- Frost Golem 3
+    while getMoney() < 7000 do task.wait(0.2) end
+    if not plantWithRetry("unit_frost_golem", positions.frostgolem3, "Frost Golem 3") then
+       return false
+    end
+    task.wait(0.15)
+    while #myUnitIDs < 16 do task.wait(0.2) end
+    upgradeToLevel(myUnitIDs[16], 5, costs.frostgolem, "Frost Golem 3")
+    
+    -- ===== PASO 12: Prismleafs 2-5 → Lvl 5 =====
+    print("[GRAVEYARD V2] ========== PASO 12: PRISMLEAFS RESTANTES ==========")
     for i = 2, 5 do
         while getMoney() < 225 do task.wait(0.2) end
         if not plantWithRetry("unit_glow_ray", positions["prismleaf"..i], "Prismleaf " .. i) then
             return false
         end
         task.wait(0.15)
-        while #myUnitIDs < (15 + i - 1) do task.wait(0.2) end
-        upgradeToLevel(myUnitIDs[15 + i - 1], 5, costs.prismleaf, "Prismleaf " .. i)
+        while #myUnitIDs < (16 + i - 1) do task.wait(0.2) end
+        upgradeToLevel(myUnitIDs[16 + i - 1], 5, costs.prismleaf, "Prismleaf " .. i)
     end
 
-    print("[GRAVEYARD V2] ========== COMPLETE - 19 UNITS PLANTED ==========")
+    print("[GRAVEYARD V2] ========== COMPLETE - 20 UNITS PLANTED ==========")
     return true
 end
 
