@@ -1139,7 +1139,7 @@ local function sendWebhook(endFrame, isTest)
         if isTest then
             print("[WEBHOOK TEST] Sent successfully!")
         else
-            print("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Candy: " .. candy)
+            print("[WEBHOOK] Sent! Result: " .. result .. " | Seeds: " .. seeds .. " | Presents: " .. presents)
         end
     end)
     
