@@ -1066,7 +1066,7 @@ local function sendWebhook(endFrame, isTest)
         
         local time = os.date("%Y-%m-%d %H:%M:%S")
         local seeds = getSeedsFromScreen()
-        local presents = getPresentsFromScreen()
+        local presents = getPresentsFromScreen()  -- ✅ CORRECTO
         
         local result = "Test Webhook"
         local runTime = "N/A"
@@ -1088,14 +1088,14 @@ local function sendWebhook(endFrame, isTest)
                 "**Matches Played:** %d\n\n" ..
                 "**Stats**\n" ..
                 "🌱 Seeds: %s\n" ..
-                "🎁 Presents: %s\n\n" ..
+                "🎁 Presents: %s\n\n" ..  -- ✅ CAMBIADO
                 "**Match Results**\n" ..
                 "%s\n" ..
                 "⏱️ Run Time: %s",
                 userName,
                 getgenv().WebhookConfig.GamesPlayed,
                 seeds,
-                presents,
+                presents,  -- ✅ CAMBIADO
                 result,
                 runTime
             )
@@ -1106,14 +1106,14 @@ local function sendWebhook(endFrame, isTest)
                 "**Matches Played:** %d\n\n" ..
                 "**Stats**\n" ..
                 "🌱 Seeds: %s\n" ..
-                "🎁 Presents: %s\n\n" ..
+                "🎁 Presents: %s\n\n" ..  -- ✅ CAMBIADO
                 "**Match Results**\n" ..
                 "%s\n" ..
                 "⏱️ Run Time: %s",
                 userName,
                 getgenv().WebhookConfig.GamesPlayed,
                 seeds,
-                presents,
+                presents,  -- ✅ CAMBIADO
                 result,
                 runTime
             )
