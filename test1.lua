@@ -2280,12 +2280,9 @@ end
 local function runGraveyardV1()
     print("[GRAVEYARD V1] Starting Rainbow Tomato & Earth Dragon strategy...")
     
-    -- ✅ RESETEAR TRACKING AL INICIO (CRÍTICO)
-    getgenv().GlobalTracking.unitIDs = {}
-    local myUnitIDs = {}
-    print("[GRAVEYARD V1] 🔄 Unit IDs reset - Starting fresh")
+    -- ✅ USAR TRACKING GLOBAL (NO CREAR LISTA LOCAL)
+    local myUnitIDs = getgenv().GlobalTracking.unitIDs
     
-    -- ===== COORDENADAS EXACTAS =====
     local rainbowPositions = {
         {cframe = CFrame.new(-344.7191162109375, 61.680301666259766, -702.30859375, -1, 0, -8.74e-08, 0, 1, 0, 8.74e-08, 0, -1), rotation = 180},
         {cframe = CFrame.new(-351.1462097167969, 61.68030548095703, -711.151123046875, -1, 0, -8.74e-08, 0, 1, 0, 8.74e-08, 0, -1), rotation = 180},
@@ -2298,13 +2295,11 @@ local function runGraveyardV1()
         {cframe = CFrame.new(-319.48638916015625, 61.68030548095703, -734.1026000976562, -1, 0, -8.74e-08, 0, 1, 0, 8.74e-08, 0, -1), rotation = 180}
     }
     
-    -- ===== PASO 1: PLANTAR RAINBOW TOMATO 1 =====
+    -- Rainbow Tomato 1
     print("[GRAVEYARD V1] Planting Rainbow Tomato 1...")
     while getMoney() < 100 do task.wait(0.2) end
-    
     for attempt = 1, 5 do
-        local placed = placeUnit("unit_tomato_rainbow", rainbowPositions[1].cframe, rainbowPositions[1].rotation)
-        if placed then 
+        if placeUnit("unit_tomato_rainbow", rainbowPositions[1].cframe, rainbowPositions[1].rotation) then 
             print("[GRAVEYARD V1] ✓ Placed Rainbow Tomato 1")
             break 
         end
@@ -2312,41 +2307,29 @@ local function runGraveyardV1()
     end
     task.wait(0.15)
     
-    -- ✅ TRACKEAR Y GUARDAR EN LISTA LOCAL
     local waitTime = 0
-    while #getgenv().GlobalTracking.unitIDs < 1 and waitTime < 10 do
+    while #myUnitIDs < 1 and waitTime < 10 do
         task.wait(0.2)
         waitTime = waitTime + 0.2
     end
+    if #myUnitIDs < 1 then warn("[GRAVEYARD V1] Failed to track RB1!") return false end
     
-    if #getgenv().GlobalTracking.unitIDs < 1 then
-        warn("[GRAVEYARD V1] Failed to track Rainbow Tomato 1!")
-        return false
-    end
-    
-    myUnitIDs[1] = getgenv().GlobalTracking.unitIDs[1]
     local rb1ID = myUnitIDs[1]
     
-    -- ===== UPGRADES RB1 → LVL 2 y 3 =====
+    -- Upgrades RB1 → 2, 3
     while getMoney() < 125 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 175 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
-    -- ===== PASO 4: PLANTAR RAINBOW TOMATO 2 =====
+    -- Rainbow Tomato 2
     print("[GRAVEYARD V1] Planting Rainbow Tomato 2...")
     while getMoney() < 100 do task.wait(0.2) end
-    
     for attempt = 1, 5 do
-        local placed = placeUnit("unit_tomato_rainbow", rainbowPositions[2].cframe, rainbowPositions[2].rotation)
-        if placed then 
+        if placeUnit("unit_tomato_rainbow", rainbowPositions[2].cframe, rainbowPositions[2].rotation) then 
             print("[GRAVEYARD V1] ✓ Placed Rainbow Tomato 2")
             break 
         end
@@ -2354,66 +2337,46 @@ local function runGraveyardV1()
     end
     task.wait(0.15)
     
-    -- ✅ TRACKEAR Y GUARDAR EN LISTA LOCAL
     waitTime = 0
-    while #getgenv().GlobalTracking.unitIDs < 2 and waitTime < 10 do
+    while #myUnitIDs < 2 and waitTime < 10 do
         task.wait(0.2)
         waitTime = waitTime + 0.2
     end
+    if #myUnitIDs < 2 then warn("[GRAVEYARD V1] Failed to track RB2!") return false end
     
-    if #getgenv().GlobalTracking.unitIDs < 2 then
-        warn("[GRAVEYARD V1] Failed to track Rainbow Tomato 2!")
-        return false
-    end
-    
-    myUnitIDs[2] = getgenv().GlobalTracking.unitIDs[2]
     local rb2ID = myUnitIDs[2]
     
-    -- ===== UPGRADES RB2 → LVL 2, 3, 4, 5 =====
+    -- Upgrades RB2 → 2, 3, 4, 5
     while getMoney() < 125 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 175 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 350 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 500 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb2ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
-    -- ===== UPGRADES RB1 → LVL 4, 5 =====
+    -- Upgrades RB1 → 4, 5
     while getMoney() < 350 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 500 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb1ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
-    -- ===== PASO 11: PLANTAR RAINBOW TOMATO 3 =====
+    -- Rainbow Tomato 3
     print("[GRAVEYARD V1] Planting Rainbow Tomato 3...")
     while getMoney() < 100 do task.wait(0.2) end
-    
     for attempt = 1, 5 do
-        local placed = placeUnit("unit_tomato_rainbow", rainbowPositions[3].cframe, rainbowPositions[3].rotation)
-        if placed then 
+        if placeUnit("unit_tomato_rainbow", rainbowPositions[3].cframe, rainbowPositions[3].rotation) then 
             print("[GRAVEYARD V1] ✓ Placed Rainbow Tomato 3")
             break 
         end
@@ -2421,91 +2384,50 @@ local function runGraveyardV1()
     end
     task.wait(0.15)
     
-    -- ✅ TRACKEAR Y GUARDAR EN LISTA LOCAL
     waitTime = 0
-    while #getgenv().GlobalTracking.unitIDs < 3 and waitTime < 10 do
+    while #myUnitIDs < 3 and waitTime < 10 do
         task.wait(0.2)
         waitTime = waitTime + 0.2
     end
+    if #myUnitIDs < 3 then warn("[GRAVEYARD V1] Failed to track RB3!") return false end
     
-    if #getgenv().GlobalTracking.unitIDs < 3 then
-        warn("[GRAVEYARD V1] Failed to track Rainbow Tomato 3!")
-        return false
-    end
-    
-    myUnitIDs[3] = getgenv().GlobalTracking.unitIDs[3]
     local rb3ID = myUnitIDs[3]
     
-    -- ===== UPGRADES RB3 → LVL 2, 3, 4, 5 =====
+    -- Upgrades RB3 → 2, 3, 4, 5
     while getMoney() < 125 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 175 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 350 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
     while getMoney() < 500 do task.wait(0.2) end
-    pcall(function()
-        ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID)
-    end)
+    pcall(function() ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rb3ID) end)
     task.wait(0.4 + (math.random() * 0.38))
     
-    print("[GRAVEYARD V1] ========== ALL RAINBOW TOMATO UPGRADES COMPLETE - PLACING DRAGONS ==========")
+    print("[GRAVEYARD V1] ========== PLACING DRAGONS ==========")
     
-    -- ===== PLANTAR 3 EARTH DRAGONS =====
-    print("[GRAVEYARD V1] Placing Earth Dragon 1...")
-    while getMoney() < 6000 do task.wait(0.2) end
-    
-    for attempt = 1, 5 do
-        local placed = placeUnit("unit_golem_dragon", dragonPositions[1].cframe, dragonPositions[1].rotation)
-        if placed then 
-            print("[GRAVEYARD V1] ✓ Placed Earth Dragon 1")
-            break 
+    -- Dragons 1, 2, 3
+    for i = 1, 3 do
+        print("[GRAVEYARD V1] Placing Dragon " .. i .. "...")
+        while getMoney() < 6000 do task.wait(0.2) end
+        for attempt = 1, 5 do
+            if placeUnit("unit_golem_dragon", dragonPositions[i].cframe, dragonPositions[i].rotation) then 
+                print("[GRAVEYARD V1] ✓ Placed Dragon " .. i)
+                break 
+            end
+            task.wait(0.15)
         end
         task.wait(0.15)
     end
-    task.wait(0.15)
     
-    print("[GRAVEYARD V1] Placing Earth Dragon 2...")
-    while getMoney() < 6000 do task.wait(0.2) end
+    print("[GRAVEYARD V1] ========== WAITING FOR WAVE 20 ==========")
     
-    for attempt = 1, 5 do
-        local placed = placeUnit("unit_golem_dragon", dragonPositions[2].cframe, dragonPositions[2].rotation)
-        if placed then 
-            print("[GRAVEYARD V1] ✓ Placed Earth Dragon 2")
-            break 
-        end
-        task.wait(0.15)
-    end
-    task.wait(0.15)
-    
-    print("[GRAVEYARD V1] Placing Earth Dragon 3...")
-    while getMoney() < 6000 do task.wait(0.2) end
-    
-    for attempt = 1, 5 do
-        local placed = placeUnit("unit_golem_dragon", dragonPositions[3].cframe, dragonPositions[3].rotation)
-        if placed then 
-            print("[GRAVEYARD V1] ✓ Placed Earth Dragon 3")
-            break 
-        end
-        task.wait(0.15)
-    end
-    task.wait(0.15)
-    
-    print("[GRAVEYARD V1] ========== ALL DRAGONS PLACED - WAITING FOR WAVE 20 ==========")
-    
-    -- ===== ESPERAR WAVE 20 =====
     local currentWave = 0
     local wave20Detected = false
     
@@ -2516,39 +2438,29 @@ local function runGraveyardV1()
                 for _, obj in pairs(gui:GetDescendants()) do
                     if obj:IsA("TextLabel") and obj.Visible and obj.Name == "Title" then
                         local waveNum = tonumber(string.match(obj.Text, "^Wave%s*(%d+)") or string.match(obj.Text, "Wave%s*(%d+)%s*/"))
-                        
                         if waveNum and waveNum ~= currentWave then
                             currentWave = waveNum
                             if currentWave >= 20 then
-                                print("[GRAVEYARD V1] ✓✓✓ WAVE 20 DETECTED! ✓✓✓")
+                                print("[GRAVEYARD V1] ✓ WAVE 20 DETECTED!")
                                 wave20Detected = true
                                 return
-                            elseif currentWave % 5 == 0 and currentWave > 0 then
-                                print("[GRAVEYARD V1] Current wave: " .. currentWave)
                             end
                         end
                     end
                 end
             end
         end)
-        
         if wave20Detected then break end
         task.wait(0.5)
     end
     
-    if not getgenv().AutoFarmConfig.GraveyardV1Active then
-        print("[GRAVEYARD V1] Farm stopped before Wave 20")
-        return false
-    end
+    if not getgenv().AutoFarmConfig.GraveyardV1Active then return false end
     
-    print("[GRAVEYARD V1] ========== WAVE 20 REACHED - SELLING ALL UNITS ==========")
-    
-    local randomDelay = 0.5 + (math.random() * 0.5)
-    task.wait(randomDelay)
+    print("[GRAVEYARD V1] ========== SELLING ALL UNITS ==========")
+    task.wait(0.5 + (math.random() * 0.5))
     
     -- Vender usando IDs trackeados
     if #myUnitIDs >= 6 then
-        print("[GRAVEYARD V1] Selling all 6 units using tracked IDs...")
         for i = 1, 6 do
             pcall(function()
                 ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("SellUnit"):InvokeServer(myUnitIDs[i])
@@ -2556,18 +2468,9 @@ local function runGraveyardV1()
             end)
             task.wait(0.05)
         end
-    else
-        -- Fallback
-        print("[GRAVEYARD V1] Selling using numeric IDs (fallback)...")
-        for unitID = 1, 6 do
-            pcall(function()
-                ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("SellUnit"):InvokeServer(unitID)
-            end)
-            task.wait(0.3)
-        end
     end
     
-    print("[GRAVEYARD V1] ========== ALL UNITS SOLD ==========")
+    print("[GRAVEYARD V1] ========== COMPLETE ==========")
     return true
 end
 
@@ -3063,12 +2966,9 @@ end
 local function runAutoWinV1()
     print("[AUTO WIN V1] Starting Tomato Plant strategy...")
     
-    -- ✅ RESETEAR TRACKING AL INICIO (CRÍTICO)
-    getgenv().GlobalTracking.unitIDs = {}
-    local myUnitIDs = {}
-    print("[AUTO WIN V1] 🔄 Unit IDs reset - Starting fresh")
+    -- ✅ USAR TRACKING GLOBAL
+    local myUnitIDs = getgenv().GlobalTracking.unitIDs
     
-    -- ===== COORDENADAS EXACTAS =====
     local tomatoPositions = {
         {cframe = CFrame.new(-326.81658935546875, 61.68030548095703, -105.2947998046875, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         {cframe = CFrame.new(-326.57305908203125, 61.68030548095703, -110.16496276855469, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
@@ -3094,12 +2994,10 @@ local function runAutoWinV1()
     
     for i = 1, #tomatoPositions do
         print("[AUTO WIN V1] Planting Tomato " .. i .. "/18...")
-        
         while getMoney() < 100 do task.wait(0.2) end
         
         for attempt = 1, 5 do
-            local placed = placeUnit("unit_tomato_plant", tomatoPositions[i].cframe, tomatoPositions[i].rotation)
-            if placed then 
+            if placeUnit("unit_tomato_plant", tomatoPositions[i].cframe, tomatoPositions[i].rotation) then 
                 print("[AUTO WIN V1] ✓ Placed Tomato " .. i)
                 break 
             end
@@ -3107,22 +3005,14 @@ local function runAutoWinV1()
         end
         task.wait(0.15)
         
-        -- ✅ ESPERAR A QUE SE TRACKEE LA UNIDAD
         local waitTime = 0
-        local tracked = false
-        while waitTime < 10 do
-            if #getgenv().GlobalTracking.unitIDs >= i then
-                tracked = true
-                myUnitIDs[i] = getgenv().GlobalTracking.unitIDs[i]
-                print("[AUTO WIN V1] ✓ Tracked Tomato " .. i .. " (ID: " .. myUnitIDs[i] .. ")")
-                break
-            end
+        while #myUnitIDs < i and waitTime < 10 do
             task.wait(0.2)
             waitTime = waitTime + 0.2
         end
         
-        if not tracked then
-            warn("[AUTO WIN V1] ❌ Failed to track Tomato " .. i .. " after 10 seconds!")
+        if #myUnitIDs < i then
+            warn("[AUTO WIN V1] Failed to track Tomato " .. i)
             return false
         end
         
@@ -3131,20 +3021,17 @@ local function runAutoWinV1()
         for level = 2, 5 do
             local cost = upgradeCosts[level - 1]
             print("[AUTO WIN V1] Upgrading Tomato " .. i .. " to Level " .. level .. "...")
-            
             while getMoney() < cost do task.wait(0.2) end
-            
             pcall(function()
                 ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(tomatoID)
             end)
-            
             task.wait(0.4 + (math.random() * 0.38))
         end
         
-        print("[AUTO WIN V1] ✓ Tomato " .. i .. " fully upgraded (Level 5)")
+        print("[AUTO WIN V1] ✓ Tomato " .. i .. " fully upgraded")
     end
     
-    print("[AUTO WIN V1] ========== ALL 18 TOMATO PLANTS PLACED AND UPGRADED ==========")
+    print("[AUTO WIN V1] ========== COMPLETE ==========")
     return true
 end
 
@@ -3152,12 +3039,9 @@ end
 local function runAutoWinV2()
     print("[AUTO WIN V2] Starting Rainbow Tomato strategy...")
     
-    -- ✅ RESETEAR TRACKING AL INICIO (CRÍTICO)
-    getgenv().GlobalTracking.unitIDs = {}
-    local myUnitIDs = {}
-    print("[AUTO WIN V2] 🔄 Unit IDs reset - Starting fresh")
+    -- ✅ USAR TRACKING GLOBAL
+    local myUnitIDs = getgenv().GlobalTracking.unitIDs
     
-    -- ===== COORDENADAS EXACTAS =====
     local rainbowPositions = {
         {cframe = CFrame.new(-345.869873046875, 61.68030548095703, -116.59803771972656, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
         {cframe = CFrame.new(-341.4617004394531, 61.68030548095703, -105.65262603759766, -1, 0, -8.742277657347586e-08, 0, 1, 0, 8.742277657347586e-08, 0, -1), rotation = 180},
@@ -3175,12 +3059,10 @@ local function runAutoWinV2()
     
     for i = 1, #rainbowPositions do
         print("[AUTO WIN V2] Planting Rainbow Tomato " .. i .. "/10...")
-        
         while getMoney() < 100 do task.wait(0.2) end
         
         for attempt = 1, 5 do
-            local placed = placeUnit("unit_tomato_rainbow", rainbowPositions[i].cframe, rainbowPositions[i].rotation)
-            if placed then 
+            if placeUnit("unit_tomato_rainbow", rainbowPositions[i].cframe, rainbowPositions[i].rotation) then 
                 print("[AUTO WIN V2] ✓ Placed Rainbow Tomato " .. i)
                 break 
             end
@@ -3188,22 +3070,14 @@ local function runAutoWinV2()
         end
         task.wait(0.15)
         
-        -- ✅ ESPERAR A QUE SE TRACKEE LA UNIDAD
         local waitTime = 0
-        local tracked = false
-        while waitTime < 10 do
-            if #getgenv().GlobalTracking.unitIDs >= i then
-                tracked = true
-                myUnitIDs[i] = getgenv().GlobalTracking.unitIDs[i]
-                print("[AUTO WIN V2] ✓ Tracked Rainbow Tomato " .. i .. " (ID: " .. myUnitIDs[i] .. ")")
-                break
-            end
+        while #myUnitIDs < i and waitTime < 10 do
             task.wait(0.2)
             waitTime = waitTime + 0.2
         end
         
-        if not tracked then
-            warn("[AUTO WIN V2] ❌ Failed to track Rainbow Tomato " .. i .. " after 10 seconds!")
+        if #myUnitIDs < i then
+            warn("[AUTO WIN V2] Failed to track Rainbow Tomato " .. i)
             return false
         end
         
@@ -3212,20 +3086,17 @@ local function runAutoWinV2()
         for level = 2, 5 do
             local cost = upgradeCosts[level - 1]
             print("[AUTO WIN V2] Upgrading Rainbow Tomato " .. i .. " to Level " .. level .. "...")
-            
             while getMoney() < cost do task.wait(0.2) end
-            
             pcall(function()
                 ReplicatedStorage:WaitForChild("RemoteFunctions"):WaitForChild("UpgradeUnit"):InvokeServer(rainbowID)
             end)
-            
             task.wait(0.4 + (math.random() * 0.38))
         end
         
-        print("[AUTO WIN V2] ✓ Rainbow Tomato " .. i .. " fully upgraded (Level 5)")
+        print("[AUTO WIN V2] ✓ Rainbow Tomato " .. i .. " fully upgraded")
     end
     
-    print("[AUTO WIN V2] ========== ALL 10 RAINBOW TOMATOES PLACED AND UPGRADED ==========")
+    print("[AUTO WIN V2] ========== COMPLETE ==========")
     return true
 end
 
