@@ -3003,24 +3003,20 @@ local function startAutoFarmLoop(strategyFunction, strategyName)
             strategyFunction()
         end)
         
-        -- ✅ SIEMPRE INCREMENTAR EL CONTADOR (incluso si falla)
-        local matchNumberAttempted = getgenv().AutoFarmConfig.MatchesPlayed + 1
+        -- ✅ SIEMPRE INCREMENTAR (victoria o derrota cuenta como partida completada)
+        getgenv().AutoFarmConfig.MatchesPlayed = getgenv().AutoFarmConfig.MatchesPlayed + 1
         
         if macroSuccess then
-            getgenv().AutoFarmConfig.MatchesPlayed = matchNumberAttempted
             print("[AUTO FARM LOOP] ✓ First macro complete! Match count: " .. getgenv().AutoFarmConfig.MatchesPlayed)
         else
-            warn("[AUTO FARM LOOP] ❌ MACRO FAILED IN MATCH #" .. matchNumberAttempted)
+            warn("[AUTO FARM LOOP] ❌ MACRO HAD ERRORS IN MATCH #" .. getgenv().AutoFarmConfig.MatchesPlayed)
             warn("[AUTO FARM LOOP] 📋 ERROR DETAILS: " .. tostring(macroError))
-            warn("[AUTO FARM LOOP] 🔄 Will restart clean on next match")
-            
-            -- ✅ INCREMENTAR CONTADOR AUNQUE HAYA FALLADO (para avanzar al siguiente match)
-            getgenv().AutoFarmConfig.MatchesPlayed = matchNumberAttempted
+            warn("[AUTO FARM LOOP] 🔄 Match still counts, continuing to next")
             
             -- ✅ NOTIFICAR AL USUARIO
             WindUI:Notify({
-                Title = "⚠️ Macro Failed",
-                Content = "Error in match #" .. matchNumberAttempted .. " - continuing to next match",
+                Title = "⚠️ Macro Had Errors",
+                Content = "Match #" .. getgenv().AutoFarmConfig.MatchesPlayed .. " completed with errors",
                 Duration = 4
             })
         end
@@ -3193,24 +3189,20 @@ local function startAutoFarmLoop(strategyFunction, strategyName)
                 strategyFunction()
             end)
             
-            -- ✅ SIEMPRE INCREMENTAR EL CONTADOR (incluso si falla)
-            local matchNumberAttempted = getgenv().AutoFarmConfig.MatchesPlayed + 1
+            -- ✅ SIEMPRE INCREMENTAR (victoria o derrota cuenta como partida completada)
+            getgenv().AutoFarmConfig.MatchesPlayed = getgenv().AutoFarmConfig.MatchesPlayed + 1
             
             if macroSuccess then
-                getgenv().AutoFarmConfig.MatchesPlayed = matchNumberAttempted
                 print("[AUTO FARM LOOP] ✅ MACRO COMPLETE! Match count: " .. getgenv().AutoFarmConfig.MatchesPlayed)
             else
-                warn("[AUTO FARM LOOP] ❌ MACRO FAILED IN MATCH #" .. matchNumberAttempted)
+                warn("[AUTO FARM LOOP] ❌ MACRO HAD ERRORS IN MATCH #" .. getgenv().AutoFarmConfig.MatchesPlayed)
                 warn("[AUTO FARM LOOP] 📋 ERROR DETAILS: " .. tostring(macroError))
-                warn("[AUTO FARM LOOP] 🔄 Tracking will reset for next match")
-                
-                -- ✅ INCREMENTAR CONTADOR AUNQUE HAYA FALLADO (para avanzar al siguiente match)
-                getgenv().AutoFarmConfig.MatchesPlayed = matchNumberAttempted
+                warn("[AUTO FARM LOOP] 🔄 Match still counts, continuing to next")
                 
                 -- ✅ NOTIFICAR AL USUARIO
                 WindUI:Notify({
-                    Title = "⚠️ Macro Failed",
-                    Content = "Error in match #" .. matchNumberAttempted .. " - continuing to next match",
+                    Title = "⚠️ Macro Had Errors",
+                    Content = "Match #" .. getgenv().AutoFarmConfig.MatchesPlayed .. " completed with errors",
                     Duration = 4
                 })
             end
