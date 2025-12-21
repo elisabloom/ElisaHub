@@ -2527,10 +2527,11 @@ end
 -- ==================== DOJO: VERSIÓN OPTIMIZADA ====================
 
 local function getRandomPositionPath1()
-    local minPos = Vector3.new(46.63258361816406, -21.75, -49.71086502075195)
-    local maxPos = Vector3.new(52.49168014526367, -21.75, -55.56996154785156)
-    local randomX = minPos.X + math.random() * (maxPos.X - minPos.X)
-    local randomZ = minPos.Z + math.random() * (maxPos.Z - minPos.Z)
+    local startPos = Vector3.new(52.96915054321289, -21.75, -56.04743194580078)
+    local endPos = Vector3.new(49.97964096069336, -21.75, -53.05792236328125)
+    local t = math.random()
+    local randomX = startPos.X + t * (endPos.X - startPos.X)
+    local randomZ = startPos.Z + t * (endPos.Z - startPos.Z)
     local position = Vector3.new(randomX, -21.75, randomZ)
     return {
         Valid = true,
@@ -2542,10 +2543,11 @@ local function getRandomPositionPath1()
 end
 
 local function getRandomPositionPath2()
-    local minPos = Vector3.new(-54.49039077758789, -21.75, -53.30671691894531)
-    local maxPos = Vector3.new(-42.14012908935547, -21.74989891052246, -40.86867141723633)
-    local randomX = minPos.X + math.random() * (maxPos.X - minPos.X)
-    local randomZ = minPos.Z + math.random() * (maxPos.Z - minPos.Z)
+    local startPos = Vector3.new(-55.176204681396484, -21.75, -53.992530822753906)
+    local endPos = Vector3.new(-50.926292419433594, -21.75, -49.74261474609375)
+    local t = math.random()
+    local randomX = startPos.X + t * (endPos.X - startPos.X)
+    local randomZ = startPos.Z + t * (endPos.Z - startPos.Z)
     local position = Vector3.new(randomX, -21.75, randomZ)
     return {
         Valid = true,
@@ -3189,20 +3191,24 @@ local function startAutoFarmLoop(strategyFunction, strategyName)
                 strategyFunction()
             end)
             
-            -- ✅ SIEMPRE INCREMENTAR (victoria o derrota cuenta como partida completada)
-            getgenv().AutoFarmConfig.MatchesPlayed = getgenv().AutoFarmConfig.MatchesPlayed + 1
+            -- ✅ SIEMPRE INCREMENTAR EL CONTADOR (incluso si falla)
+            local matchNumberAttempted = getgenv().AutoFarmConfig.MatchesPlayed + 1
             
             if macroSuccess then
+                getgenv().AutoFarmConfig.MatchesPlayed = matchNumberAttempted
                 print("[AUTO FARM LOOP] ✅ MACRO COMPLETE! Match count: " .. getgenv().AutoFarmConfig.MatchesPlayed)
             else
-                warn("[AUTO FARM LOOP] ❌ MACRO HAD ERRORS IN MATCH #" .. getgenv().AutoFarmConfig.MatchesPlayed)
+                warn("[AUTO FARM LOOP] ❌ MACRO FAILED IN MATCH #" .. matchNumberAttempted)
                 warn("[AUTO FARM LOOP] 📋 ERROR DETAILS: " .. tostring(macroError))
-                warn("[AUTO FARM LOOP] 🔄 Match still counts, continuing to next")
+                warn("[AUTO FARM LOOP] 🔄 Tracking will reset for next match")
+                
+                -- ✅ INCREMENTAR CONTADOR AUNQUE HAYA FALLADO (para avanzar al siguiente match)
+                getgenv().AutoFarmConfig.MatchesPlayed = matchNumberAttempted
                 
                 -- ✅ NOTIFICAR AL USUARIO
                 WindUI:Notify({
-                    Title = "⚠️ Macro Had Errors",
-                    Content = "Match #" .. getgenv().AutoFarmConfig.MatchesPlayed .. " completed with errors",
+                    Title = "⚠️ Macro Failed",
+                    Content = "Error in match #" .. matchNumberAttempted .. " - continuing to next match",
                     Duration = 4
                 })
             end
