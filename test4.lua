@@ -1212,7 +1212,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
@@ -1228,7 +1228,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
@@ -1244,7 +1244,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
@@ -1260,7 +1260,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
@@ -1276,7 +1276,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
@@ -1292,7 +1292,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
@@ -1308,7 +1308,7 @@ local MapConfig = {
                 setMapRemote = "LobbySetMap_8"
             },
             secondary = {
-                teleport = CFrame.new(125, 78, 779.65),
+                teleport = CFrame.new(123, 79, 770),
                 remote = "LobbySetMaxPlayers_7",
                 leaveRemote = "LeaveLobby_7",
                 setMapRemote = "LobbySetMap_7"
