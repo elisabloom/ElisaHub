@@ -1201,143 +1201,50 @@ getgenv().AutoFarmToggles = getgenv().AutoFarmToggles or {
     AutoWinV2 = nil
 }
 
--- ==================== MAP CONFIG & SETUP FUNCTION (MODIFICADO CON DUAL POSITION) ====================
+-- ==================== MAP CONFIG & SETUP FUNCTION (DEBE IR ANTES DE MAIN TAB) ====================
 local MapConfig = {
     ["map_farm"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     },
     ["map_jungle"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     },
     ["map_island"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     },
     ["map_toxic"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     },
     ["map_back_garden"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     },
     ["map_dojo"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     },
     ["map_graveyard"] = {
-        positions = {
-            primary = {
-                teleport = CFrame.new(118.89, 78, 779.65),
-                remote = "LobbySetMaxPlayers_8",
-                leaveRemote = "LeaveLobby_8",
-                setMapRemote = "LobbySetMap_8"
-            },
-            secondary = {
-                teleport = CFrame.new(123, 79, 770),
-                remote = "LobbySetMaxPlayers_7",
-                leaveRemote = "LeaveLobby_7",
-                setMapRemote = "LobbySetMap_7"
-            }
-        }
+        teleport = CFrame.new(118.89, 78, 779.65),
+        remote = "LobbySetMaxPlayers_8"
     }
 }
 
--- ==================== FUNCIÓN DE SETUP DE LOBBY CON REINTENTOS Y DUAL POSITION ====================
+-- ==================== FUNCIÓN DE SETUP DE LOBBY CON REINTENTOS ====================
 local function setupLobbyWithRetry(mapId, mapName, maxRetries)
     maxRetries = maxRetries or 10
     local mapConfig = MapConfig[mapId]
     
-    if not mapConfig or not mapConfig.positions then
+    if not mapConfig then
         warn("[LOBBY SETUP] ❌ No config found for map: " .. mapId)
         return false
     end
     
-    local usePrimary = true -- Empezar con la posición primaria
-    
     for attempt = 1, maxRetries do
-        -- Alternar entre posiciones primary y secondary
-        local currentPosition = usePrimary and mapConfig.positions.primary or mapConfig.positions.secondary
-        local positionName = usePrimary and "PRIMARY" or "SECONDARY"
-        
-        print("[LOBBY SETUP] ========================================")
         print("[LOBBY SETUP] Attempt " .. attempt .. "/" .. maxRetries .. " for " .. mapName)
-        print("[LOBBY SETUP] Using " .. positionName .. " position")
-        print("[LOBBY SETUP] ========================================")
         
         -- 1. Verificar si ya estamos en el mapa correcto
         local currentMap = getCurrentMap()
@@ -1348,35 +1255,35 @@ local function setupLobbyWithRetry(mapId, mapName, maxRetries)
         
         -- 2. Si estamos en lobby, hacer el setup
         if currentMap == "map_lobby" then
-            print("[LOBBY SETUP] In lobby - executing setup with " .. positionName .. " position...")
+            print("[LOBBY SETUP] In lobby - executing setup...")
             
             -- Teleport
             local Character = LocalPlayer.Character
             if Character then
                 local HRP = Character:FindFirstChild("HumanoidRootPart")
                 if HRP then
-                    print("[LOBBY SETUP] Teleporting to " .. positionName .. " position...")
-                    HRP.CFrame = currentPosition.teleport
+                    print("[LOBBY SETUP] Teleporting...")
+                    HRP.CFrame = mapConfig.teleport
                     task.wait(1)
                 end
             end
             
-            -- Set max players usando el remote correspondiente
-            print("[LOBBY SETUP] Setting max players to 1 (using " .. currentPosition.remote .. ")...")
+            -- Set max players
+            print("[LOBBY SETUP] Setting max players to 1...")
             pcall(function()
                 game:GetService("ReplicatedStorage")
                     :WaitForChild("RemoteFunctions")
-                    :WaitForChild(currentPosition.remote)
+                    :WaitForChild(mapConfig.remote)
                     :InvokeServer(1)
             end)
             task.wait(0.3)
             
-            -- Set map usando el remote correspondiente
-            print("[LOBBY SETUP] Setting map to: " .. mapId .. " (using " .. currentPosition.setMapRemote .. ")...")
+            -- Set map
+            print("[LOBBY SETUP] Setting map to: " .. mapId)
             pcall(function()
                 game:GetService("ReplicatedStorage")
                     :WaitForChild("RemoteFunctions")
-                    :WaitForChild(currentPosition.setMapRemote)
+                    :WaitForChild("LobbySetMap_8")
                     :InvokeServer(mapId)
             end)
             
@@ -1386,25 +1293,21 @@ local function setupLobbyWithRetry(mapId, mapName, maxRetries)
             
             currentMap = getCurrentMap()
             if currentMap == "in_map" then
-                print("[LOBBY SETUP] ✅ Successfully entered map on attempt " .. attempt .. " using " .. positionName .. " position!")
+                print("[LOBBY SETUP] ✅ Successfully entered map on attempt " .. attempt)
                 return true
             else
-                warn("[LOBBY SETUP] ⚠️ Still in lobby after 7 seconds with " .. positionName .. " position")
+                warn("[LOBBY SETUP] ⚠️ Still in lobby after 7 seconds")
                 
                 if attempt < maxRetries then
-                    print("[LOBBY SETUP] Leaving lobby and switching position...")
+                    print("[LOBBY SETUP] Leaving lobby and retrying...")
                     
-                    -- Salir del lobby usando el remote correspondiente
+                    -- Salir del lobby
                     pcall(function()
                         game:GetService("ReplicatedStorage")
                             :WaitForChild("RemoteFunctions")
-                            :WaitForChild(currentPosition.leaveRemote)
+                            :WaitForChild("LeaveLobby_8")
                             :InvokeServer()
                     end)
-                    
-                    -- ✅ ALTERNAR POSICIÓN PARA EL SIGUIENTE INTENTO
-                    usePrimary = not usePrimary
-                    print("[LOBBY SETUP] Switched to " .. (usePrimary and "PRIMARY" or "SECONDARY") .. " position for next attempt")
                     
                     -- Esperar 5 segundos antes del siguiente intento
                     print("[LOBBY SETUP] Waiting 5 seconds before retry...")
@@ -1418,7 +1321,6 @@ local function setupLobbyWithRetry(mapId, mapName, maxRetries)
     end
     
     warn("[LOBBY SETUP] ❌ Failed to enter map after " .. maxRetries .. " attempts")
-    warn("[LOBBY SETUP] Tried both PRIMARY and SECONDARY positions")
     return false
 end
 
