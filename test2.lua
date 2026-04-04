@@ -4029,14 +4029,34 @@ local function startAutoFarmLoop(strategyFunction, strategyName)
             print("[AUTO FARM LOOP] ========== WAITING FOR NEW GAME ==========")
             task.wait(2)
             
-            local newGameStarted = false
+            -- Primero esperar a que desaparezca GameEnd (Play Again presionado)
+            local gameEndGone = false
             local waitTime = 0
-            while not newGameStarted and waitTime < 15 do
+            while not gameEndGone and waitTime < 60 do
                 pcall(function()
                     local gui = PlayerGui:FindFirstChild("GameGui")
                     if gui then
                         local endFrame = gui.Screen.Middle:FindFirstChild("GameEnd")
                         if endFrame and not endFrame.Visible then
+                            gameEndGone = true
+                        end
+                    end
+                end)
+                task.wait(0.5)
+                waitTime = waitTime + 0.5
+            end
+            
+            print("[AUTO FARM LOOP] ✓ GameEnd gone - now waiting for waves to start")
+            
+            -- Luego esperar a que aparezcan las waves (juego realmente iniciado)
+            local newGameStarted = false
+            waitTime = 0
+            while not newGameStarted and waitTime < 30 do
+                pcall(function()
+                    local gui = PlayerGui:FindFirstChild("GameGuiNoInset")
+                    if gui then
+                        local waveControls = gui:FindFirstChild("Screen") and gui.Screen:FindFirstChild("Top") and gui.Screen.Top:FindFirstChild("WaveControls")
+                        if waveControls and waveControls.Visible then
                             newGameStarted = true
                         end
                     end
