@@ -3860,13 +3860,7 @@ local function startAutoFarmLoop(strategyFunction, strategyName)
         end
         
         print("[AUTO FARM LOOP] First run - Activating toggles...")
-        local waitedForToggles = 0
-        while (not getgenv().MainTabToggles.AutoSkip or not getgenv().MainTabToggles.AutoPlayAgain) and waitedForToggles < 10 do
-            task.wait(0.2)
-            waitedForToggles = waitedForToggles + 0.2
-        end
-        print("[AUTO FARM LOOP] Toggles ready after " .. waitedForToggles .. " seconds")
-        task.wait(0.5)
+        task.wait(1)
         
         if not getgenv().MainTabConfig.AutoSkip and getgenv().MainTabToggles.AutoSkip then
             getgenv().MainTabToggles.AutoSkip:Set(true)
@@ -3896,10 +3890,16 @@ local function startAutoFarmLoop(strategyFunction, strategyName)
             getgenv().MainTabToggles.AutoDifficulty:Set(true)
         end
         
-        task.wait(3)
+        task.wait(1)
         
-        pcall(function()
-            game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunctions"):WaitForChild("PlaceDifficultyVote"):InvokeServer(difficulty)
+        -- Votar dificultad repetidamente hasta que el juego la acepte
+        task.spawn(function()
+            for i = 1, 10 do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunctions"):WaitForChild("PlaceDifficultyVote"):InvokeServer(difficulty)
+                end)
+                task.wait(1)
+            end
         end)
         
         print("[AUTO FARM LOOP] ========== EXECUTING FIRST MACRO ==========")
