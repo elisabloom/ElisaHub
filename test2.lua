@@ -5263,11 +5263,12 @@ MiscTab:Space()
 
 local EggCollectorToggle
 local eggCollectorRunning = false
+local myUserId = tostring(game:GetService("Players").LocalPlayer.UserId)
 
 EggCollectorToggle = MiscTab:Toggle({
     Flag = "EggCollector",
     Title = "Easter Egg Collector",
-    Desc = "Auto collects all easter eggs on the map",
+    Desc = "Auto collects available easter eggs",
     Default = false,
     Callback = function(state)
         eggCollectorRunning = state
@@ -5275,11 +5276,13 @@ EggCollectorToggle = MiscTab:Toggle({
         if state then
             WindUI:Notify({
                 Title = "Egg Collector Started",
-                Content = "Collecting easter eggs...",
+                Content = "Collecting available easter eggs...",
                 Duration = 3
             })
             
             task.spawn(function()
+                local collected = {}
+                
                 while eggCollectorRunning do
                     pcall(function()
                         for _, obj in pairs(workspace:GetChildren()) do
@@ -5287,20 +5290,44 @@ EggCollectorToggle = MiscTab:Toggle({
                             
                             if obj.Name == "Collectable" then
                                 local id = obj:GetAttribute("ID")
-                                if id then
-                                    pcall(function()
+                                if not id then continue end
+                                
+                                -- Evitar recolectar el mismo huevo dos veces
+                                if collected[id] then continue end
+                                
+                                local acceptedPlayers = obj:GetAttribute("AcceptedPlayers")
+                                
+                                local canCollect = false
+                                
+                                if not acceptedPlayers or acceptedPlayers == "" then
+                                    -- Sin restriccion, cualquiera puede agarrarlo
+                                    canCollect = true
+                                else
+                                    -- Verificar si mi UserId esta en la lista
+                                    if string.find(acceptedPlayers, myUserId) then
+                                        canCollect = true
+                                    end
+                                end
+                                
+                                if canCollect then
+                                    local success = pcall(function()
                                         game:GetService("ReplicatedStorage")
                                             :WaitForChild("RemoteEvents")
                                             :WaitForChild("CollectCollectable")
                                             :FireServer(id)
                                     end)
-                                    print("[EGG COLLECTOR] Collected egg ID: " .. tostring(id))
-                                    task.wait(0.1)
+                                    
+                                    if success then
+                                        collected[id] = true
+                                        print("[EGG COLLECTOR] ✓ Collected egg ID: " .. tostring(id) .. " | Type: " .. tostring(obj:GetAttribute("ItemId")))
+                                        task.wait(0.15)
+                                    end
                                 end
                             end
                         end
                     end)
-                    task.wait(0.5) -- Rescan cada 1 segundos por nuevos huevos
+                    
+                    task.wait(2)
                 end
             end)
             
@@ -5313,7 +5340,6 @@ EggCollectorToggle = MiscTab:Toggle({
         end
     end
 })
-
 -- ==================== CARGAR CONTENIDO DEL ANTI BAN TAB ====================
 task.spawn(function()
     wait(0.4)
