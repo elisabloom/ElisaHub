@@ -5300,7 +5300,7 @@ EggCollectorToggle = MiscTab:Toggle({
                             end
                         end
                     end)
-                    task.wait(1) -- Rescan cada 1 segundos por nuevos huevos
+                    task.wait(0.5) -- Rescan cada 1 segundos por nuevos huevos
                 end
             end)
             
