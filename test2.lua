@@ -5265,6 +5265,32 @@ local EggCollectorToggle
 local eggCollectorRunning = false
 local myUserId = tostring(game:GetService("Players").LocalPlayer.UserId)
 
+local function tryCollect(obj)
+    if obj.Name ~= "Collectable" then return end
+    
+    local id = obj:GetAttribute("ID")
+    if not id then return end
+    
+    local acceptedPlayers = obj:GetAttribute("AcceptedPlayers")
+    
+    -- Si tiene AcceptedPlayers, verificar que sea para mi
+    if acceptedPlayers and acceptedPlayers ~= "" then
+        if not string.find(acceptedPlayers, myUserId) then
+            return -- Este huevo no es para mi
+        end
+    end
+    
+    -- Recoger inmediatamente
+    pcall(function()
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("RemoteEvents")
+            :WaitForChild("CollectCollectable")
+            :FireServer(id)
+    end)
+    
+    print("[EGG COLLECTOR] ✓ Collected: " .. tostring(obj:GetAttribute("ItemId")) .. " (ID: " .. tostring(id) .. ")")
+end
+
 EggCollectorToggle = MiscTab:Toggle({
     Flag = "EggCollector",
     Title = "Easter Egg Collector",
@@ -5281,54 +5307,27 @@ EggCollectorToggle = MiscTab:Toggle({
             })
             
             task.spawn(function()
-                local collected = {}
-                
-                while eggCollectorRunning do
-                    pcall(function()
-                        for _, obj in pairs(workspace:GetChildren()) do
-                            if not eggCollectorRunning then break end
-                            
-                            if obj.Name == "Collectable" then
-                                local id = obj:GetAttribute("ID")
-                                if not id then continue end
-                                
-                                -- Evitar recolectar el mismo huevo dos veces
-                                if collected[id] then continue end
-                                
-                                local acceptedPlayers = obj:GetAttribute("AcceptedPlayers")
-                                
-                                local canCollect = false
-                                
-                                if not acceptedPlayers or acceptedPlayers == "" then
-                                    -- Sin restriccion, cualquiera puede agarrarlo
-                                    canCollect = true
-                                else
-                                    -- Verificar si mi UserId esta en la lista
-                                    if string.find(acceptedPlayers, myUserId) then
-                                        canCollect = true
-                                    end
-                                end
-                                
-                                if canCollect then
-                                    local success = pcall(function()
-                                        game:GetService("ReplicatedStorage")
-                                            :WaitForChild("RemoteEvents")
-                                            :WaitForChild("CollectCollectable")
-                                            :FireServer(id)
-                                    end)
-                                    
-                                    if success then
-                                        collected[id] = true
-                                        print("[EGG COLLECTOR] ✓ Collected egg ID: " .. tostring(id) .. " | Type: " .. tostring(obj:GetAttribute("ItemId")))
-                                        task.wait(0.15)
-                                    end
-                                end
-                            end
-                        end
-                    end)
-                    
-                    task.wait(2)
+                -- Recoger los que ya existen en workspace
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if not eggCollectorRunning then break end
+                    tryCollect(obj)
+                    task.wait(0.05)
                 end
+                
+                -- Escuchar nuevos huevos en tiempo real
+                local connection = workspace.ChildAdded:Connect(function(obj)
+                    if not eggCollectorRunning then return end
+                    task.wait(0.1) -- Pequeño delay para que los atributos carguen
+                    tryCollect(obj)
+                end)
+                
+                -- Esperar hasta que se desactive
+                while eggCollectorRunning do
+                    task.wait(0.5)
+                end
+                
+                connection:Disconnect()
+                print("[EGG COLLECTOR] Stopped and disconnected")
             end)
             
         else
